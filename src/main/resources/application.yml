@@ -1,27 +1,3 @@
 spring:
-  datasource:
-    url: 'jdbc:derby:database;create=true;user=APP'
   pid:
     file: 'observer.pid'
-  mail:
-    host: 'smtp.1und1.de'
-    port: 587
-    username: '{cipher}'
-    password: '{cipher}'
-    properties:
-      mail:
-        smtp:
-          auth: true
-          timeout: 3000
-          connectiontimeout: 5000
-          writetimeout: 5000
-          starttls:
-            enabled: true
-org:
-  salex:
-    blog:
-      url: 'https://holzwerken.salex.org/wp-json/wp/v2'
-      username: '{cipher}'
-      password: '{cipher}'
-    mail:
-      alert: 'sascha.gaertner@salex.org'        

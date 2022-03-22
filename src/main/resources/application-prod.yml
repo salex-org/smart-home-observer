@@ -1,3 +1,20 @@
+spring:
+  datasource:
+    url: 'jdbc:derby:database;create=true;user=APP'
+  mail:
+    host: 'smtp.1und1.de'
+    port: 587
+    username: '{cipher}'
+    password: '{cipher}'
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 3000
+          connectiontimeout: 5000
+          writetimeout: 5000
+          starttls:
+            enabled: true
 org:
   salex:
     raspberry:
@@ -8,6 +25,13 @@ org:
       gauger: '0 5/10 * * * *'
       historyPublisher: '0 0 0 * * *'
       alertMailer: '0 0 6 * * *'
+    blog:
+      url: 'https://holzwerken.salex.org/wp-json/wp/v2'
+      username: '{cipher}'
+      password: '{cipher}'
+    mail:
+      climateAlertAddresses:
+        - 'sascha.gaertner@salex.org'
     hmip:
       client:
         access-point-sgtin: '{cipher}'

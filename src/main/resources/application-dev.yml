@@ -1,7 +1,31 @@
+spring:
+  datasource:
+    url: 'jdbc:derby:database;create=true;user=APP'
+  mail:
+    host: 'smtp.1und1.de'
+    port: 587
+    username: '{cipher}'
+    password: '{cipher}'
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 3000
+          connectiontimeout: 5000
+          writetimeout: 5000
+          starttls:
+            enabled: true
 org:
   salex:
     cron:
       enabled: false
+    blog:
+      url: 'https://holzwerken.salex.org/wp-json/wp/v2'
+      username: '{cipher}'
+      password: '{cipher}'
+    mail:
+      climateAlertAddresses:
+        - 'sascha.gaertner@salex.org'
     hmip:
       client:
         access-point-sgtin: '{cipher}115dc711932aa9219ef6da67f52a2a577aff53226af3119eb502adb1fad493241fd2c0795a62099a52dcce36c2b9050e'
