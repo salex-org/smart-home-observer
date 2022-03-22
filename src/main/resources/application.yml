@@ -1,13 +1,13 @@
 spring:
   datasource:
-    url: "jdbc:derby:database;create=true;user=APP"
+    url: 'jdbc:derby:database;create=true;user=APP'
   pid:
-    file: "observer.pid"
+    file: 'observer.pid'
   mail:
-    host: "smtp.1und1.de"
+    host: 'smtp.1und1.de'
     port: 587
-    username: ""
-    password: ""
+    username: '{cipher}'
+    password: '{cipher}'
     properties:
       mail:
         smtp:
@@ -20,8 +20,8 @@ spring:
 org:
   salex:
     blog:
-      url: "https://holzwerken.salex.org/wp-json/wp/v2"
-      username: ""
-      password: ""
+      url: 'https://holzwerken.salex.org/wp-json/wp/v2'
+      username: '{cipher}'
+      password: '{cipher}'
     mail:
-      alert: "sascha.gaertner@salex.org"
+      alert: 'sascha.gaertner@salex.org'        

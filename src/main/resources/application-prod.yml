@@ -2,9 +2,17 @@ org:
   salex:
     raspberry:
       script:
-        cpu: "/usr/bin/vcgencmd"
+        cpu: '/usr/bin/vcgencmd'
     cron:
       enabled: true
-      gauger: "0 5/10 * * * *"
-      historyPublisher: "0 0 0 * * *"
-      alertMailer: "0 0 6 * * *"
+      gauger: '0 5/10 * * * *'
+      historyPublisher: '0 0 0 * * *'
+      alertMailer: '0 0 6 * * *'
+    hmip:
+      client:
+        access-point-sgtin: '{cipher}'
+        device-id: '{cipher}'
+        client-id: '{cipher}'
+        client-name: 'Smart Home Observer'
+        client-auth-token: '{cipher}'
+        auth-token: '{cipher}'
