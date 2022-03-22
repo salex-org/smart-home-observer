@@ -1,0 +1,10 @@
+org:
+  salex:
+    raspberry:
+      script:
+        cpu: "/usr/bin/vcgencmd"
+    cron:
+      enabled: true
+      gauger: "0 5/10 * * * *"
+      historyPublisher: "0 0 0 * * *"
+      alertMailer: "0 0 6 * * *"

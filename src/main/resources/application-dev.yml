@@ -1,0 +1,4 @@
+org:
+  salex:
+    cron:
+      enabled: false

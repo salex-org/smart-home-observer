@@ -43,3 +43,15 @@ be viewed in human-readable form with the tool `tai64nlocal`:
 cd ~/observer/logs
 ls *.s | tai64nlocal
 ```
+
+# Profiles and configuration
+In production the profile `prod` will be activated by the `start.sh` script.
+For local tests the profile `dev` should be used. With this the configuration
+is done in different `application.yml` files:
+
+| File                                      | Usage                                               |
+|-------------------------------------------|-----------------------------------------------------|
+| `src/main/resources/application.yml`      | Contains all stage unspecific configuration values. |
+| `src/main/resources/application-dev.yml`  | Contains configuration values for stage `dev`.      |
+| `src/main/resources/application-prod.yml` | Contains configuration values for stage `prod`.     |
+| `src/test/resources/application.yml`      | Contains configuration values for stage `test`.     |
