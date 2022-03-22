@@ -1,4 +1,4 @@
 #!/bin/bash
 pid=$(<observer.pid)
-kill -SIGTERM $pid
+kill $pid
 echo 'Observer stopped'
