@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 @Transactional
 @Repository
@@ -78,8 +79,41 @@ public class ObserverDatabase {
         );
     }
 
+    private Sensor getSensor(List<Sensor> sensors, int sid) {
+        for(Sensor sensor : sensors) {
+            if(sensor.getId() == sid) {
+                return sensor;
+            }
+        }
+        return null;
+    }
+
     public List<Sensor> getSensors() {
         return sensors;
     }
 
+    public Reading addReading(Reading reading) {
+        // TODO implement
+        return reading;
+    }
+
+    public List<Reading> getReadings(int hours) {
+        // TODO implement
+        return List.of();
+    }
+
+    public List<Reading> getReadings(int hours, Sensor sensor) {
+        // TODO implement
+        return List.of();
+    }
+
+    public Map<Sensor, List<ClimateMeasurementBoundaries>> getClimateMeasurementBoundaries(int days) {
+        // TODO implement
+        return Map.of();
+    }
+
+    public List<ClimateMeasurementBoundaries> getClimateMeasurementBoundaries(int days, Sensor sensor) {
+        // TODO implement
+        return List.of();
+    }
 }

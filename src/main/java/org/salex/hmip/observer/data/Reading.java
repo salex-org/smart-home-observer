@@ -1,6 +1,5 @@
 package org.salex.hmip.observer.data;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class Reading {
     public Reading(int id, Date readingTime) {
         this.id = id;
         this.readingTime = readingTime;
-        this.measurements = new ArrayList<>();
+        this.measurements = List.of();
     }
 
     public int getId() {
