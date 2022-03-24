@@ -1,37 +1,38 @@
 package org.salex.hmip.observer.data;
 
+import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Entity
+@Table (name = "readings")
 public class Reading {
-    private final int id;
-    private final Date readingTime;
-    private final List<Measurement> measurements;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "reading_time", nullable = false)
+    private Date readingTime;
+
+    @OneToMany(targetEntity = Measurement.class, mappedBy = "reading", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Measurement> measurements;
 
     public Reading() {
         this(new Date());
     }
 
     public Reading(Date readingTime) {
-        this(-1, readingTime);
+        this(null, readingTime);
     }
 
-    public Reading(int id, Reading reading) {
-        this(id, reading.readingTime);
-        this.measurements.addAll(reading.measurements);
-    }
-
-    public Reading(int id, java.sql.Date readingTime) {
-        this(id, new Date(readingTime.getTime()));
-    }
-
-    public Reading(int id, Date readingTime) {
+    public Reading(Long id, Date readingTime) {
         this.id = id;
         this.readingTime = readingTime;
-        this.measurements = List.of();
+        this.measurements = new ArrayList<>();
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
@@ -39,7 +40,15 @@ public class Reading {
         return readingTime;
     }
 
+    public void setReadingTime(Date readingTime) {
+        this.readingTime = readingTime;
+    }
+
     public List<Measurement> getMeasurements() {
         return measurements;
+    }
+
+    public void addMeasurement(Measurement measurement) {
+        this.measurements.add(measurement);
     }
 }

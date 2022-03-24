@@ -1,10 +1,19 @@
 package org.salex.hmip.observer.data;
 
+import javax.persistence.*;
 import java.util.Date;
 
+@Entity
+@Table(name = "homematic_measuerements")
 public abstract class HomematicMeasurement extends Measurement {
-    private final Sensor sensor;
-    private final Date measuringTime;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sensor")
+    private Sensor sensor;
+
+    @Column(name = "measuring_time")
+    private Date measuringTime;
+
+    protected HomematicMeasurement() {}
 
     public HomematicMeasurement(Reading reading, Sensor sensor, Date measuringTime) {
         super(reading);
@@ -16,7 +25,15 @@ public abstract class HomematicMeasurement extends Measurement {
         return sensor;
     }
 
+    public void setSensor(Sensor sensor) {
+        this.sensor = sensor;
+    }
+
     public Date getMeasuringTime() {
         return measuringTime;
+    }
+
+    public void setMeasuringTime(Date measuringTime) {
+        this.measuringTime = measuringTime;
     }
 }

@@ -2,116 +2,116 @@ package org.salex.hmip.observer.data;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-@Transactional
-@Repository
+@Service
 public class ObserverDatabase {
     private static final Logger LOG = LoggerFactory.getLogger(ObserverDatabase.class);
 
-    private final JdbcTemplate jdbcTemplate;
+    private final SensorRepository sensorRepository;
 
-    private List<Sensor> sensors;
+    private final ReadingRepository readingRepository;
 
-    public ObserverDatabase(JdbcTemplate jdbcTemplate) throws SQLException {
-        this.jdbcTemplate = jdbcTemplate;
+    private final ClimateMeasurementRepository climateMeasurementRepository;
 
-        if(tableExists("sensors")) {
-            LOG.info("Table sensors already exists");
-        } else {
-            LOG.info("Creating table sensors");
-            this.jdbcTemplate.execute("create table sensors(id int not null, name varchar(32) not null, kind varchar(32) not null, sgtin varchar(32), primary key (id))");
+    public ObserverDatabase(SensorRepository sensorRepository, ReadingRepository readingRepository, ClimateMeasurementRepository climateMeasurementRepository) throws SQLException {
+        this.sensorRepository = sensorRepository;
+        this.readingRepository = readingRepository;
+        this.climateMeasurementRepository = climateMeasurementRepository;
+
+        if(this.getSensors().isEmpty()) {
             LOG.info("Initializing sensor data");
-            this.jdbcTemplate.execute("insert into sensors(id, name, kind, sgtin) values (1, 'Maschinenraum', 'HmIP_STHO', '3014-F711-A000-0EDD-89B3-A015')");
-            this.jdbcTemplate.execute("insert into sensors(id, name, kind, sgtin) values (2, 'Bankraum', 'HmIP_STHO', '3014-F711-A000-0EDD-89B3-A112')");
-            this.jdbcTemplate.execute("insert into sensors(id, name, kind, sgtin) values (3, 'Carport', 'HmIP_STHO', '3014-F711-A000-10DD-899E-53A0')");
+            this.sensorRepository.saveAll(List.of(
+                    new Sensor(1l, "Maschinenraum", Sensor.Type.HmIP_STHO, "3014-F711-A000-0EDD-89B3-A015"),
+                    new Sensor(2l, "Bankraum", Sensor.Type.HmIP_STHO, "3014-F711-A000-0EDD-89B3-A112"),
+                    new Sensor(3l, "Carport", Sensor.Type.HmIP_STHO, "3014-F711-A000-10DD-899E-53A0")
+            ));
         }
-
-        if(tableExists("readings")) {
-            LOG.info("Table readings already exists");
-        } else {
-            LOG.info("Creating table readings");
-            this.jdbcTemplate.execute("create table readings(id int not null primary key generated always as identity (start with 1, increment by 1), reading_time timestamp not null)");
-        }
-
-        if(tableExists("climate")) {
-            LOG.info("Table climate already exists");
-        } else {
-            LOG.info("Creating table climate");
-            this.jdbcTemplate.execute("create table climate(reading int not null, sensor int not null, measuring_time timestamp not null, temperature double, humidity double, vapor_amount double, wind_speed double, wind_direction double, brightness double, rainfall double, primary key(reading, sensor), foreign key (reading) references readings(id), foreign key (sensor) references sensors(id) )");
-        }
-
-        if(tableExists("operating")) {
-            LOG.info("Table operating already exists");
-        } else {
-            LOG.info("Creating table operating");
-            this.jdbcTemplate.execute("create table operating(reading int not null, cpu_temperature double, core_voltage double, disk_usage double, memory_usage double, primary key(reading), foreign key (reading) references readings(id) )");
-        }
-
-        if(tableExists("consumption")) {
-            LOG.info("Table consumption already exists");
-        } else {
-            LOG.info("Creating table consumption");
-            this.jdbcTemplate.execute("create table consumption(reading int not null, sensor int not null, measuring_time timestamp not null, power double, primary key(reading, sensor), foreign key (reading) references readings(id), foreign key (sensor) references sensors(id) )");
-        }
-
-        LOG.info("Loading sensor data");
-        this.sensors = loadSensors();
 
         LOG.info("Database ready to rumble!");
     }
 
-    private boolean tableExists(String name) throws SQLException {
-        DatabaseMetaData meta = this.jdbcTemplate.getDataSource().getConnection().getMetaData();
-        return meta.getTables(null, null, name.toUpperCase(), null).next();
-    }
-
-    private List<Sensor> loadSensors() {
-        return this.jdbcTemplate.query("select * from sensors order by id", (row, rowNum) ->
-            new Sensor(row.getInt("id"), row.getString("name"), row.getString("kind"), row.getString("sgtin"))
-        );
-    }
-
-    private Sensor getSensor(List<Sensor> sensors, int sid) {
-        for(Sensor sensor : sensors) {
-            if(sensor.getId() == sid) {
-                return sensor;
-            }
-        }
-        return null;
-    }
-
+    /**
+     * Get a list of all sensors.
+     */
+    @Transactional
     public List<Sensor> getSensors() {
-        return sensors;
+        return this.sensorRepository.findAll();
     }
 
+    /**
+     * Add a new reading to the database.
+     */
+    @Transactional
     public Reading addReading(Reading reading) {
-        // TODO implement
-        return reading;
+        return this.readingRepository.save(reading);
     }
 
-    public List<Reading> getReadings(int hours) {
-        // TODO implement
-        return List.of();
+    /**
+     * Retrieve all climate measurement data for the last specified hours.
+     */
+    @Transactional
+    public List<ClimateMeasurement> getClimateMeasurements(int hours) {
+        return getClimateMeasurements(hours, new Date());
     }
 
-    public List<Reading> getReadings(int hours, Sensor sensor) {
-        // TODO implement
-        return List.of();
+    /**
+     * Retrieve all climate measurement data for the specified hours before the given timestamp.
+     */
+    @Transactional
+    public List<ClimateMeasurement> getClimateMeasurements(int hours, Date endTime) {
+        var startTime = new Date(endTime.getTime() - TimeUnit.HOURS.toMillis(hours));
+        return getClimateMeasurements(startTime, endTime);
     }
 
+    /**
+     * Retrieve all climate measurement data between the given timestamps.
+     */
+    @Transactional
+    public List<ClimateMeasurement> getClimateMeasurements(Date startTime, Date endTime) {
+        return this.climateMeasurementRepository.findByMeasuringTimeBetween(startTime, endTime);
+    }
+
+    /**
+     * Retrieve all climate measurement data for the last specified hours regarding the given sensor.
+     */
+    @Transactional
+    public List<ClimateMeasurement> getClimateMeasurements(int hours, Sensor sensor) {
+        return getClimateMeasurements(hours, new Date(), sensor);
+    }
+
+    /**
+     * Retrieve all climate measurement data for the specified hours before the given timestamp regarding
+     * the given sensor.
+     */
+    @Transactional
+    public List<ClimateMeasurement> getClimateMeasurements(int hours, Date endTime, Sensor sensor) {
+        var startTime = new Date(endTime.getTime() - TimeUnit.HOURS.toMillis(hours));
+        return getClimateMeasurements(startTime, endTime, sensor);
+    }
+
+    /**
+     * Retrieve all climate measurement data between the given timestamps regarding the given sensor.
+     */
+    @Transactional
+    public List<ClimateMeasurement> getClimateMeasurements(Date startTime, Date endTime, Sensor sensor) {
+        return this.climateMeasurementRepository.findByMeasuringTimeBetweenAndSensor(startTime, endTime, sensor);
+    }
+
+    @Transactional
     public Map<Sensor, List<ClimateMeasurementBoundaries>> getClimateMeasurementBoundaries(int days) {
         // TODO implement
         return Map.of();
     }
 
+    @Transactional
     public List<ClimateMeasurementBoundaries> getClimateMeasurementBoundaries(int days, Sensor sensor) {
         // TODO implement
         return List.of();

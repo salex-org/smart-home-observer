@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    url: 'jdbc:derby:memory:test;create=true'
+  jpa:
+    hibernate:
+      ddl-auto: update
