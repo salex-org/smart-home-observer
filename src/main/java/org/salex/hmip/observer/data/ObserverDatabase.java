@@ -6,9 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
+import java.util.*;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -57,7 +56,6 @@ public class ObserverDatabase {
     /**
      * Retrieve all climate measurement data for the last specified hours.
      */
-    @Transactional
     public List<ClimateMeasurement> getClimateMeasurements(int hours) {
         return getClimateMeasurements(hours, new Date());
     }
@@ -65,7 +63,6 @@ public class ObserverDatabase {
     /**
      * Retrieve all climate measurement data for the specified hours before the given timestamp.
      */
-    @Transactional
     public List<ClimateMeasurement> getClimateMeasurements(int hours, Date endTime) {
         var startTime = new Date(endTime.getTime() - TimeUnit.HOURS.toMillis(hours));
         return getClimateMeasurements(startTime, endTime);
@@ -82,7 +79,6 @@ public class ObserverDatabase {
     /**
      * Retrieve all climate measurement data for the last specified hours regarding the given sensor.
      */
-    @Transactional
     public List<ClimateMeasurement> getClimateMeasurements(int hours, Sensor sensor) {
         return getClimateMeasurements(hours, new Date(), sensor);
     }
@@ -91,7 +87,6 @@ public class ObserverDatabase {
      * Retrieve all climate measurement data for the specified hours before the given timestamp regarding
      * the given sensor.
      */
-    @Transactional
     public List<ClimateMeasurement> getClimateMeasurements(int hours, Date endTime, Sensor sensor) {
         var startTime = new Date(endTime.getTime() - TimeUnit.HOURS.toMillis(hours));
         return getClimateMeasurements(startTime, endTime, sensor);
@@ -105,15 +100,38 @@ public class ObserverDatabase {
         return this.climateMeasurementRepository.findByMeasuringTimeBetweenAndSensor(startTime, endTime, sensor);
     }
 
-    @Transactional
+    /**
+     * Evaluates the climate data of the last specified days and returns the maximum and minimum values per day
+     * for each sensor.
+     */
     public Map<Sensor, List<ClimateMeasurementBoundaries>> getClimateMeasurementBoundaries(int days) {
-        // TODO implement
-        return Map.of();
+        return getClimateMeasurementBoundaries(days, new Date());
     }
 
+    /**
+     * Evaluates the climate data of the specified days before the given timestamp and returns the maximum and
+     * minimum values per day for each sensor.
+     */
+    public Map<Sensor, List<ClimateMeasurementBoundaries>> getClimateMeasurementBoundaries(int days, Date endTime) {
+        var startTime = new Date(endTime.getTime() - TimeUnit.DAYS.toMillis(days));
+        return getClimateMeasurementBoundaries(startTime, endTime);
+    }
+
+    /**
+     * Evaluates the climate data of the specified period and returns the maximum and minimum values per day
+     * for each sensor.
+     */
     @Transactional
-    public List<ClimateMeasurementBoundaries> getClimateMeasurementBoundaries(int days, Sensor sensor) {
-        // TODO implement
-        return List.of();
+    public Map<Sensor, List<ClimateMeasurementBoundaries>> getClimateMeasurementBoundaries(Date startTime, Date endTime) {
+        var result = new HashMap<Sensor, List<ClimateMeasurementBoundaries>>();
+        var sensorLookup = new HashMap<Long, Sensor>();
+        for(var sensor : this.sensorRepository.findAll()) {
+            sensorLookup.put(sensor.getId(), sensor);
+            result.put(sensor, new ArrayList<ClimateMeasurementBoundaries>());
+        }
+        for(var boundaries :  this.climateMeasurementRepository.findBoundariesByMeasuringTimeBetween(startTime, endTime)) {
+            result.get(sensorLookup.get(boundaries.getSensorId())).add(boundaries);
+        }
+        return result;
     }
 }

@@ -8,7 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -86,6 +89,7 @@ public class TestObserverDatabase {
         var measurement = measurements.stream().filter(m -> m.getMeasuringTime().compareTo(now) == 0).findFirst().orElse(null);
         Assertions.assertNotNull(measurement);
         Assertions.assertEquals(now, measurement.getMeasuringTime());
+        Assertions.assertEquals(sensor, measurement.getSensor());
         Assertions.assertEquals(1.0, measurement.getTemperature());
         Assertions.assertEquals(2.0, measurement.getHumidity());
         Assertions.assertEquals(3.0, measurement.getVaporAmount());
@@ -132,14 +136,75 @@ public class TestObserverDatabase {
 
     @Test
     public void testGetClimateMeasurementBoundaries() {
-        // TODO implement
+        // Prepare test
+        final var now = new Date();
+        final var tenMinutesAgo = new Date(now.getTime() - TimeUnit.MINUTES.toMillis(10));
+        final var yesterday = new Date(now.getTime() - TimeUnit.DAYS.toMillis(1));
+        final var threeDaysAgo = new Date(now.getTime() - TimeUnit.DAYS.toMillis(3));
+        final var sensorIterator = this.database.getSensors().iterator();
+        final var firstSensor = sensorIterator.next();
+        final var secondSensor = sensorIterator.next();
+
+        // Create some data in the database
+        database.addReading(createReading(now, firstSensor));
+        var maxReading = new Reading(tenMinutesAgo);
+        maxReading.addMeasurement(new ClimateMeasurement(maxReading, firstSensor, tenMinutesAgo, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0));
+        database.addReading(maxReading);
+        database.addReading(createReading(now, secondSensor));
+        database.addReading(createReading(yesterday, firstSensor));
+        database.addReading(createReading(threeDaysAgo, firstSensor));
+        database.addReading(createReading(threeDaysAgo, secondSensor));
+
+        // Read the measurement boundaries
+        var boundaries = database.getClimateMeasurementBoundaries(2);
+
+        // Check if the correct boundaries are found
+        Assertions.assertNotNull(boundaries);
+        Assertions.assertEquals(3, boundaries.size());
+        Assertions.assertEquals(2, boundaries.get(firstSensor).size());
+        Assertions.assertEquals(1, boundaries.get(secondSensor).size());
+
+        // Check if all attributes are filled
+        var today = today();
+        var examinee = boundaries.get(firstSensor).stream().filter(b -> b.getDay().compareTo(today) == 0).findFirst().orElse(null);
+        Assertions.assertNotNull(examinee);
+        Assertions.assertNotNull(examinee.getSensorId());
+        Assertions.assertEquals(firstSensor.getId(), examinee.getSensorId());
+        Assertions.assertNotNull(examinee.getDay());
+        Assertions.assertNotNull(examinee.getMinimumTemperature());
+        Assertions.assertEquals(1.0, examinee.getMinimumTemperature());
+        Assertions.assertNotNull(examinee.getMaximumTemperature());
+        Assertions.assertEquals(10.0, examinee.getMaximumTemperature());
+        Assertions.assertNotNull(examinee.getMinimumHumidity());
+        Assertions.assertEquals(2.0, examinee.getMinimumHumidity());
+        Assertions.assertNotNull(examinee.getMaximumHumidity());
+        Assertions.assertEquals(20.0, examinee.getMaximumHumidity());
+        Assertions.assertNotNull(examinee.getMinimumVaporAmount());
+        Assertions.assertEquals(3.0, examinee.getMinimumVaporAmount());
+        Assertions.assertNotNull(examinee.getMaximumVaporAmount());
+        Assertions.assertEquals(30.0, examinee.getMaximumVaporAmount());
+        Assertions.assertNotNull(examinee.getMinimumWindSpeed());
+        Assertions.assertEquals(4.0, examinee.getMinimumWindSpeed());
+        Assertions.assertNotNull(examinee.getMaximumWindSpeed());
+        Assertions.assertEquals(40.0, examinee.getMaximumWindSpeed());
+        Assertions.assertNotNull(examinee.getMinimumBrightness());
+        Assertions.assertEquals(6.0, examinee.getMinimumBrightness());
+        Assertions.assertNotNull(examinee.getMaximumBrightness());
+        Assertions.assertEquals(60.0, examinee.getMaximumBrightness());
+        Assertions.assertNotNull(examinee.getMinimumRainfall());
+        Assertions.assertEquals(7.0, examinee.getMinimumRainfall());
+        Assertions.assertNotNull(examinee.getMaximumRainfall());
+        Assertions.assertEquals(70.0, examinee.getMaximumRainfall());
     }
 
-    @Test
-    public void testGetClimateMeasurementBoundariesRegardingSensor() {
-        // TODO implement
+    private Date today() {
+        final var calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
     }
-
 
     private Reading createReading(Date readingTime, Sensor sensor) {
         final var reading = new Reading(readingTime);

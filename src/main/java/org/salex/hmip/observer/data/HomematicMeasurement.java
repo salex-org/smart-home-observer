@@ -6,7 +6,7 @@ import java.util.Date;
 @Entity
 @Table(name = "homematic_measuerements")
 public abstract class HomematicMeasurement extends Measurement {
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sensor")
     private Sensor sensor;
 

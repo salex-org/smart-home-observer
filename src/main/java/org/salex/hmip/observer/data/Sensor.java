@@ -1,6 +1,7 @@
 package org.salex.hmip.observer.data;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "sensors")
@@ -58,5 +59,18 @@ public class Sensor {
 
     public void setSgtin(String sgtin) {
         this.sgtin = sgtin;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Sensor sensor = (Sensor) o;
+        return id.equals(sensor.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
