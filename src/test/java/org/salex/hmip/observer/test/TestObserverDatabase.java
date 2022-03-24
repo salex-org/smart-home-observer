@@ -5,34 +5,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.salex.hmip.observer.data.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-@SpringBootTest
+@DataJpaTest
+@Import(ObserverDatabase.class)
 public class TestObserverDatabase {
     @Autowired
     ObserverDatabase database;
-
-    @Autowired
-    ReadingRepository readingRepository;
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    @BeforeEach
-    public void emptyDatabse() {
-        jdbcTemplate.execute("delete from climate_measuerements");
-        jdbcTemplate.execute("delete from consumption_measuerements");
-        jdbcTemplate.execute("delete from operating_measuerements");
-        jdbcTemplate.execute("delete from readings");
-    }
 
     @Test
     public void testGetSensors() {
