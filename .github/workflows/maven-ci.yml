@@ -1,9 +1,7 @@
 name: Build and test the observer
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  - push
+  - pull_request
 jobs:
   build:
     name: Build and test the observer
