@@ -1,13 +1,11 @@
 package org.salex.hmip.observer.test;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.salex.hmip.observer.data.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -15,10 +13,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @DataJpaTest
-@Import(ObserverDatabase.class)
-public class TestObserverDatabase {
+@Import(JpaObserverDatabase.class)
+public class TestJpaObserverDatabase {
     @Autowired
-    ObserverDatabase database;
+    JpaObserverDatabase database;
 
     @Test
     public void testGetSensors() {
@@ -66,7 +64,7 @@ public class TestObserverDatabase {
         var measurements = database.getClimateMeasurements(2);
 
         // Check if the correct measurements are found
-        var measuringTimes = measurements.stream().map(HomematicMeasurement::getMeasuringTime).collect(Collectors.toList());
+        var measuringTimes = measurements.stream().map(HomematicMeasurement::getMeasuringTime).toList();
         Assertions.assertEquals(2, measuringTimes.size());
         Assertions.assertTrue(measuringTimes.stream().anyMatch(t -> t.compareTo(now) == 0));
         Assertions.assertTrue(measuringTimes.stream().anyMatch(t -> t.compareTo(oneHourAgo) == 0));

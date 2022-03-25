@@ -24,7 +24,6 @@ org:
       script:
         cpu: '/usr/bin/vcgencmd'
     cron:
-      enabled: true
       measure: '0 0/1 * * * *'
 #      measure: '0 5/10 * * * *'
 #      statistics: '0 0 0 * * *'
