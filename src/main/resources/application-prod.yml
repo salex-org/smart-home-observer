@@ -20,14 +20,14 @@ spring:
             enabled: true
 org:
   salex:
+    cron:
+      measure: '0 0/1 * * * *'
+    #      measure: '0 5/10 * * * *'
+    #      statistics: '0 0 0 * * *'
+    #      alert: '0 0 6 * * *'
     raspberry:
       script:
         cpu: '/usr/bin/vcgencmd'
-    cron:
-      measure: '0 0/1 * * * *'
-#      measure: '0 5/10 * * * *'
-#      statistics: '0 0 0 * * *'
-#      alert: '0 0 6 * * *'
     blog:
       url: 'https://holzwerken.salex.org/wp-json/wp/v2'
       username: '{cipher}'
