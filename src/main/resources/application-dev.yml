@@ -20,8 +20,12 @@ spring:
             enabled: true
 org:
   salex:
+    raspberry:
+      script:
+        cpu: '/usr/bin/vcgencmd'
     cron:
       enabled: false
+#      measure: '0 0/1 * * * *'
     blog:
       url: 'https://holzwerken.salex.org/wp-json/wp/v2'
       username: '{cipher}c7bc691561f71e2514fc39a04bf2157b1a5f15b52e7b120e5e204db181be6828'

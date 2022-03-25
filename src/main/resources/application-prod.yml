@@ -25,9 +25,10 @@ org:
         cpu: '/usr/bin/vcgencmd'
     cron:
       enabled: true
-      gauger: '0 5/10 * * * *'
-      historyPublisher: '0 0 0 * * *'
-      alertMailer: '0 0 6 * * *'
+      measure: '0 0/1 * * * *'
+#      measure: '0 5/10 * * * *'
+#      statistics: '0 0 0 * * *'
+#      alert: '0 0 6 * * *'
     blog:
       url: 'https://holzwerken.salex.org/wp-json/wp/v2'
       username: '{cipher}'
