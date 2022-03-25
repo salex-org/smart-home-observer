@@ -36,12 +36,7 @@ public class MeasurementTask {
                 .flatMap(reading -> this.climateMeasurementService.measureClimateValues(reading, this.database.getSensors()))
                 .flatMap(this.operatingMeasurementService::measureOperatingValues)
                 .subscribe(reading -> {
-                    // TODO Add new reading to the database
-//                    this.database.addReading(reading);
-                    LOG.info(String.format("New reading added to database at %s", reading.getReadingTime()));
-                    for(var measurement : reading.getMeasurements()) {
-                        LOG.info(String.format("\t%s", measurement));
-                    }
+                    this.database.addReading(reading);
                 });
     }
 }
