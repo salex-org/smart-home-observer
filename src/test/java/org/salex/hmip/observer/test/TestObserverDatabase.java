@@ -79,10 +79,6 @@ public class TestObserverDatabase {
         Assertions.assertEquals(1.0, measurement.getTemperature());
         Assertions.assertEquals(2.0, measurement.getHumidity());
         Assertions.assertEquals(3.0, measurement.getVaporAmount());
-        Assertions.assertEquals(4.0, measurement.getWindSpeed());
-        Assertions.assertEquals(5.0, measurement.getWindDirection());
-        Assertions.assertEquals(6.0, measurement.getBrightness());
-        Assertions.assertEquals(7.0, measurement.getRainfall());
     }
 
     @Test
@@ -134,7 +130,7 @@ public class TestObserverDatabase {
         // Create some data in the database
         database.addReading(createReading(now, firstSensor));
         var maxReading = new Reading(tenMinutesAgo);
-        maxReading.addMeasurement(new ClimateMeasurement(maxReading, firstSensor, tenMinutesAgo, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0));
+        maxReading.addMeasurement(new ClimateMeasurement(maxReading, firstSensor, tenMinutesAgo, 10.0, 20.0, 30.0));
         database.addReading(maxReading);
         database.addReading(createReading(now, secondSensor));
         database.addReading(createReading(yesterday, firstSensor));
@@ -169,18 +165,6 @@ public class TestObserverDatabase {
         Assertions.assertEquals(3.0, examinee.getMinimumVaporAmount());
         Assertions.assertNotNull(examinee.getMaximumVaporAmount());
         Assertions.assertEquals(30.0, examinee.getMaximumVaporAmount());
-        Assertions.assertNotNull(examinee.getMinimumWindSpeed());
-        Assertions.assertEquals(4.0, examinee.getMinimumWindSpeed());
-        Assertions.assertNotNull(examinee.getMaximumWindSpeed());
-        Assertions.assertEquals(40.0, examinee.getMaximumWindSpeed());
-        Assertions.assertNotNull(examinee.getMinimumBrightness());
-        Assertions.assertEquals(6.0, examinee.getMinimumBrightness());
-        Assertions.assertNotNull(examinee.getMaximumBrightness());
-        Assertions.assertEquals(60.0, examinee.getMaximumBrightness());
-        Assertions.assertNotNull(examinee.getMinimumRainfall());
-        Assertions.assertEquals(7.0, examinee.getMinimumRainfall());
-        Assertions.assertNotNull(examinee.getMaximumRainfall());
-        Assertions.assertEquals(70.0, examinee.getMaximumRainfall());
     }
 
     private Date today() {
@@ -205,7 +189,7 @@ public class TestObserverDatabase {
     }
 
     private ClimateMeasurement createClimateMeasurement(Reading reading, Sensor sensor, Date measuringTime) {
-        return new ClimateMeasurement(reading, sensor, measuringTime, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0);
+        return new ClimateMeasurement(reading, sensor, measuringTime, 1.0, 2.0, 3.0);
     }
 
     private ConsumptionMeasurement createConsumptionMeasurement(Reading reading, Sensor sensor, Date measuringTime) {
