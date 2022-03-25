@@ -52,6 +52,6 @@ public class RaspberryOperatingMeasurementService implements OperatingMeasuremen
         final Process p = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", "free | grep Speicher" });
         final BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
         final String[] result = reader.readLine().split("[,; \\t\\n\\r]+");
-        return Double.parseDouble(result[2]) / Double.parseDouble(result[1]) + 100;
+        return Double.parseDouble(result[2]) / Double.parseDouble(result[1]) * 100;
     }
 }
