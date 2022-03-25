@@ -7,8 +7,8 @@ spring:
   mail:
     host: 'smtp.1und1.de'
     port: 587
-    username: '{cipher}23fc0b6920326a8f86f5c9d0781cb45fcd28d5b96d6960c6e0d4349f84a57e3d'
-    password: '{cipher}a04bd71f778bbe37313aa612d1f025c61d1928ac3ae7cd851962696c02da5df006a1b9247e54e2ce2e8012af6642ac24'
+    username: ''
+    password: ''
     properties:
       mail:
         smtp:
@@ -30,8 +30,8 @@ org:
         cpu: '/usr/bin/vcgencmd'
     blog:
       url: 'https://holzwerken.salex.org/wp-json/wp/v2'
-      username: '{cipher}c7bc691561f71e2514fc39a04bf2157b1a5f15b52e7b120e5e204db181be6828'
-      password: '{cipher}94edabe976608d19c465049437acc56a120deb9fd1b2a531e42e742f5875b156d6b00ff2723562de4559b2a632daea25'
+      username: ''
+      password: ''
     mail:
       climateAlertAddresses:
         - 'sascha.gaertner@salex.org'
