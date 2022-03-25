@@ -23,11 +23,6 @@ public class Reading {
     }
 
     public Reading(Date readingTime) {
-        this(null, readingTime);
-    }
-
-    public Reading(Long id, Date readingTime) {
-        this.id = id;
         this.readingTime = readingTime;
         this.measurements = new ArrayList<>();
     }
