@@ -7,8 +7,8 @@ spring:
   mail:
     host: 'smtp.1und1.de'
     port: 587
-    username: '{cipher}'
-    password: '{cipher}'
+    username: ''
+    password: ''
     properties:
       mail:
         smtp:
@@ -30,8 +30,8 @@ org:
         cpu: '/usr/bin/vcgencmd'
     blog:
       url: 'https://holzwerken.salex.org/wp-json/wp/v2'
-      username: '{cipher}'
-      password: '{cipher}'
+      username: ''
+      password: ''
     mail:
       climateAlertAddresses:
         - 'sascha.gaertner@salex.org'
