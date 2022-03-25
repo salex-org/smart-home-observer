@@ -49,4 +49,15 @@ public class ClimateMeasurement extends HomematicMeasurement {
     public void setVaporAmount(Double vaporAmount) {
         this.vaporAmount = vaporAmount;
     }
+
+    @Override
+    public String toString() {
+        return "ClimateMeasurement{" +
+                "sensor=" + getSensor() +
+                ", measuringTime=" + getMeasuringTime() +
+                ", temperature=" + temperature +
+                ", humidity=" + humidity +
+                ", vaporAmount=" + vaporAmount +
+                '}';
+    }
 }

@@ -60,4 +60,14 @@ public class OperatingMeasurement extends Measurement {
     public void setMemoryUsage(Double memoryUsage) {
         this.memoryUsage = memoryUsage;
     }
+
+    @Override
+    public String toString() {
+        return "OperatingMeasurement{" +
+                "cpuTemperature=" + cpuTemperature +
+                ", coreVoltage=" + coreVoltage +
+                ", diskUsage=" + diskUsage +
+                ", memoryUsage=" + memoryUsage +
+                '}';
+    }
 }

@@ -46,4 +46,11 @@ public class Reading {
     public void addMeasurement(Measurement measurement) {
         this.measurements.add(measurement);
     }
+
+    @Override
+    public String toString() {
+        return "Reading{" +
+                "readingTime=" + readingTime +
+                '}';
+    }
 }

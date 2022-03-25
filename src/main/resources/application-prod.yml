@@ -20,14 +20,14 @@ spring:
             enabled: true
 org:
   salex:
+    cron:
+      measure: '0 0/1 * * * *'
+    #      measure: '0 5/10 * * * *'
+    #      statistics: '0 0 0 * * *'
+    #      alert: '0 0 6 * * *'
     raspberry:
       script:
         cpu: '/usr/bin/vcgencmd'
-    cron:
-      enabled: true
-      gauger: '0 5/10 * * * *'
-      historyPublisher: '0 0 0 * * *'
-      alertMailer: '0 0 6 * * *'
     blog:
       url: 'https://holzwerken.salex.org/wp-json/wp/v2'
       username: '{cipher}'
@@ -37,9 +37,9 @@ org:
         - 'sascha.gaertner@salex.org'
     hmip:
       client:
-        access-point-sgtin: '{cipher}'
-        device-id: '{cipher}'
-        client-id: '{cipher}'
-        client-name: 'Smart Home Observer'
-        client-auth-token: '{cipher}'
-        auth-token: '{cipher}'
+        access-point-sgtin: '{cipher}115dc711932aa9219ef6da67f52a2a577aff53226af3119eb502adb1fad493241fd2c0795a62099a52dcce36c2b9050e'
+        device-id: '{cipher}cb1567e69e8853622c5165147c51da479834b2ba28216e7900033ed2f0b6c7590a2f4857292afcb8825bc581973e8518edbbb8d0f2ba131683fc1a0257dfa9e1'
+        client-id: '{cipher}d7c035feec0ef93951164640bda455c947c10de98a57b447e0bc1ad7c2f7da91351dfc05b811d92e86ef2dc54e4e8200843eb4bb716b242b07c6d1aa69fa2ac8'
+        client-name: 'Java-Client'
+        client-auth-token: '{cipher}3ea6ac26b0757090e1e42bb50d94b1178ee81e93581f207de9dc8f9f03eabc1514c356c90e9eb92a7f4f905d77a4e0c3aef854791a8d52eca2069ddd0386cd23c4f417a0e7803f3c70f2dab87d4c198dc5d2b34b12764fd95b97b40c804fbea643bec63f5924b7a83f61c5c87926b18d6ac7472ad873a42dfc17ae8882cff4b26d4cd080db9cc146de504a2e682b9b9c176e34f094e6824acf8cac6ea281c5ff'
+        auth-token: '{cipher}86ec99888d406091897bba7acc53ee839205cd3dceb0e02d14f02ad9285f7a0ad96689b77bce23f7e51fa9fee5540dccf9a46bf7c48171ffd4ebdfc8a00723244c76db1c0f538584d45b2c6f647600996f509292202b2b94433b65784c047063'
