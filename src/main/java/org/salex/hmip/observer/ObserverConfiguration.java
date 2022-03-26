@@ -36,8 +36,8 @@ public class ObserverConfiguration {
     }
 
     @Bean
-    ClimateMeasurementService createClimateMeasurementService(HmIPClient client) {
-        return new HomematicClimateMeasurementService(client);
+    ClimateMeasurementService createClimateMeasurementService(HmIPClient client, ObserverDatabase database) {
+        return new HomematicClimateMeasurementService(client, database);
     }
 
     @Bean
@@ -48,8 +48,8 @@ public class ObserverConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    OperatingMeasurementService createFallbackOpperatingMeasurementService() {
-        LOG.warn("No operating measurement service available, operating measuring will be skipped!");
+    OperatingMeasurementService createNoOperatingMeasurementService() {
+        LOG.warn("No service for measurement of operating values available, measuring will be skipped!");
         return Mono::just;
     }
 }
