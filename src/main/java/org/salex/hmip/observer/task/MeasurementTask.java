@@ -33,7 +33,7 @@ public class MeasurementTask {
     @Scheduled(cron = "${org.salex.cron.measure}")
     public void measure() {
         Mono.just(new Reading())
-                .flatMap(reading -> this.climateMeasurementService.measureClimateValues(reading, this.database.getSensors()))
+                .flatMap(this.climateMeasurementService::measureClimateValues)
                 .flatMap(this.operatingMeasurementService::measureOperatingValues)
                 .subscribe(reading -> {
                     this.database.addReading(reading);

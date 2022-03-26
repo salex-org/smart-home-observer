@@ -3,6 +3,7 @@ package org.salex.hmip.observer.service;
 import org.salex.hmip.client.HmIPClient;
 import org.salex.hmip.client.HmIPState;
 import org.salex.hmip.observer.data.ClimateMeasurement;
+import org.salex.hmip.observer.data.ObserverDatabase;
 import org.salex.hmip.observer.data.Reading;
 import org.salex.hmip.observer.data.Sensor;
 import reactor.core.publisher.Flux;
@@ -15,14 +16,17 @@ import java.util.Map;
 public class HomematicClimateMeasurementService implements ClimateMeasurementService {
     private final HmIPClient client;
 
-    public HomematicClimateMeasurementService(HmIPClient client) {
+    private final ObserverDatabase database;
+
+    public HomematicClimateMeasurementService(HmIPClient client, ObserverDatabase database) {
         this.client = client;
+        this.database = database;
     }
 
     @Override
-    public Mono<Reading> measureClimateValues(Reading reading, List<Sensor> sensors) {
+    public Mono<Reading> measureClimateValues(Reading reading) {
         final var sensorMap = new HashMap<String, Sensor>();
-        for(var sensor : sensors) {
+        for(var sensor : this.database.getSensors()) {
             sensorMap.put(sensor.getSgtin().replace("-", ""), sensor);
         }
         return client.loadCurrentState()
