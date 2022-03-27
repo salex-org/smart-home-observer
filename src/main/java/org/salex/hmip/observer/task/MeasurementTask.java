@@ -36,9 +36,7 @@ public class MeasurementTask {
                 .flatMap(this.climateMeasurementService::measureClimateValues)
                 .flatMap(this.operatingMeasurementService::measureOperatingValues)
                 .doOnError(error -> LOG.warn(String.format("Error '%s' occurred on reading measured values, measuring will be skipped!", getRootCauseMessage(error))))
-                .doOnSuccess(reading -> {
-                    this.database.addReading(reading);
-                })
+                .doOnSuccess(reading -> this.database.addReading(reading))
                 .subscribe();
     }
 
