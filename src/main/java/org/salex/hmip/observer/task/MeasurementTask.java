@@ -35,12 +35,16 @@ public class MeasurementTask {
         Mono.just(new Reading())
                 .flatMap(this.climateMeasurementService::measureClimateValues)
                 .flatMap(this.operatingMeasurementService::measureOperatingValues)
-                .subscribe(reading -> {
-                    // this.database.addReading(reading);
-                    LOG.info(String.format("New reading added to database at %s", reading.getReadingTime()));
-                    for(var measurement : reading.getMeasurements()) {
-                        LOG.info(String.format("\t%s", measurement));
-                    }
-                });
+                .doOnError(error -> LOG.warn(String.format("Error '%s' occurred on reading measured values, measuring will be skipped!", getRootCauseMessage(error))))
+                .doOnSuccess(reading -> this.database.addReading(reading))
+                .subscribe();
+    }
+
+    private String getRootCauseMessage(Throwable error) {
+        if(error.getCause() != null) {
+            return getRootCauseMessage(error.getCause());
+        } else {
+            return error.getMessage();
+        }
     }
 }
