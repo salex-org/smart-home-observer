@@ -37,11 +37,7 @@ public class MeasurementTask {
                 .flatMap(this.operatingMeasurementService::measureOperatingValues)
                 .doOnError(error -> LOG.warn(String.format("Error '%s' occurred on reading measured values, measuring will be skipped!", getRootCauseMessage(error))))
                 .doOnSuccess(reading -> {
-                    // this.database.addReading(reading);
-                    LOG.info(String.format("New reading added to database at %s", reading.getReadingTime()));
-                    for(var measurement : reading.getMeasurements()) {
-                        LOG.info(String.format("\t%s", measurement));
-                    }
+                    this.database.addReading(reading);
                 })
                 .subscribe();
     }
