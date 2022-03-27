@@ -36,7 +36,11 @@ public class MeasurementTask {
                 .flatMap(this.climateMeasurementService::measureClimateValues)
                 .flatMap(this.operatingMeasurementService::measureOperatingValues)
                 .subscribe(reading -> {
-                    this.database.addReading(reading);
+                    // this.database.addReading(reading);
+                    LOG.info(String.format("New reading added to database at %s", reading.getReadingTime()));
+                    for(var measurement : reading.getMeasurements()) {
+                        LOG.info(String.format("\t%s", measurement));
+                    }
                 });
     }
 }
