@@ -1,5 +1,7 @@
 package org.salex.hmip.observer.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 
 @Entity
@@ -11,6 +13,7 @@ public abstract class Measurement {
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "reading")
+    @JsonIgnore
     private Reading reading;
 
     protected Measurement() {}
