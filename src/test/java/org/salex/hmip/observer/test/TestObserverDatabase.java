@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @DataJpaTest
 @Import(JpaObserverDatabase.class)
-public class TestJpaObserverDatabase {
+public class TestObserverDatabase {
     @Autowired
     JpaObserverDatabase database;
 
