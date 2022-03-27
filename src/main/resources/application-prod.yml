@@ -36,7 +36,7 @@ org:
         - 'sascha.gaertner@salex.org'
     hmip:
       client:
-        access-point-sgtin: '{cipher}6e9a89f20ba9262b4a52eb26cd52d721b2d5f0dc2df632c1c4cd145dc2a8450af401777a43f338484166b98e8e1b3d82'
+        access-point-sgtin: '{cipher}cb5b21ee2d04ea7b6c6100393f46fbc9f09ce4dcd836fbc93d1a89f09b9d44cb7719fadc6fd9670fdf2b70ef4f783bbd'
         device-id: '{cipher}0483ca53258d20538b6c3316c7a28c3ef318b803ce77e4190eb077dd9ba3751feb7f779f0fe7d5fc03f9f34484bd06cf7a69a5cc72fe014e14df7a847aaf83b0'
         client-id: '{cipher}8835e3a1cf69f3dcaef370c4d580a715ad02fe9ccdc20b352c3ea9ccb5697566e9de05ccf3030a63d6573706eafaddb388da6580b9de675bd58ea7c0946c8b3d'
         client-name: 'Smart Home Observer'
