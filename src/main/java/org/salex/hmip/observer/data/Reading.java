@@ -4,6 +4,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Table (name = "readings")
@@ -45,6 +46,11 @@ public class Reading {
 
     public void addMeasurement(Measurement measurement) {
         this.measurements.add(measurement);
+    }
+
+    public Reading addMeasurement(Optional<Measurement> measurement) {
+        measurement.ifPresent(this::addMeasurement);
+        return this;
     }
 
     @Override

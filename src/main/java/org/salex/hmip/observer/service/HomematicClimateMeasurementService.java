@@ -2,10 +2,7 @@ package org.salex.hmip.observer.service;
 
 import org.salex.hmip.client.HmIPClient;
 import org.salex.hmip.client.HmIPState;
-import org.salex.hmip.observer.data.ClimateMeasurement;
-import org.salex.hmip.observer.data.ObserverDatabase;
-import org.salex.hmip.observer.data.Reading;
-import org.salex.hmip.observer.data.Sensor;
+import org.salex.hmip.observer.data.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -33,15 +30,12 @@ public class HomematicClimateMeasurementService implements ClimateMeasurementSer
                 .map(Map::values)
                 .flatMapMany(Flux::fromIterable)
                 .filter(device -> sensorMap.containsKey(device.getSGTIN()))
-                .map(device -> {
-                   for(var channel : device.getChannels().values()) {
-                       if(channel instanceof final HmIPState.ClimateSensorChannel climateSensorChannel) {
-                           final var measurement = new ClimateMeasurement(reading, sensorMap.get(device.getSGTIN()), device.getStatusTimestamp(), climateSensorChannel.getTemperature(), (double) climateSensorChannel.getHumidity(), climateSensorChannel.getVaporAmount());
-                           reading.addMeasurement(measurement);
-                       }
-                   }
-                   return device;
-                })
+                .map(device -> reading.addMeasurement(device.getChannels().values().stream()
+                            .filter(HmIPState.ClimateSensorChannel.class::isInstance)
+                            .map(HmIPState.ClimateSensorChannel.class::cast)
+                            .map(channel -> new ClimateMeasurement(reading, sensorMap.get(device.getSGTIN()), device.getStatusTimestamp(), channel.getTemperature(), (double) channel.getHumidity(), channel.getVaporAmount()))
+                            .map(Measurement.class::cast)
+                            .findFirst()))
                 .then(Mono.just(reading));
     }
 }
