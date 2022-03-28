@@ -16,6 +16,7 @@ import org.springframework.core.io.ClassPathResource;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,16 +32,32 @@ public class TestClimateMeasurementService {
     @BeforeEach
     void setup() {
         database = mock(ObserverDatabase.class);
-        when(database.getSensors()).thenReturn(List.of(
-                new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1"),
-                new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2")));
         homematicClient = mock(HmIPClient.class);
-        service = new HomematicClimateMeasurementService(homematicClient, database);
     }
 
     @Test
-    void testReadClimateDataFromTheCloud() throws Exception {
-        when(homematicClient.loadCurrentState()).thenReturn(Mono.just(createHmIPState("TestClimateMeasurementService/testReadClimateDataFromTheCLoud.json")));
+    void should_return_measurement_data_only_all_configured_sensors_available_in_the_cloud() throws Exception {
+        when(homematicClient.loadCurrentState()).thenReturn(Mono.just(createHmIPState("TestClimateMeasurementService/hmip-state-with-three-sensor-devices.json")));
+        when(database.getSensors()).thenReturn(List.of(
+                new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1"),
+                new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2"),
+                new Sensor(2L, "Testsensor 3", Sensor.Type.HmIP_STHO, "test-sgtin-3")));
+        service = new HomematicClimateMeasurementService(homematicClient, database);
+        var reading = new Reading();
+        StepVerifier
+                .create(service.measureClimateValues(reading))
+                .expectNext(reading)
+                .verifyComplete();
+        assertThat(reading.getMeasurements().size()).isEqualTo(3);
+    }
+
+    @Test
+    void should_return_measurement_data_only_for_configured_sensors() throws Exception {
+        when(homematicClient.loadCurrentState()).thenReturn(Mono.just(createHmIPState("TestClimateMeasurementService/hmip-state-with-three-sensor-devices.json")));
+        when(database.getSensors()).thenReturn(List.of(
+                new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1"),
+                new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2")));
+        service = new HomematicClimateMeasurementService(homematicClient, database);
         var reading = new Reading();
         StepVerifier
                 .create(service.measureClimateValues(reading))
@@ -50,8 +67,26 @@ public class TestClimateMeasurementService {
     }
 
     @Test
-    void testReadClimateDataMissingInTheCloud() throws Exception {
-        when(homematicClient.loadCurrentState()).thenReturn(Mono.just(createHmIPState("TestClimateMeasurementService/testReadClimateDataMissingInTheCloud.json")));
+    void should_return_measurement_data_only_for_sensors_devices_available_in_the_cloud() throws Exception {
+        when(homematicClient.loadCurrentState()).thenReturn(Mono.just(createHmIPState("TestClimateMeasurementService/hmip-state-with-two-sensor-devices.json")));
+        when(database.getSensors()).thenReturn(List.of(
+                new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1"),
+                new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2"),
+                new Sensor(2L, "Testsensor 3", Sensor.Type.HmIP_STHO, "test-sgtin-3")));
+        service = new HomematicClimateMeasurementService(homematicClient, database);
+        var reading = new Reading();
+        StepVerifier
+                .create(service.measureClimateValues(reading))
+                .expectNext(reading)
+                .verifyComplete();
+        assertThat(reading.getMeasurements().size()).isEqualTo(2);
+    }
+
+    @Test
+    void should_return_measurement_data_when_reading_sensor_device() throws Exception {
+        when(homematicClient.loadCurrentState()).thenReturn(Mono.just(createHmIPState("TestClimateMeasurementService/hmip-state-with-one-sensor-device.json")));
+        when(database.getSensors()).thenReturn(List.of(new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1")));
+        service = new HomematicClimateMeasurementService(homematicClient, database);
         var reading = new Reading();
         StepVerifier
                 .create(service.measureClimateValues(reading))
@@ -61,6 +96,8 @@ public class TestClimateMeasurementService {
         assertThat(reading.getMeasurements().get(0)).isInstanceOf(ClimateMeasurement.class);
         assertThat(((ClimateMeasurement)reading.getMeasurements().get(0)).getTemperature()).isEqualTo(7.3);
         assertThat(((ClimateMeasurement)reading.getMeasurements().get(0)).getHumidity()).isEqualTo(73);
+        assertThat(((ClimateMeasurement)reading.getMeasurements().get(0)).getVaporAmount()).isEqualTo(7.348975847536114);
+        assertThat(((ClimateMeasurement)reading.getMeasurements().get(0)).getMeasuringTime()).isEqualTo(new Date(1648411198375L));
     }
 
     private HmIPState createHmIPState(String resource) throws Exception {
