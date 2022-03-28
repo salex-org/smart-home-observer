@@ -19,13 +19,13 @@ public class TestObserverDatabase {
     JpaObserverDatabase database;
 
     @Test
-    public void testGetSensors() {
+    void should_return_all_sensors() {
         var sensors = this.database.getSensors();
         Assertions.assertEquals(3, sensors.size());
     }
 
     @Test
-    public void testAddReading() {
+    void should_set_ids_when_adding_reading() {
         // Prepare test
         final var sensor = this.database.getSensors().iterator().next();
         final var readingTime = new Date();
@@ -48,7 +48,7 @@ public class TestObserverDatabase {
     }
 
     @Test
-    public void testGetClimateMeasurement() {
+    public void should_return_relevant_measurements_with_all_attributes_filled() {
         // Prepare test
         final var now = new Date();
         final var oneHourAgo = new Date(now.getTime() - TimeUnit.HOURS.toMillis(1));
@@ -80,7 +80,7 @@ public class TestObserverDatabase {
     }
 
     @Test
-    public void testGetClimateMeasurementRegardingSensor() {
+    public void should_return_only_measurements_selected_by_time_and_sensor() {
         // Prepare test
         final var now = new Date();
         final var oneHourAgo = new Date(now.getTime() - TimeUnit.HOURS.toMillis(1));
@@ -105,7 +105,7 @@ public class TestObserverDatabase {
         Assertions.assertTrue(measuringTimes.stream().anyMatch(t -> t.compareTo(now) == 0));
         Assertions.assertTrue(measuringTimes.stream().anyMatch(t -> t.compareTo(oneHourAgo) == 0));
 
-        // Read the measurements for first sensor
+        // Read the measurements for second sensor
         measurements = database.getClimateMeasurements(2, secondSensor);
 
         // Check if the correct measurements are found
@@ -115,7 +115,7 @@ public class TestObserverDatabase {
     }
 
     @Test
-    public void testGetClimateMeasurementBoundaries() {
+    public void should_return_measurement_boundaries_for_selected_time_with_all_attributes_filled() {
         // Prepare test
         final var now = new Date();
         final var tenMinutesAgo = new Date(now.getTime() - TimeUnit.MINUTES.toMillis(10));
