@@ -18,14 +18,11 @@ jobs:
           cache: maven
 
       - name: Build
-        run: mvn --batch-mode -DskipTests package --file pom.xml
-
-      - name: Test
-        run: mvn --batch-mode -Dmaven.test.failure.ignore=true test --file pom.xml
+        run: mvn --batch-mode package --file pom.xml
 
       - name: Report
         uses: dorny/test-reporter@v1
-        if: always()
+        if: success() || failure()
         with:
           name: Maven Tests
           path: target/surefire-reports/*.xml
