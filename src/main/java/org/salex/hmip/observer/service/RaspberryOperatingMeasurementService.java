@@ -10,10 +10,26 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 public class RaspberryOperatingMeasurementService implements OperatingMeasurementService {
+    public static class OperatingSystemAccess {
+
+        public String runCommand(String[] command) throws IOException {
+            final Process p = Runtime.getRuntime().exec(command);
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
+            return reader.readLine();
+        }
+    }
+
     private final String cpuMeasureScript;
 
+    private final OperatingSystemAccess operatingSystemAccess;
+
     public RaspberryOperatingMeasurementService(String cpuMeasureScript) {
+        this(cpuMeasureScript, new OperatingSystemAccess());
+    }
+
+    public RaspberryOperatingMeasurementService(String cpuMeasureScript, OperatingSystemAccess operatingSystemAccess) {
         this.cpuMeasureScript = cpuMeasureScript;
+        this.operatingSystemAccess = operatingSystemAccess;
     }
 
     @Override
@@ -28,30 +44,22 @@ public class RaspberryOperatingMeasurementService implements OperatingMeasuremen
     }
 
     private Double readCPUTemperature() throws IOException {
-        final Process p = Runtime.getRuntime().exec(new String[] { this.cpuMeasureScript, "measure_temp" });
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
-        final String[] result = reader.readLine().split("[=']");
+        final var result = this.operatingSystemAccess.runCommand(new String[] { this.cpuMeasureScript, "measure_temp" }).split("[=']");
         return Double.parseDouble(result[1]);
     }
 
     private Double readCoreVoltage() throws IOException {
-        final Process p = Runtime.getRuntime().exec(new String[] { this.cpuMeasureScript, "measure_volts" });
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
-        final String[] result = reader.readLine().split("[=V]");
+        final var result = this.operatingSystemAccess.runCommand(new String[] { this.cpuMeasureScript, "measure_volts" }).split("[=V]");
         return Double.parseDouble(result[1]);
     }
 
     private Double readDiskUsage() throws IOException {
-        final Process p = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", "df -P | grep /dev/root" });
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
-        final String[] result = reader.readLine().split("[,; \\t\\n\\r]+");
+        final var result = this.operatingSystemAccess.runCommand(new String[] { "/bin/sh", "-c", "df -P | grep /dev/root" }).split("[,; \\t\\n\\r]+");
         return Double.parseDouble(result[2]) / Double.parseDouble(result[1]) * 100;
     }
 
     private Double readMemoryUsage() throws IOException {
-        final Process p = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", "free | grep Speicher" });
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
-        final String[] result = reader.readLine().split("[,; \\t\\n\\r]+");
+        final var result = this.operatingSystemAccess.runCommand(new String[] { "/bin/sh", "-c", "free | grep Speicher" }).split("[,; \\t\\n\\r]+");
         return Double.parseDouble(result[2]) / Double.parseDouble(result[1]) * 100;
     }
 }
