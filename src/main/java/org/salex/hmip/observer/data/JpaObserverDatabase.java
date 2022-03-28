@@ -48,8 +48,8 @@ public class JpaObserverDatabase implements ObserverDatabase {
      * Add a new reading to the database.
      */
     @Transactional
-    public void addReading(Reading reading) {
-        this.readingRepository.save(reading);
+    public Reading addReading(Reading reading) {
+        return this.readingRepository.save(reading);
     }
 
     /**

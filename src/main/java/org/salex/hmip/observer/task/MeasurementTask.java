@@ -2,6 +2,7 @@ package org.salex.hmip.observer.task;
 
 import org.salex.hmip.observer.data.ObserverDatabase;
 import org.salex.hmip.observer.data.Reading;
+import org.salex.hmip.observer.service.BlogPublishService;
 import org.salex.hmip.observer.service.ClimateMeasurementService;
 import org.salex.hmip.observer.service.OperatingMeasurementService;
 import org.slf4j.Logger;
@@ -23,10 +24,13 @@ public class MeasurementTask {
 
     private final ClimateMeasurementService climateMeasurementService;
 
-    public MeasurementTask(@Value("${org.salex.cron.measure}") String cron, ObserverDatabase database, OperatingMeasurementService operatingMeasurementService, ClimateMeasurementService climateMeasurementService) {
+    private final BlogPublishService blogPublishService;
+
+    public MeasurementTask(@Value("${org.salex.cron.measure}") String cron, ObserverDatabase database, OperatingMeasurementService operatingMeasurementService, ClimateMeasurementService climateMeasurementService, BlogPublishService blogPublishService) {
         this.database = database;
         this.operatingMeasurementService = operatingMeasurementService;
         this.climateMeasurementService = climateMeasurementService;
+        this.blogPublishService = blogPublishService;
         LOG.info(String.format("Measurement task started scheduled with cron %s", cron));
     }
 
@@ -35,8 +39,9 @@ public class MeasurementTask {
         Mono.just(new Reading())
                 .flatMap(this.climateMeasurementService::measureClimateValues)
                 .flatMap(this.operatingMeasurementService::measureOperatingValues)
+                .map(this.database::addReading)
+                .flatMap(this.blogPublishService::postOverview)
                 .doOnError(error -> LOG.warn(String.format("Error '%s' occurred on reading measured values, measuring will be skipped!", getRootCauseMessage(error))))
-                .doOnSuccess(reading -> this.database.addReading(reading))
                 .subscribe();
     }
 

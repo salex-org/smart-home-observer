@@ -13,7 +13,7 @@ public interface ObserverDatabase {
     /**
      * Add a new reading to the database.
      */
-    void addReading(Reading reading);
+    Reading addReading(Reading reading);
 
     /**
      * Retrieve all climate measurement data for the last specified hours.
