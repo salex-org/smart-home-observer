@@ -27,7 +27,6 @@ import static org.mockito.Mockito.when;
 public class TestClimateMeasurementService {
     private ObserverDatabase database;
     private HmIPClient homematicClient;
-    private ClimateMeasurementService service;
 
     @BeforeEach
     void setup() {
@@ -42,8 +41,8 @@ public class TestClimateMeasurementService {
                 new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1"),
                 new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2"),
                 new Sensor(2L, "Testsensor 3", Sensor.Type.HmIP_STHO, "test-sgtin-3")));
-        service = new HomematicClimateMeasurementService(homematicClient, database);
-        var reading = new Reading();
+        final var service = new HomematicClimateMeasurementService(homematicClient, database);
+        final var reading = new Reading();
         StepVerifier
                 .create(service.measureClimateValues(reading))
                 .expectNext(reading)
@@ -57,8 +56,8 @@ public class TestClimateMeasurementService {
         when(database.getSensors()).thenReturn(List.of(
                 new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1"),
                 new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2")));
-        service = new HomematicClimateMeasurementService(homematicClient, database);
-        var reading = new Reading();
+        final var service = new HomematicClimateMeasurementService(homematicClient, database);
+        final var reading = new Reading();
         StepVerifier
                 .create(service.measureClimateValues(reading))
                 .expectNext(reading)
@@ -73,8 +72,8 @@ public class TestClimateMeasurementService {
                 new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1"),
                 new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2"),
                 new Sensor(2L, "Testsensor 3", Sensor.Type.HmIP_STHO, "test-sgtin-3")));
-        service = new HomematicClimateMeasurementService(homematicClient, database);
-        var reading = new Reading();
+        final var  service = new HomematicClimateMeasurementService(homematicClient, database);
+        final var reading = new Reading();
         StepVerifier
                 .create(service.measureClimateValues(reading))
                 .expectNext(reading)
@@ -86,8 +85,8 @@ public class TestClimateMeasurementService {
     void should_return_measurement_data_when_reading_sensor_device() throws Exception {
         when(homematicClient.loadCurrentState()).thenReturn(Mono.just(createHmIPState("TestClimateMeasurementService/hmip-state-with-one-sensor-device.json")));
         when(database.getSensors()).thenReturn(List.of(new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1")));
-        service = new HomematicClimateMeasurementService(homematicClient, database);
-        var reading = new Reading();
+        final var service = new HomematicClimateMeasurementService(homematicClient, database);
+        final var reading = new Reading();
         StepVerifier
                 .create(service.measureClimateValues(reading))
                 .expectNext(reading)
