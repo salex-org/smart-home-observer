@@ -64,13 +64,13 @@ public class TestObserverDatabase {
         var measurements = database.getClimateMeasurements(2);
 
         // Check if the correct measurements are found
-        var measuringTimes = measurements.stream().map(HomematicMeasurement::getMeasuringTime).toList();
+        var measuringTimes = measurements.get(sensor).stream().map(HomematicMeasurement::getMeasuringTime).toList();
         Assertions.assertEquals(2, measuringTimes.size());
         Assertions.assertTrue(measuringTimes.stream().anyMatch(t -> t.compareTo(now) == 0));
         Assertions.assertTrue(measuringTimes.stream().anyMatch(t -> t.compareTo(oneHourAgo) == 0));
 
         // Check if all attributes are filled
-        var measurement = measurements.stream().filter(m -> m.getMeasuringTime().compareTo(now) == 0).findFirst().orElse(null);
+        var measurement = measurements.get(sensor).stream().filter(m -> m.getMeasuringTime().compareTo(now) == 0).findFirst().orElse(null);
         Assertions.assertNotNull(measurement);
         Assertions.assertEquals(now, measurement.getMeasuringTime());
         Assertions.assertEquals(sensor, measurement.getSensor());

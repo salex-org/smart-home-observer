@@ -1,5 +1,6 @@
 package org.salex.hmip.observer.task;
 
+import org.salex.hmip.observer.blog.Image;
 import org.salex.hmip.observer.data.ObserverDatabase;
 import org.salex.hmip.observer.data.Reading;
 import org.salex.hmip.observer.service.BlogPublishService;
@@ -41,7 +42,9 @@ public class MeasurementTask {
                 .flatMap(this.operatingMeasurementService::measureOperatingValues)
                 .map(this.database::addReading)
                 .flatMap(this.blogPublishService::postOverview)
-                .doOnError(error -> LOG.warn(String.format("Error '%s' occurred on reading measured values, measuring will be skipped!", getRootCauseMessage(error))))
+                .map(reading -> this.database.getClimateMeasurements(24, reading.getReadingTime()))
+                .flatMap(this.blogPublishService::postDetails)
+                .doOnError(error -> LOG.warn(String.format("Error '%s' occurred on reading measurement", getRootCauseMessage(error))))
                 .subscribe();
     }
 

@@ -1,5 +1,5 @@
 package org.salex.hmip.observer.test;
 
-public class TestBlogPublishService {
+public class TestChartGenerator {
     // TODO implement
 }

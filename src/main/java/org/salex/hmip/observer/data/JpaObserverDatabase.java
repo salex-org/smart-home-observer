@@ -55,14 +55,14 @@ public class JpaObserverDatabase implements ObserverDatabase {
     /**
      * Retrieve all climate measurement data for the last specified hours.
      */
-    public List<ClimateMeasurement> getClimateMeasurements(int hours) {
+    public Map<Sensor, List<ClimateMeasurement>> getClimateMeasurements(int hours) {
         return getClimateMeasurements(hours, new Date());
     }
 
     /**
      * Retrieve all climate measurement data for the specified hours before the given timestamp.
      */
-    public List<ClimateMeasurement> getClimateMeasurements(int hours, Date endTime) {
+    public Map<Sensor, List<ClimateMeasurement>> getClimateMeasurements(int hours, Date endTime) {
         var startTime = new Date(endTime.getTime() - TimeUnit.HOURS.toMillis(hours));
         return getClimateMeasurements(startTime, endTime);
     }
@@ -71,8 +71,17 @@ public class JpaObserverDatabase implements ObserverDatabase {
      * Retrieve all climate measurement data between the given timestamps.
      */
     @Transactional
-    public List<ClimateMeasurement> getClimateMeasurements(Date startTime, Date endTime) {
-        return this.climateMeasurementRepository.findByMeasuringTimeBetween(startTime, endTime);
+    public Map<Sensor, List<ClimateMeasurement>> getClimateMeasurements(Date startTime, Date endTime) {
+        var result = new HashMap<Sensor, List<ClimateMeasurement>>();
+        var sensorLookup = new HashMap<Long, Sensor>();
+        for(var sensor : this.sensorRepository.findAll()) {
+            sensorLookup.put(sensor.getId(), sensor);
+            result.put(sensor, new ArrayList<>());
+        }
+        for(var measurement :  this.climateMeasurementRepository.findByMeasuringTimeBetween(startTime, endTime)) {
+            result.get(sensorLookup.get(measurement.getSensor().getId())).add(measurement);
+        }
+        return result;
     }
 
     /**

@@ -1,5 +1,6 @@
 package org.salex.hmip.observer;
 
+import freemarker.core.TemplateNumberFormatFactory;
 import org.salex.hmip.client.HmIPClient;
 import org.salex.hmip.client.HmIPConfiguration;
 import org.salex.hmip.client.HmIPProperties;
@@ -15,9 +16,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import reactor.core.publisher.Mono;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class ObserverConfiguration {
@@ -60,13 +64,15 @@ public class ObserverConfiguration {
     BlogPublishService createWordPressPublishService(
             @Value("${org.salex.blog.url}") String url,
             @Value("${org.salex.blog.username}") String username,
-            @Value("${org.salex.blog.password}") String password) {
+            @Value("${org.salex.blog.password}") String password,
+            ChartGenerator chartGenerator,
+            ContentGenerator contentGenerator) {
         final var basicAuth = HttpHeaders.encodeBasicAuth(username, password, null);
         final var client = WebClient.builder().baseUrl(url).defaultHeaders(headers -> {
             headers.setBasicAuth(basicAuth);
             headers.setContentType(MediaType.APPLICATION_JSON);
         }).build();
-        return new WordPressPublishService(client);
+        return new WordPressPublishService(client, contentGenerator, chartGenerator);
     }
 
     @Bean
@@ -80,10 +86,27 @@ public class ObserverConfiguration {
             }
 
             @Override
-            public Mono<Void> postDetails(List<ClimateMeasurement> measurements) {
+            public Mono<Map<Sensor, List<ClimateMeasurement>>> postDetails(Map<Sensor, List<ClimateMeasurement>> data) {
                 return Mono.empty();
             }
         };
     }
 
+    @Bean
+    ChartGenerator createJFreeChartGenerator() {
+        return new JFreeChartGenerator();
+    }
+
+    @Bean
+    ContentGenerator createFreeMarkerContentGenerator(FreeMarkerConfigurer freeMarkerConfigurer) throws Exception {
+        return new FreeMarkerContentGenerator(freeMarkerConfigurer);
+    }
+
+    @Bean
+    public FreeMarkerConfigurer freeMarkerConfigurer(){
+        final var freeMarkerConfigurer = new FreeMarkerConfigurer();
+        freeMarkerConfigurer.setTemplateLoaderPath("classpath:/templates");
+        freeMarkerConfigurer.setDefaultEncoding("UTF-8");
+        return freeMarkerConfigurer;
+    }
 }

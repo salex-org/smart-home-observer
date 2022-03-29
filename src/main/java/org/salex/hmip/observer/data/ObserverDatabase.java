@@ -18,17 +18,17 @@ public interface ObserverDatabase {
     /**
      * Retrieve all climate measurement data for the last specified hours.
      */
-    List<ClimateMeasurement> getClimateMeasurements(int hours);
+    Map<Sensor, List<ClimateMeasurement>> getClimateMeasurements(int hours);
 
     /**
      * Retrieve all climate measurement data for the specified hours before the given timestamp.
      */
-    List<ClimateMeasurement> getClimateMeasurements(int hours, Date endTime);
+    Map<Sensor, List<ClimateMeasurement>> getClimateMeasurements(int hours, Date endTime);
 
     /**
      * Retrieve all climate measurement data between the given timestamps.
      */
-    List<ClimateMeasurement> getClimateMeasurements(Date startTime, Date endTime);
+    Map<Sensor, List<ClimateMeasurement>> getClimateMeasurements(Date startTime, Date endTime);
 
     /**
      * Retrieve all climate measurement data for the last specified hours regarding the given sensor.

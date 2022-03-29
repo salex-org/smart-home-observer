@@ -10,6 +10,8 @@ import org.salex.hmip.observer.task.MeasurementTask;
 import reactor.core.publisher.Mono;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -40,13 +42,17 @@ public class TestMeasurementTask {
         when(climateMeasurementService.measureClimateValues(any())).thenReturn(Mono.just(reading));
         when(operatingMeasurementService.measureOperatingValues(any())).thenReturn(Mono.just(reading));
         when(blogPublishService.postOverview(any())).thenReturn(Mono.just(reading));
+        when(blogPublishService.postDetails(any())).thenReturn(Mono.just(new HashMap<Sensor, List<ClimateMeasurement>>()));
         when(database.addReading(any())).thenReturn(reading);
+        when(database.getClimateMeasurements(eq(24), any(Date.class))).thenReturn(new HashMap<Sensor, List<ClimateMeasurement>>());
         final var task = new MeasurementTask("test-cron", database, operatingMeasurementService, climateMeasurementService, blogPublishService);
         task.measure();
         verify(climateMeasurementService, times(1)).measureClimateValues(any());
         verify(operatingMeasurementService, times(1)).measureOperatingValues(any());
         verify(database, times(1)).addReading(reading);
+        verify(database, times(1)).getClimateMeasurements(eq(24), any(Date.class));
         verify(blogPublishService, times(1)).postOverview(reading);
+        verify(blogPublishService, times(1)).postDetails(any());
         verifyNoMoreInteractions(climateMeasurementService);
         verifyNoMoreInteractions(operatingMeasurementService);
         verifyNoMoreInteractions(database);
