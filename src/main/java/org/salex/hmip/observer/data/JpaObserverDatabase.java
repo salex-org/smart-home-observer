@@ -27,9 +27,9 @@ public class JpaObserverDatabase implements ObserverDatabase {
         if(this.getSensors().isEmpty()) {
             LOG.info("Initializing sensor data");
             this.sensorRepository.saveAll(List.of(
-                    new Sensor(1L, "Maschinenraum", Sensor.Type.HmIP_STHO, "3014-F711-A000-0EDD-89B3-A015"),
-                    new Sensor(2L, "Bankraum", Sensor.Type.HmIP_STHO, "3014-F711-A000-0EDD-89B3-A112"),
-                    new Sensor(3L, "Carport", Sensor.Type.HmIP_STHO, "3014-F711-A000-10DD-899E-53A0")
+                    new Sensor(1L, "Maschinenraum", Sensor.Type.HmIP_STHO, "3014-F711-A000-0EDD-89B3-A015", "#71893F"),
+                    new Sensor(2L, "Bankraum", Sensor.Type.HmIP_STHO, "3014-F711-A000-0EDD-89B3-A112", "#517199"),
+                    new Sensor(3L, "Carport", Sensor.Type.HmIP_STHO, "3014-F711-A000-10DD-899E-53A0", "#7B219F")
             ));
         }
 

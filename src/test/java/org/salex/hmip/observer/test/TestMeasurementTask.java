@@ -34,8 +34,8 @@ public class TestMeasurementTask {
     void should_read_latest_measurement_data_and_add_reading_to_database() {
         final var now = new Date();
         final var reading = new Reading(now);
-        final var firstSensor = new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1");
-        final var secondSensor = new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2");
+        final var firstSensor = new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000");
+        final var secondSensor = new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2", "#00FF00");
         reading.addMeasurement(new ClimateMeasurement(reading, firstSensor, now, 12.3, 42.7, 3.45674395764));
         reading.addMeasurement(new ClimateMeasurement(reading, secondSensor, now, 15.7, 43.5, 3.14159265358));
         reading.addMeasurement(new OperatingMeasurement(reading, 1.0, 2.0, 3.0, 4.0));
@@ -63,8 +63,8 @@ public class TestMeasurementTask {
     void should_skip_add_reading_to_database_when_error_occurred_in_climate_measurement() {
         final var now = new Date();
         final var reading = new Reading(now);
-        final var firstSensor = new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1");
-        final var secondSensor = new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2");
+        final var firstSensor = new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000");
+        final var secondSensor = new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2", "#00FF00");
         reading.addMeasurement(new ClimateMeasurement(reading, firstSensor, now, 12.3, 42.7, 3.45674395764));
         reading.addMeasurement(new ClimateMeasurement(reading, secondSensor, now, 15.7, 43.5, 3.14159265358));
         reading.addMeasurement(new OperatingMeasurement(reading, 1.0, 2.0, 3.0, 4.0));
@@ -80,8 +80,8 @@ public class TestMeasurementTask {
     void should_skip_add_reading_to_database_when_error_occurred_in_operating_measurement() {
         final var now = new Date();
         final var reading = new Reading(now);
-        final var firstSensor = new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1");
-        final var secondSensor = new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2");
+        final var firstSensor = new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000");
+        final var secondSensor = new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2", "#00FF00");
         reading.addMeasurement(new ClimateMeasurement(reading, firstSensor, now, 12.3, 42.7, 3.45674395764));
         reading.addMeasurement(new ClimateMeasurement(reading, secondSensor, now, 15.7, 43.5, 3.14159265358));
         reading.addMeasurement(new OperatingMeasurement(reading, 1.0, 2.0, 3.0, 4.0));

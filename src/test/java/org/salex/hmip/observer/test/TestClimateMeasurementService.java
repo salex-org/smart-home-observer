@@ -38,9 +38,9 @@ public class TestClimateMeasurementService {
     void should_return_measurement_data_only_all_configured_sensors_available_in_the_cloud() throws Exception {
         when(homematicClient.loadCurrentState()).thenReturn(Mono.just(createHmIPState("TestClimateMeasurementService/hmip-state-with-three-sensor-devices.json")));
         when(database.getSensors()).thenReturn(List.of(
-                new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1"),
-                new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2"),
-                new Sensor(2L, "Testsensor 3", Sensor.Type.HmIP_STHO, "test-sgtin-3")));
+                new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000"),
+                new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2", "#00FF00"),
+                new Sensor(2L, "Testsensor 3", Sensor.Type.HmIP_STHO, "test-sgtin-3", "#0000FF")));
         final var service = new HomematicClimateMeasurementService(homematicClient, database);
         final var reading = new Reading();
         StepVerifier
@@ -54,8 +54,8 @@ public class TestClimateMeasurementService {
     void should_return_measurement_data_only_for_configured_sensors() throws Exception {
         when(homematicClient.loadCurrentState()).thenReturn(Mono.just(createHmIPState("TestClimateMeasurementService/hmip-state-with-three-sensor-devices.json")));
         when(database.getSensors()).thenReturn(List.of(
-                new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1"),
-                new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2")));
+                new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000"),
+                new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2", "#00FF00")));
         final var service = new HomematicClimateMeasurementService(homematicClient, database);
         final var reading = new Reading();
         StepVerifier
@@ -69,9 +69,9 @@ public class TestClimateMeasurementService {
     void should_return_measurement_data_only_for_sensors_devices_available_in_the_cloud() throws Exception {
         when(homematicClient.loadCurrentState()).thenReturn(Mono.just(createHmIPState("TestClimateMeasurementService/hmip-state-with-two-sensor-devices.json")));
         when(database.getSensors()).thenReturn(List.of(
-                new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1"),
-                new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2"),
-                new Sensor(2L, "Testsensor 3", Sensor.Type.HmIP_STHO, "test-sgtin-3")));
+                new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000"),
+                new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2", "#00FF00"),
+                new Sensor(2L, "Testsensor 3", Sensor.Type.HmIP_STHO, "test-sgtin-3", "#0000FF")));
         final var  service = new HomematicClimateMeasurementService(homematicClient, database);
         final var reading = new Reading();
         StepVerifier
@@ -84,7 +84,7 @@ public class TestClimateMeasurementService {
     @Test
     void should_return_measurement_data_when_reading_sensor_device() throws Exception {
         when(homematicClient.loadCurrentState()).thenReturn(Mono.just(createHmIPState("TestClimateMeasurementService/hmip-state-with-one-sensor-device.json")));
-        when(database.getSensors()).thenReturn(List.of(new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1")));
+        when(database.getSensors()).thenReturn(List.of(new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000")));
         final var service = new HomematicClimateMeasurementService(homematicClient, database);
         final var reading = new Reading();
         StepVerifier

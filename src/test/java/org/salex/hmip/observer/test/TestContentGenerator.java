@@ -36,8 +36,8 @@ public class TestContentGenerator {
     void should_generate_overview_content_when_called_with_correct_reading() {
         final var now = new Date();
         final var reading = new Reading(now);
-        final var firstSensor = new Sensor(1L, "First", Sensor.Type.HmIP_STHO, "test-sgtin-1");
-        final var secondSensor = new Sensor(2L, "Second", Sensor.Type.HmIP_STHO, "test-sgtin-2");
+        final var firstSensor = new Sensor(1L, "First", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000");
+        final var secondSensor = new Sensor(2L, "Second", Sensor.Type.HmIP_STHO, "test-sgtin-2", "#00FF00");
         reading.addMeasurement(new ClimateMeasurement(reading, firstSensor, now, 13.2, 42.7, 5.2386758493768));
         reading.addMeasurement(new ClimateMeasurement(reading, secondSensor, now, 16.8, 38.5, 6.6784739686878));
         StepVerifier
@@ -67,8 +67,8 @@ public class TestContentGenerator {
         final var reading = new Reading(now);
         final var image = new Image("test-image");
         image.setFull("http://link-to-test-image");
-        final var firstSensor = new Sensor(1L, "First", Sensor.Type.HmIP_STHO, "test-sgtin-1");
-        final var secondSensor = new Sensor(2L, "Second", Sensor.Type.HmIP_STHO, "test-sgtin-2");
+        final var firstSensor = new Sensor(1L, "First", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000");
+        final var secondSensor = new Sensor(2L, "Second", Sensor.Type.HmIP_STHO, "test-sgtin-2", "#00FF00");
         final var data = Map.of(
                 firstSensor, List.of(
                         new ClimateMeasurement(reading, firstSensor, twentyMinutesAgo, 11.2, 52.7, 5.2386758493768),

@@ -29,8 +29,8 @@ public class TestClimateRestController {
     void should_return_measurement_data_of_the_past_two_hours() {
         final var now = new Date();
         final var reading = new Reading((now));
-        final var firstSensor = new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1");
-        final var secondSensor = new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2");
+        final var firstSensor = new Sensor(1L, "Testsensor 1", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000");
+        final var secondSensor = new Sensor(2L, "Testsensor 2", Sensor.Type.HmIP_STHO, "test-sgtin-2", "#00FF00");
         final var oneHourAgo = new Date(now.getTime() - TimeUnit.HOURS.toMillis(1));
         final var threeHoursAgo = new Date(now.getTime() - TimeUnit.HOURS.toMillis(3));
         when(database.getClimateMeasurements(2)).thenReturn(Map.of(

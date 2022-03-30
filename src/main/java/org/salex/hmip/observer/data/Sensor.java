@@ -24,13 +24,17 @@ public class Sensor {
     @Column(name = "sgtin", nullable = false)
     private String sgtin;
 
+    @Column(name = "color", nullable = false)
+    private String color;
+
     protected Sensor() {}
 
-    public Sensor(Long id, String name, Type type, String sgtin) {
+    public Sensor(Long id, String name, Type type, String sgtin, String color) {
         this.id = id;
         this.name = name;
         this.type = type;
         this.sgtin = sgtin;
+        this.color = color;
     }
 
     public Long getId() {
@@ -62,8 +66,11 @@ public class Sensor {
     }
 
     public String getColor() {
-        // TODO implement
-        return "#00AA00";
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 
     @Override
