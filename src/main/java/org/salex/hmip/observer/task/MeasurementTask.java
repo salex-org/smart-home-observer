@@ -51,7 +51,7 @@ public class MeasurementTask {
                     final var data = this.database.getClimateMeasurements(start, end);
                     return this.blogPublishService.postDetails(start, end, data);
                 })
-                .doOnError(error -> LOG.warn(String.format("Error '%s' occurred on reading measurement", getRootCauseMessage(error))))
+                .doOnError(error -> LOG.warn(String.format("Error '%s' occurred in measurement task", getRootCauseMessage(error))))
                 .subscribe();
     }
 
