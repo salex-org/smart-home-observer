@@ -14,6 +14,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 @ConditionalOnProperty("org.salex.cron.measure")
 @Service
 public class MeasurementTask {
@@ -42,8 +45,12 @@ public class MeasurementTask {
                 .flatMap(this.operatingMeasurementService::measureOperatingValues)
                 .map(this.database::addReading)
                 .flatMap(this.blogPublishService::postOverview)
-                .map(reading -> this.database.getClimateMeasurements(24, reading.getReadingTime()))
-                .flatMap(this.blogPublishService::postDetails)
+                .flatMap(reading -> {
+                    final var end = reading.getReadingTime();
+                    final var start = new Date(end.getTime() - TimeUnit.HOURS.toMillis(24));
+                    final var data = this.database.getClimateMeasurements(start, end);
+                    return this.blogPublishService.postDetails(start, end, data);
+                })
                 .doOnError(error -> LOG.warn(String.format("Error '%s' occurred on reading measurement", getRootCauseMessage(error))))
                 .subscribe();
     }

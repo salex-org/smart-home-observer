@@ -57,7 +57,7 @@ public class FreeMarkerContentGenerator implements ContentGenerator {
     }
 
     @Override
-    public Mono<String> generateDetails(Map<Sensor, List<ClimateMeasurement>> data, Image diagram) {
+    public Mono<String> generateDetails(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data, Image diagram) {
         if(data.isEmpty()) {
             return Mono.just("<h3>Keine Daten vorhanden</h3>");
         } else {
@@ -70,17 +70,15 @@ public class FreeMarkerContentGenerator implements ContentGenerator {
                         templateData.put("minHum", measurements.stream().min(Comparator.comparing(ClimateMeasurement::getHumidity)).orElseThrow());
                         templateData.put("maxHum", measurements.stream().max(Comparator.comparing(ClimateMeasurement::getHumidity)).orElseThrow());
                         templateData.put("sensor", sensor);
-                        templateData.put("color", "#00AA00"); // TODO implement sensor specific color
                         return templateData;
                     })
                     .collectList()
                     .map(measurements -> {
                         final var templateData = new HashMap<String, Object>();
                         templateData.put("measurements", measurements);
-                        templateData.put("periodStart", new Date()); // TODO implement
-                        templateData.put("periodEnd", new Date()); // TODO implement
-                        templateData.put("diagramId", "d-id"); // TODO implement
-                        templateData.put("diagramFull", "d-full"); // TODO implement
+                        templateData.put("periodStart", start);
+                        templateData.put("periodEnd", end);
+                        templateData.put("diagram", diagram);
                         return templateData;
                     })
                     .flatMap(templateData -> {

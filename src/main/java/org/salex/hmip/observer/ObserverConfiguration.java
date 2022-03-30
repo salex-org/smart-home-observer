@@ -19,6 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import reactor.core.publisher.Mono;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,7 @@ public class ObserverConfiguration {
             }
 
             @Override
-            public Mono<Map<Sensor, List<ClimateMeasurement>>> postDetails(Map<Sensor, List<ClimateMeasurement>> data) {
+            public Mono<Map<Sensor, List<ClimateMeasurement>>> postDetails(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data) {
                 return Mono.empty();
             }
         };

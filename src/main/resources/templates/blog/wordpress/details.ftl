@@ -1,5 +1,5 @@
 <h3>Zeitraum von ${periodStart?datetime} bis ${periodEnd?datetime}</h3>
-<img class="aligncenter size-full wp-image-${diagramId}" src="${diagramFull}" alt="" width="600" height="300" />
+<img class="aligncenter size-full wp-image-${diagram.id}" src="${diagram.full}" alt="" width="600" height="300" />
 <table border="0">
     <tr>
         <th rowspan="2" width="80px">&nbsp;</th>
@@ -14,7 +14,7 @@
     </tr>
     <#list measurements as measurement>
     <tr>
-        <td><span style="font-size: 18px; color: ${measurement.color};">${measurement.sensor.name}<span></td>
+        <td><span style="font-size: 18px; color: ${measurement.sensor.color};">${measurement.sensor.name}</span></td>
         <td align="center">
             <span style="font-size: 18px;">${measurement.minTemp.temperature?string.@temp}</span><br />
             <span style="font-size: 10px; color: gray;">${measurement.minTemp.measuringTime?datetime}</span>

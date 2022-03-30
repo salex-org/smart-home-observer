@@ -61,6 +61,11 @@ public class Sensor {
         this.sgtin = sgtin;
     }
 
+    public String getColor() {
+        // TODO implement
+        return "#00AA00";
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
