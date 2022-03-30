@@ -81,12 +81,9 @@ public class TestContentGenerator {
                         new ClimateMeasurement(reading, secondSensor, now, 22.2, 62.7, 5.2386758493768)
                 )
         );
-
-        generator.generateDetails(twentyMinutesAgo, now, data, image).subscribe(content -> System.out.println(content));
-       /* StepVerifier
-                .create(generator.generateDetails(data, image))
+       StepVerifier
+                .create(generator.generateDetails(twentyMinutesAgo, now, data, image))
                 .expectNextCount(1)
-                .verifyComplete(); */
-        // TODO implement
+                .verifyComplete();
     }
 }
