@@ -60,7 +60,7 @@ public class WordPressPublishService implements BlogPublishService {
     }
 
     private Mono<Post> getPost(String id, String type) {
-        return this.client.get().uri("/" + type + "/" + id).retrieve().bodyToMono(Post.class);
+        return this.client.get().uri("/{type}/{id}", type, id).retrieve().bodyToMono(Post.class);
     }
 
     private Mono<Void> updatePost(String id, String type, String content, List<Image> images) {
@@ -71,7 +71,7 @@ public class WordPressPublishService implements BlogPublishService {
                     setReferencedImages(post, images);
                     return this.client
                             .post()
-                            .uri("/" + type + "/" + id)
+                            .uri("/{type}/{id}", type, id)
                             .bodyValue(post)
                             .retrieve()
                             .bodyToMono(Void.class)
@@ -83,7 +83,7 @@ public class WordPressPublishService implements BlogPublishService {
     }
 
     private Mono<Void> deleteImage(String id) {
-        return this.client.delete().uri("/media/" + id + "?force=true").retrieve().bodyToMono(Void.class);
+        return this.client.delete().uri("/media/{id}?force=true", id).retrieve().bodyToMono(Void.class);
     }
 
     private Mono<Image> addPNGImage(String prefix, byte[] data) {
@@ -104,7 +104,7 @@ public class WordPressPublishService implements BlogPublishService {
                 .mapNotNull(location -> Stream.of(location.split("/")).reduce( (first, last) -> last ))
                 .mapNotNull(Optional::get)
                 .flatMap(imageId -> this.client.get()
-                            .uri("/media/" + imageId)
+                            .uri("/media/{id}", imageId)
                             .retrieve()
                             .bodyToMono(Media.class)
                             .map(media -> {
