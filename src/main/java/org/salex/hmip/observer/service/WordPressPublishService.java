@@ -4,6 +4,7 @@ import org.salex.hmip.observer.blog.Image;
 import org.salex.hmip.observer.blog.Media;
 import org.salex.hmip.observer.blog.Post;
 import org.salex.hmip.observer.data.ClimateMeasurement;
+import org.salex.hmip.observer.data.ClimateMeasurementBoundaries;
 import org.salex.hmip.observer.data.Reading;
 import org.salex.hmip.observer.data.Sensor;
 import org.springframework.http.*;
@@ -57,6 +58,12 @@ public class WordPressPublishService implements BlogPublishService {
                                 .flatMap(content -> updatePost(DETAILS_ID, DETAILS_TYPE, content, List.of(image)))
                                 .then(Mono.just(data))
                         );
+    }
+
+    @Override
+    public Mono<Map<Sensor, List<ClimateMeasurementBoundaries>>> postHistory(Date start, Date end, Map<Sensor, List<ClimateMeasurementBoundaries>> data) {
+        // TODO inmplement
+        return Mono.just(data);
     }
 
     private Mono<Post> getPost(String id, String type) {

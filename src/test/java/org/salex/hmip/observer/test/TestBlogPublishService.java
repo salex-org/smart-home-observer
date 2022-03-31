@@ -147,6 +147,11 @@ public class TestBlogPublishService {
         assertThat(deleteOldImageRequest.getPath()).isEqualTo("/media/634535?force=true");
     }
 
+    @Test
+    void should_generate_history_for_period() throws Exception {
+        // TODO implement
+    }
+
     private static MockResponse createMockResponse(HttpStatus status, String resultJson, String[]... headers) throws IOException {
         final var mockResponse = new MockResponse();
         mockResponse.setResponseCode(status.value());

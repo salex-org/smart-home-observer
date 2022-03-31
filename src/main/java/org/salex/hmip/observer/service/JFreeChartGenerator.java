@@ -75,6 +75,18 @@ public class JFreeChartGenerator implements ChartGenerator {
         return baos.toByteArray();
     }
 
+    @Override
+    public byte[] create365DayTemperatureChart(Date start, Date end, List<ClimateMeasurement> data, Sensor sensor) throws IOException {
+        // TODO implement
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] create365DayHumidityChart(Date start, Date end, List<ClimateMeasurement> data, Sensor sensor) throws IOException {
+        // TODO implement
+        return new byte[0];
+    }
+
     private XYDataset createTimeSeriesCollection(TimeSeries series) {
         final TimeSeriesCollection dataset = new TimeSeriesCollection();
         dataset.addSeries(series);

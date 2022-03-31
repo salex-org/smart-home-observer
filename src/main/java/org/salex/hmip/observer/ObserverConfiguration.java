@@ -90,6 +90,11 @@ public class ObserverConfiguration {
             public Mono<Map<Sensor, List<ClimateMeasurement>>> postDetails(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data) {
                 return Mono.empty();
             }
+
+            @Override
+            public Mono<Map<Sensor, List<ClimateMeasurementBoundaries>>> postHistory(Date start, Date end, Map<Sensor, List<ClimateMeasurementBoundaries>> data) {
+                return Mono.empty();
+            }
         };
     }
 

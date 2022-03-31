@@ -25,7 +25,7 @@ public class TestChartGenerator {
     }
 
     @Test
-    void should_generate_chart_for_measurements_per_sensor() throws IOException {
+    void should_generate_24_hour_chart_for_measurements_per_sensor() throws IOException {
         final var now = new Date();
         final var tenMinutesAgo = new Date(now.getTime() - TimeUnit.MINUTES.toMillis(10));
         final var twentyMinutesAgo = new Date(now.getTime() - TimeUnit.MINUTES.toMillis(20));
@@ -46,5 +46,15 @@ public class TestChartGenerator {
         );
         final var png = generator.create24HourChart(twentyMinutesAgo, now, data);
         Assertions.assertThat(png).isNotEmpty();
+    }
+
+    @Test
+    void should_generate_356_day_chart_for_temperature() throws IOException {
+        // TODO implement
+    }
+
+    @Test
+    void should_generate_356_day_chart_for_humidity() throws IOException {
+        // TODO implement
     }
 }
