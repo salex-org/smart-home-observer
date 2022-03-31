@@ -1,0 +1,88 @@
+{
+  "id": 60309,
+  "date": "2018-06-22T15:00:52",
+  "date_gmt": "2018-06-22T13:00:52",
+  "guid": {
+    "rendered": "https://holzwerken.salex.org/?page_id=60309"
+  },
+  "modified": "2022-03-12T01:00:57",
+  "modified_gmt": "2022-03-11T23:00:57",
+  "slug": "werkstattklima-entwicklung",
+  "status": "publish",
+  "type": "page",
+  "link": "https://holzwerken.salex.org/werkstattklima-entwicklung",
+  "title": {
+    "rendered": "Werkstattklima &#8211; Jahresverlauf"
+  },
+  "content": {
+    "rendered": "<h3>Zeitraum von 12.03.2021 bis 11.03.2022</h3>\n<table border=\"0\">\n<tr>\n<th rowspan=\"2\" width=\"80px\">&nbsp;</th>\n<th colspan=\"2\" style=\"border-bottom-width: 2px; border-bottom-color: #999999; border-bottom-style: solid;\"><span style=\"font-size: 18px; color: #666666;\">Temperatur</span></th>\n<th colspan=\"2\" style=\"border-bottom-width: 2px; border-bottom-color: #999999; border-bottom-style: dashed;\"><span style=\"font-size: 18px; color: #666666;\">Luftfeuchtigkeit</span></th>\n</tr>\n<tr>\n<th width=\"120px\"><span style=\"font-size: 18px; color: #666666;\">Minimum</span></th>\n<th width=\"120px\"><span style=\"font-size: 18px; color: #666666;\">Maximum</span></th>\n<th width=\"120px\"><span style=\"font-size: 18px; color: #666666;\">Minimum</span></th>\n<th width=\"120px\"><span style=\"font-size: 18px; color: #666666;\">Maximum</span></th>\n</tr>\n<tr>\n<td rowspan=\"2\"><span style=\"font-size: 18px; color: #666666;\">Raspberry<span></td>\n<td colspan=\"2\" style=\"padding: 20px 0px\"><a href=\"https://holzwerken.salex.org/wp-content/uploads/2022/03/temperature-0410a875-141c-44cb-b22c-076996e3ebb5.png\" rel=\"lightbox[60309]\"><img loading=\"lazy\" class=\"aligncenter wp-image-633623 size-medium\" src=\"https://holzwerken.salex.org/wp-content/uploads/2022/03/temperature-0410a875-141c-44cb-b22c-076996e3ebb5-150x150.png\" alt=\"\" width=\"150\" height=\"150\" /></a></td>\n<td colspan=\"2\" style=\"padding: 20px 0px\">&nbsp;</td>\n</tr>\n<tr>\n<td align=\"center\"><span style=\"font-size: 18px; color: #666666;\">+14,3&nbsp;&deg;C</span><br /><span style=\"font-size: 10px; color: gray;\">26.12.2021</span></td>\n<td align=\"center\"><span style=\"font-size: 18px; color: #666666;\">+56,2&nbsp;&deg;C</span><br /><span style=\"font-size: 10px; color: gray;\">18.06.2021</span></td>\n<td align=\"center\"><span style=\"font-size: 18px; color: #666666;\">0,0&nbsp;%</span><br /><span style=\"font-size: 10px; color: gray;\">18.06.2021</span></td>\n<td align=\"center\"><span style=\"font-size: 18px; color: #666666;\">0,0&nbsp;%</span><br /><span style=\"font-size: 10px; color: gray;\">18.06.2021</span></td>\n</tr>\n<tr>\n<td rowspan=\"2\"><span style=\"font-size: 18px; color: #71893F;\">Maschinenraum<span></td>\n<td colspan=\"2\" style=\"padding: 20px 0px\"><a href=\"https://holzwerken.salex.org/wp-content/uploads/2022/03/temperature-e4a81499-d521-4e7f-a317-97269c7eecd6.png\" rel=\"lightbox[60309]\"><img loading=\"lazy\" class=\"aligncenter wp-image-633624 size-medium\" src=\"https://holzwerken.salex.org/wp-content/uploads/2022/03/temperature-e4a81499-d521-4e7f-a317-97269c7eecd6-150x150.png\" alt=\"\" width=\"150\" height=\"150\" /></a></td>\n<td colspan=\"2\" style=\"padding: 20px 0px\"><a href=\"https://holzwerken.salex.org/wp-content/uploads/2022/03/humidity-8937943e-576f-47d0-97db-faf43f48e114.png\" rel=\"lightbox[60309]\"><img loading=\"lazy\" class=\"aligncenter wp-image-633625 size-medium\" src=\"https://holzwerken.salex.org/wp-content/uploads/2022/03/humidity-8937943e-576f-47d0-97db-faf43f48e114-150x150.png\" alt=\"\" width=\"150\" height=\"150\" /></a></td>\n</tr>\n<tr>\n<td align=\"center\"><span style=\"font-size: 18px; color: #180795;\">-6,3&nbsp;&deg;C</span><br /><span style=\"font-size: 10px; color: gray;\">26.12.2021</span></td>\n<td align=\"center\"><span style=\"font-size: 18px; color: #d60a13;\">+37,3&nbsp;&deg;C</span><br /><span style=\"font-size: 10px; color: gray;\">19.06.2021</span></td>\n<td align=\"center\"><span style=\"font-size: 18px; color: #d60a13;\">2,2&nbsp;%</span><br /><span style=\"font-size: 10px; color: gray;\">25.04.2021</span></td>\n<td align=\"center\"><span style=\"font-size: 18px; color: #d60a13;\">99,9&nbsp;%</span><br /><span style=\"font-size: 10px; color: gray;\">22.01.2022</span></td>\n</tr>\n<tr>\n<td rowspan=\"2\"><span style=\"font-size: 18px; color: #517199;\">Werkraum<span></td>\n<td colspan=\"2\" style=\"padding: 20px 0px\"><a href=\"https://holzwerken.salex.org/wp-content/uploads/2022/03/temperature-5b753ce8-607f-4099-8c43-8b6d139694b2.png\" rel=\"lightbox[60309]\"><img loading=\"lazy\" class=\"aligncenter wp-image-633626 size-medium\" src=\"https://holzwerken.salex.org/wp-content/uploads/2022/03/temperature-5b753ce8-607f-4099-8c43-8b6d139694b2-150x150.png\" alt=\"\" width=\"150\" height=\"150\" /></a></td>\n<td colspan=\"2\" style=\"padding: 20px 0px\"><a href=\"https://holzwerken.salex.org/wp-content/uploads/2022/03/humidity-fd53695b-d361-4ac1-9ae6-756d71e43229.png\" rel=\"lightbox[60309]\"><img loading=\"lazy\" class=\"aligncenter wp-image-633627 size-medium\" src=\"https://holzwerken.salex.org/wp-content/uploads/2022/03/humidity-fd53695b-d361-4ac1-9ae6-756d71e43229-150x150.png\" alt=\"\" width=\"150\" height=\"150\" /></a></td>\n</tr>\n<tr>\n<td align=\"center\"><span style=\"font-size: 18px; color: #180795;\">-5,9&nbsp;&deg;C</span><br /><span style=\"font-size: 10px; color: gray;\">26.12.2021</span></td>\n<td align=\"center\"><span style=\"font-size: 18px; color: #d60a13;\">+38,4&nbsp;&deg;C</span><br /><span style=\"font-size: 10px; color: gray;\">18.06.2021</span></td>\n<td align=\"center\"><span style=\"font-size: 18px; color: #d60a13;\">1,0&nbsp;%</span><br /><span style=\"font-size: 10px; color: gray;\">17.06.2021</span></td>\n<td align=\"center\"><span style=\"font-size: 18px; color: #d60a13;\">3290,1&nbsp;%</span><br /><span style=\"font-size: 10px; color: gray;\">22.11.2021</span></td>\n</tr>\n<tr>\n<td rowspan=\"2\"><span style=\"font-size: 18px; color: #7B219F;\">Außen<span></td>\n<td colspan=\"2\" style=\"padding: 20px 0px\"><a href=\"https://holzwerken.salex.org/wp-content/uploads/2022/03/temperature-7685dbb6-d746-4c55-b860-7fd1a4d6b821.png\" rel=\"lightbox[60309]\"><img loading=\"lazy\" class=\"aligncenter wp-image-633628 size-medium\" src=\"https://holzwerken.salex.org/wp-content/uploads/2022/03/temperature-7685dbb6-d746-4c55-b860-7fd1a4d6b821-150x150.png\" alt=\"\" width=\"150\" height=\"150\" /></a></td>\n<td colspan=\"2\" style=\"padding: 20px 0px\"><a href=\"https://holzwerken.salex.org/wp-content/uploads/2022/03/humidity-362b445a-1761-4461-a074-de82080b25b8.png\" rel=\"lightbox[60309]\"><img loading=\"lazy\" class=\"aligncenter wp-image-633629 size-medium\" src=\"https://holzwerken.salex.org/wp-content/uploads/2022/03/humidity-362b445a-1761-4461-a074-de82080b25b8-150x150.png\" alt=\"\" width=\"150\" height=\"150\" /></a></td>\n</tr>\n<tr>\n<td align=\"center\"><span style=\"font-size: 18px; color: #180795;\">-9,5&nbsp;&deg;C</span><br /><span style=\"font-size: 10px; color: gray;\">26.12.2021</span></td>\n<td align=\"center\"><span style=\"font-size: 18px; color: #d60a13;\">+35,6&nbsp;&deg;C</span><br /><span style=\"font-size: 10px; color: gray;\">17.06.2021</span></td>\n<td align=\"center\"><span style=\"font-size: 18px; color: #d60a13;\">1,0&nbsp;%</span><br /><span style=\"font-size: 10px; color: gray;\">17.06.2021</span></td>\n<td align=\"center\"><span style=\"font-size: 18px; color: #d60a13;\">99,9&nbsp;%</span><br /><span style=\"font-size: 10px; color: gray;\">17.06.2021</span></td>\n</tr>\n</table>\n",
+    "protected": false
+  },
+  "excerpt": {
+    "rendered": "<p>Zeitraum von 12.03.2021 bis 11.03.2022 &nbsp; Temperatur Luftfeuchtigkeit Minimum Maximum Minimum Maximum Raspberry &nbsp; +14,3&nbsp;&deg;C26.12.2021 +56,2&nbsp;&deg;C18.06.2021 0,0&nbsp;%18.06.2021 0,0&nbsp;%18.06.2021 Maschinenraum -6,3&nbsp;&deg;C26.12.2021 +37,3&nbsp;&deg;C19.06.2021 2,2&nbsp;%25.04.2021 99,9&nbsp;%22.01.2022 Werkraum -5,9&nbsp;&deg;C26.12.2021 +38,4&nbsp;&deg;C18.06.2021 1,0&nbsp;%17.06.2021 3290,1&nbsp;%22.11.2021 Außen -9,5&nbsp;&deg;C26.12.2021 +35,6&nbsp;&deg;C17.06.2021 1,0&nbsp;%17.06.2021 99,9&nbsp;%17.06.2021</p>\n",
+    "protected": false
+  },
+  "author": 1,
+  "featured_media": 0,
+  "parent": 0,
+  "menu_order": 0,
+  "comment_status": "closed",
+  "ping_status": "closed",
+  "template": "",
+  "meta": {
+    "referenced_images": "633623;633624;633625;633626;633627;633628;633629"
+  },
+  "_links": {
+    "self": [
+      {
+        "href": "https://holzwerken.salex.org/wp-json/wp/v2/pages/60309"
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://holzwerken.salex.org/wp-json/wp/v2/pages"
+      }
+    ],
+    "about": [
+      {
+        "href": "https://holzwerken.salex.org/wp-json/wp/v2/types/page"
+      }
+    ],
+    "author": [
+      {
+        "embeddable": true,
+        "href": "https://holzwerken.salex.org/wp-json/wp/v2/users/1"
+      }
+    ],
+    "replies": [
+      {
+        "embeddable": true,
+        "href": "https://holzwerken.salex.org/wp-json/wp/v2/comments?post=60309"
+      }
+    ],
+    "version-history": [
+      {
+        "count": 11,
+        "href": "https://holzwerken.salex.org/wp-json/wp/v2/pages/60309/revisions"
+      }
+    ],
+    "predecessor-version": [
+      {
+        "id": 633630,
+        "href": "https://holzwerken.salex.org/wp-json/wp/v2/pages/60309/revisions/633630"
+      }
+    ],
+    "wp:attachment": [
+      {
+        "href": "https://holzwerken.salex.org/wp-json/wp/v2/media?parent=60309"
+      }
+    ],
+    "curies": [
+      {
+        "name": "wp",
+        "href": "https://api.w.org/{rel}",
+        "templated": true
+      }
+    ]
+  }
+}
