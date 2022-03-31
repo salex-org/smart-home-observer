@@ -10,7 +10,6 @@ import org.salex.hmip.observer.data.ClimateMeasurement;
 import org.salex.hmip.observer.data.ObserverDatabase;
 import org.salex.hmip.observer.data.Reading;
 import org.salex.hmip.observer.data.Sensor;
-import org.salex.hmip.observer.service.ClimateMeasurementService;
 import org.salex.hmip.observer.service.HomematicClimateMeasurementService;
 import org.springframework.core.io.ClassPathResource;
 import reactor.core.publisher.Mono;
