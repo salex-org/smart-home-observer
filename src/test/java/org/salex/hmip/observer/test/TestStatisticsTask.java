@@ -30,19 +30,19 @@ public class TestStatisticsTask {
         // Prepare the test data
         final var now = new Date();
         final var yesterday = new Date(now.getTime() - TimeUnit.DAYS.toMillis(1));
-        final var aYearAgo = new Date(now.getTime() - TimeUnit.DAYS.toMillis(370));
+        final var moreThanAYearAgo = new Date(now.getTime() - TimeUnit.DAYS.toMillis(370));
         final var firstSensor = new Sensor(1L, "First", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000");
         final var secondSensor = new Sensor(2L, "Second", Sensor.Type.HmIP_STHO, "test-sgtin-2", "#00FF00");
         final var data = Map.of(
                 firstSensor, List.of(
                         createBoundaries(firstSensor, now, 10.0, 15.0, 42.0, 56.0, 3.123, 5.321),
                         createBoundaries(firstSensor, yesterday, 12.0, 17.0, 47.0, 58.0, 4.123, 6.321),
-                        createBoundaries(firstSensor, aYearAgo, 8.0, 13.0, 38.0, 49.0, 2.123, 4.321)
+                        createBoundaries(firstSensor, moreThanAYearAgo, 8.0, 13.0, 38.0, 49.0, 2.123, 4.321)
                 ),
                 secondSensor, List.of(
                         createBoundaries(secondSensor, now, 10.5, 15.5, 42.5, 56.5, 3.123, 5.321),
                         createBoundaries(secondSensor, yesterday, 12.5, 17.5, 47.5, 58.5, 4.123, 6.321),
-                        createBoundaries(secondSensor, aYearAgo, 8.5, 13.5, 38.5, 49.5, 2.123, 4.321)
+                        createBoundaries(secondSensor, moreThanAYearAgo, 8.5, 13.5, 38.5, 49.5, 2.123, 4.321)
                 ));
 
         // Prepare the mocks

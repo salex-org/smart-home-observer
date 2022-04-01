@@ -1,13 +1,13 @@
 package org.salex.hmip.observer.test;
 
+import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.salex.hmip.observer.blog.Image;
-import org.salex.hmip.observer.data.ClimateMeasurement;
-import org.salex.hmip.observer.data.OperatingMeasurement;
-import org.salex.hmip.observer.data.Reading;
-import org.salex.hmip.observer.data.Sensor;
+import org.salex.hmip.observer.data.*;
 import org.salex.hmip.observer.service.*;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
@@ -90,8 +90,6 @@ public class TestBlogPublishService {
         final var tenMinutesAgo = new Date(now.getTime() - TimeUnit.MINUTES.toMillis(10));
         final var twentyMinutesAgo = new Date(now.getTime() - TimeUnit.MINUTES.toMillis(20));
         final var reading = new Reading(now);
-        final var image = new Image("test-image");
-        image.setFull("http://link-to-test-image");
         final var firstSensor = new Sensor(1L, "First", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000");
         final var secondSensor = new Sensor(2L, "Second", Sensor.Type.HmIP_STHO, "test-sgtin-2", "#00FF00");
         final var data = Map.of(
@@ -108,7 +106,7 @@ public class TestBlogPublishService {
         );
 
         // Prepare the mocks
-        when(chartGenerator.create24HourChart(any(), any(), any())).thenReturn(new byte[0]);
+        when(chartGenerator.create24HourChart(any(), any(), any())).thenReturn(Mono.just(new byte[0]));
         when(contentGenerator.generateDetails(any(), any(), any(), any(Image.class))).thenReturn(Mono.just("some test content"));
         this.mockWebServer.enqueue(createMockResponse(HttpStatus.CREATED, "add-image-result.json", new String[][] { { "Location", "some-test-id/12345" }, { "Content-Type", "application/json; charset=UTF-8" }})); // Add new image
         this.mockWebServer.enqueue(createMockResponse(HttpStatus.OK, "get-image-result.json", new String[][] { { "Content-Type", "application/json; charset=UTF-8" } })); // Read data for new image
@@ -149,20 +147,125 @@ public class TestBlogPublishService {
 
     @Test
     void should_generate_history_for_period() throws Exception {
-        // TODO implement
+        // Prepare the test data
+        final var now = new Date();
+        final var yesterday = new Date(now.getTime() - TimeUnit.DAYS.toMillis(1));
+        final var moreThanAYearAgo = new Date(now.getTime() - TimeUnit.DAYS.toMillis(370));
+        final var firstSensor = new Sensor(1L, "First", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000");
+        final var secondSensor = new Sensor(2L, "Second", Sensor.Type.HmIP_STHO, "test-sgtin-2", "#00FF00");
+        final var data = Map.of(
+                firstSensor, List.of(
+                        createBoundaries(firstSensor, now, 10.0, 15.0, 42.0, 56.0, 3.123, 5.321),
+                        createBoundaries(firstSensor, yesterday, 12.0, 17.0, 47.0, 58.0, 4.123, 6.321),
+                        createBoundaries(firstSensor, moreThanAYearAgo, 8.0, 13.0, 38.0, 49.0, 2.123, 4.321)
+                ),
+                secondSensor, List.of(
+                        createBoundaries(secondSensor, now, 10.5, 15.5, 42.5, 56.5, 3.123, 5.321),
+                        createBoundaries(secondSensor, yesterday, 12.5, 17.5, 47.5, 58.5, 4.123, 6.321),
+                        createBoundaries(secondSensor, moreThanAYearAgo, 8.5, 13.5, 38.5, 49.5, 2.123, 4.321)
+                ));
+
+        // Prepare the mocks
+        when(chartGenerator.create365DayHumidityChart(any(Date.class), any(Date.class), any(List.class), any(Sensor.class))).thenReturn(Mono.just(new byte[0]));
+        when(chartGenerator.create365DayTemperatureChart(any(Date.class), any(Date.class), any(List.class), any(Sensor.class))).thenReturn(Mono.just(new byte[0]));
+        when(contentGenerator.generateHistory(any(Date.class), any(Date.class), any(Map.class), any(Map.class))).thenReturn(Mono.just("some test content"));
+
+        this.mockWebServer.setDispatcher(new Dispatcher() {
+            @NotNull
+            @Override
+            public MockResponse dispatch(@NotNull RecordedRequest recordedRequest) throws InterruptedException {
+                System.err.println("=======> Unexpected request: " + recordedRequest);
+                if(recordedRequest.getPath().startsWith("/media")) {
+                    if(recordedRequest.getMethod().equals("POST")) {
+                        return createMockResponse(HttpStatus.CREATED, "add-image-result.json", new String[][] { { "Location", "some-test-id/12345" }, { "Content-Type", "application/json; charset=UTF-8" }}); // Add new image
+                    }
+                    if(recordedRequest.getMethod().equals("GET")) {
+                        return createMockResponse(HttpStatus.OK, "get-image-result.json", new String[][] { { "Content-Type", "application/json; charset=UTF-8" } }); // Read data for new image
+                    }
+                    if(recordedRequest.getMethod().equals("DELETE")) {
+                        return createMockResponse(HttpStatus.OK, null); // Delete old image
+                    }
+                }
+                if( recordedRequest.getPath().equals("/pages/60309")) {
+                    if(recordedRequest.getMethod().equals("POST")) {
+                        return createMockResponse(HttpStatus.OK, null); // Post new content
+                    }
+                    if(recordedRequest.getMethod().equals("GET")) {
+                        return createMockResponse(HttpStatus.OK, "history-page.json", new String[][] { { "Content-Type", "application/json; charset=UTF-8" } }); // Read old content
+                    }
+                }
+                return new MockResponse();
+            }
+        });
+
+        // Create and call the service
+        final var service = new WordPressPublishService(webClient, contentGenerator, chartGenerator);
+        StepVerifier
+                .create(service.postHistory(yesterday, now, data))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        // Verification
+        verify(contentGenerator, times(1)).generateHistory(any(Date.class), any(Date.class), any(Map.class), any(Map.class));
+        verifyNoMoreInteractions(contentGenerator);
+        verify(chartGenerator, times(2)).create365DayTemperatureChart(any(Date.class), any(Date.class), any(List.class), any(Sensor.class));
+        verify(chartGenerator, times(2)).create365DayHumidityChart(any(Date.class), any(Date.class), any(List.class), any(Sensor.class));
+        verifyNoMoreInteractions(chartGenerator);
+        assertThat(this.mockWebServer.getRequestCount()).isEqualTo(14);
     }
 
-    private static MockResponse createMockResponse(HttpStatus status, String resultJson, String[]... headers) throws IOException {
-        final var mockResponse = new MockResponse();
-        mockResponse.setResponseCode(status.value());
-        if(resultJson != null) {
-            final var resultJsonFile = new ClassPathResource("TestBlogPublishService/" + resultJson).getFile();
-            final var body = Files.readString(resultJsonFile.toPath());
-            mockResponse.setBody(body);
+    private static MockResponse createMockResponse(HttpStatus status, String resultJson, String[]... headers) {
+        try {
+            final var mockResponse = new MockResponse();
+            mockResponse.setResponseCode(status.value());
+            if (resultJson != null) {
+                final var resultJsonFile = new ClassPathResource("TestBlogPublishService/" + resultJson).getFile();
+                final var body = Files.readString(resultJsonFile.toPath());
+                mockResponse.setBody(body);
+            }
+            for (var header : headers) {
+                mockResponse.setHeader(header[0], header[1]);
+            }
+            return mockResponse;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        for(var header : headers) {
-            mockResponse.setHeader(header[0], header[1]);
-        }
-        return mockResponse;
+    }
+
+    private ClimateMeasurementBoundaries createBoundaries(Sensor sensor, Date day, Double minTemp, Double maxTemp, Double minHum, Double maxHum, Double minVap, Double maxVap) {
+        return new ClimateMeasurementBoundaries() {
+            @Override
+            public Double getMinimumTemperature() {
+                return minTemp;
+            }
+            @Override
+            public Double getMaximumTemperature() {
+                return maxTemp;
+            }
+            @Override
+            public Double getMinimumHumidity() {
+                return minHum;
+            }
+            @Override
+            public Double getMaximumHumidity() {
+                return maxHum;
+            }
+            @Override
+            public Double getMinimumVaporAmount() {
+                return minVap;
+            }
+            @Override
+            public Double getMaximumVaporAmount() {
+                return maxVap;
+            }
+            @Override
+            public Long getSensorId() {
+                return sensor.getId();
+            }
+            @Override
+            public Date getDay() {
+                return day;
+            }
+        };
     }
 }

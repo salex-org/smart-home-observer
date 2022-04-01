@@ -1,17 +1,18 @@
 package org.salex.hmip.observer.service;
 
 import org.salex.hmip.observer.data.ClimateMeasurement;
+import org.salex.hmip.observer.data.ClimateMeasurementBoundaries;
 import org.salex.hmip.observer.data.Sensor;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 public interface ChartGenerator {
-    byte[] create24HourChart(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data) throws IOException;
+    Mono<byte[]> create24HourChart(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data);
 
-    byte[] create365DayTemperatureChart(Date start, Date end, List<ClimateMeasurement> data, Sensor sensor) throws IOException;
+    Mono<byte[]> create365DayTemperatureChart(Date start, Date end, List<ClimateMeasurementBoundaries> data, Sensor sensor);
 
-    byte[] create365DayHumidityChart(Date start, Date end, List<ClimateMeasurement> data, Sensor sensor) throws IOException;
+    Mono<byte[]> create365DayHumidityChart(Date start, Date end, List<ClimateMeasurementBoundaries> data, Sensor sensor);
 }

@@ -11,8 +11,8 @@ import org.springframework.http.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -46,14 +46,8 @@ public class WordPressPublishService implements BlogPublishService {
 
     @Override
     public Mono<Map<Sensor, List<ClimateMeasurement>>> postDetails(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data) {
-        return Mono.just(this.chartGenerator)
-                        .flatMap(generator -> {
-                            try {
-                                return addPNGImage("verlauf-", generator.create24HourChart(start, end, data));
-                            } catch (IOException e) {
-                                return Mono.error(e);
-                            }
-                        })
+        return chartGenerator.create24HourChart(start, end, data)
+                        .flatMap(chart -> addPNGImage("verlauf-", chart))
                         .flatMap(image -> contentGenerator.generateDetails(start, end, data, image)
                                 .flatMap(content -> updatePost(DETAILS_ID, DETAILS_TYPE, content, List.of(image)))
                                 .then(Mono.just(data))
@@ -62,8 +56,33 @@ public class WordPressPublishService implements BlogPublishService {
 
     @Override
     public Mono<Map<Sensor, List<ClimateMeasurementBoundaries>>> postHistory(Date start, Date end, Map<Sensor, List<ClimateMeasurementBoundaries>> data) {
-        // TODO inmplement
-        return Mono.just(data);
+        return createDiagrams(start, end, data)
+                .flatMap(charts -> contentGenerator.generateHistory(start, end, data, charts)
+                        .flatMap(content -> updatePost(HISTORY_ID, HISTORY_TYPE, content, listOfImages(charts)))
+                        .then(Mono.just(data))
+                );
+    }
+
+    private Mono<Map<Sensor, Map<String, Image>>> createDiagrams(Date start, Date end, Map<Sensor, List<ClimateMeasurementBoundaries>> data) {
+        return Flux.fromIterable(data.keySet())
+                .flatMap(sensor -> Mono.zip(Mono.just(sensor), createDiagrams(start, end, sensor, data.get(sensor))))
+                .collectMap(Tuple2::getT1, Tuple2::getT2);
+    }
+
+    private Mono<Map<String, Image>> createDiagrams(Date start, Date end, Sensor sensor, List<ClimateMeasurementBoundaries> data) {
+        return Flux.concat(
+                Mono.zip(Mono.just("temperature"), chartGenerator.create365DayTemperatureChart(start, end, data, sensor).flatMap(chart -> addPNGImage("temperature-", chart))),
+                Mono.zip(Mono.just("humidity"), chartGenerator.create365DayHumidityChart(start, end, data, sensor).flatMap(chart -> addPNGImage("humidity-", chart)))
+        )
+        .collectMap(Tuple2::getT1, Tuple2::getT2);
+    }
+
+    private List<Image> listOfImages(Map<Sensor, Map<String, Image>> images) {
+        final var list = new ArrayList<Image>();
+        for(var sensorImages : images.values()) {
+            list.addAll(sensorImages.values());
+        }
+        return list;
     }
 
     private Mono<Post> getPost(String id, String type) {
