@@ -174,7 +174,6 @@ public class TestBlogPublishService {
             @NotNull
             @Override
             public MockResponse dispatch(@NotNull RecordedRequest recordedRequest) throws InterruptedException {
-                System.err.println("=======> Unexpected request: " + recordedRequest);
                 if(recordedRequest.getPath().startsWith("/media")) {
                     if(recordedRequest.getMethod().equals("POST")) {
                         return createMockResponse(HttpStatus.CREATED, "add-image-result.json", new String[][] { { "Location", "some-test-id/12345" }, { "Content-Type", "application/json; charset=UTF-8" }}); // Add new image
