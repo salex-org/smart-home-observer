@@ -169,33 +169,20 @@ public class TestBlogPublishService {
         when(chartGenerator.create365DayHumidityChart(any(Date.class), any(Date.class), any(List.class), any(Sensor.class))).thenReturn(Mono.just(new byte[0]));
         when(chartGenerator.create365DayTemperatureChart(any(Date.class), any(Date.class), any(List.class), any(Sensor.class))).thenReturn(Mono.just(new byte[0]));
         when(contentGenerator.generateHistory(any(Date.class), any(Date.class), any(Map.class), any(Map.class))).thenReturn(Mono.just("some test content"));
-
-        this.mockWebServer.setDispatcher(new Dispatcher() {
-            @NotNull
-            @Override
-            public MockResponse dispatch(@NotNull RecordedRequest recordedRequest) throws InterruptedException {
-                if(recordedRequest.getPath().startsWith("/media")) {
-                    if(recordedRequest.getMethod().equals("POST")) {
-                        return createMockResponse(HttpStatus.CREATED, "add-image-result.json", new String[][] { { "Location", "some-test-id/12345" }, { "Content-Type", "application/json; charset=UTF-8" }}); // Add new image
-                    }
-                    if(recordedRequest.getMethod().equals("GET")) {
-                        return createMockResponse(HttpStatus.OK, "get-image-result.json", new String[][] { { "Content-Type", "application/json; charset=UTF-8" } }); // Read data for new image
-                    }
-                    if(recordedRequest.getMethod().equals("DELETE")) {
-                        return createMockResponse(HttpStatus.OK, null); // Delete old image
-                    }
-                }
-                if( recordedRequest.getPath().equals("/pages/60309")) {
-                    if(recordedRequest.getMethod().equals("POST")) {
-                        return createMockResponse(HttpStatus.OK, null); // Post new content
-                    }
-                    if(recordedRequest.getMethod().equals("GET")) {
-                        return createMockResponse(HttpStatus.OK, "history-page.json", new String[][] { { "Content-Type", "application/json; charset=UTF-8" } }); // Read old content
-                    }
-                }
-                return new MockResponse();
-            }
-        });
+        this.mockWebServer.enqueue(createMockResponse(HttpStatus.CREATED, "add-image-result.json", new String[][] { { "Location", "some-test-id/12345" }, { "Content-Type", "application/json; charset=UTF-8" }})); // Add new image
+        this.mockWebServer.enqueue(createMockResponse(HttpStatus.CREATED, "add-image-result.json", new String[][] { { "Location", "some-test-id/12345" }, { "Content-Type", "application/json; charset=UTF-8" }})); // Add new image
+        this.mockWebServer.enqueue(createMockResponse(HttpStatus.OK, "get-image-result.json", new String[][] { { "Content-Type", "application/json; charset=UTF-8" } })); // Read data for new image
+        this.mockWebServer.enqueue(createMockResponse(HttpStatus.OK, "get-image-result.json", new String[][] { { "Content-Type", "application/json; charset=UTF-8" } })); // Read data for new image
+        this.mockWebServer.enqueue(createMockResponse(HttpStatus.CREATED, "add-image-result.json", new String[][] { { "Location", "some-test-id/12345" }, { "Content-Type", "application/json; charset=UTF-8" }})); // Add new image
+        this.mockWebServer.enqueue(createMockResponse(HttpStatus.CREATED, "add-image-result.json", new String[][] { { "Location", "some-test-id/12345" }, { "Content-Type", "application/json; charset=UTF-8" }})); // Add new image
+        this.mockWebServer.enqueue(createMockResponse(HttpStatus.OK, "get-image-result.json", new String[][] { { "Content-Type", "application/json; charset=UTF-8" } })); // Read data for new image
+        this.mockWebServer.enqueue(createMockResponse(HttpStatus.OK, "get-image-result.json", new String[][] { { "Content-Type", "application/json; charset=UTF-8" } })); // Read data for new image
+        this.mockWebServer.enqueue(createMockResponse(HttpStatus.OK, "history-page.json", new String[][] { { "Content-Type", "application/json; charset=UTF-8" } })); // Read old content
+        this.mockWebServer.enqueue(createMockResponse(HttpStatus.OK, null)); // Post new content
+        this.mockWebServer.enqueue(createMockResponse(HttpStatus.OK, null)); // Delete image 633623
+        this.mockWebServer.enqueue(createMockResponse(HttpStatus.OK, null)); // Delete image 633624
+        this.mockWebServer.enqueue(createMockResponse(HttpStatus.OK, null)); // Delete image 633625
+        this.mockWebServer.enqueue(createMockResponse(HttpStatus.OK, null)); // Delete image 633626
 
         // Create and call the service
         final var service = new WordPressPublishService(webClient, contentGenerator, chartGenerator);
@@ -211,6 +198,52 @@ public class TestBlogPublishService {
         verify(chartGenerator, times(2)).create365DayHumidityChart(any(Date.class), any(Date.class), any(List.class), any(Sensor.class));
         verifyNoMoreInteractions(chartGenerator);
         assertThat(this.mockWebServer.getRequestCount()).isEqualTo(14);
+        final var addNewImageRequest1 = this.mockWebServer.takeRequest();
+        final var addNewImageRequest2 = this.mockWebServer.takeRequest();
+        final var readNewImageRequest1 = this.mockWebServer.takeRequest();
+        final var readNewImageRequest2 = this.mockWebServer.takeRequest();
+        final var addNewImageRequest3 = this.mockWebServer.takeRequest();
+        final var addNewImageRequest4 = this.mockWebServer.takeRequest();
+        final var readNewImageRequest3 = this.mockWebServer.takeRequest();
+        final var readNewImageRequest4 = this.mockWebServer.takeRequest();
+        final var readPostRequest = this.mockWebServer.takeRequest();
+        final var updatePostRequest = this.mockWebServer.takeRequest();
+        final var deleteOldImageRequest1 = this.mockWebServer.takeRequest();
+        final var deleteOldImageRequest2 = this.mockWebServer.takeRequest();
+        final var deleteOldImageRequest3 = this.mockWebServer.takeRequest();
+        final var deleteOldImageRequest4 = this.mockWebServer.takeRequest();
+        assertThat(addNewImageRequest1.getMethod()).isEqualTo("POST");
+        assertThat(addNewImageRequest1.getPath()).isEqualTo("/media");
+        assertThat(addNewImageRequest1.getHeader("content-disposition")).startsWith("attachement; filename=temperature-");
+        assertThat(readNewImageRequest1.getMethod()).isEqualTo("GET");
+        assertThat(readNewImageRequest1.getPath()).isEqualTo("/media/12345");
+        assertThat(addNewImageRequest2.getMethod()).isEqualTo("POST");
+        assertThat(addNewImageRequest2.getPath()).isEqualTo("/media");
+        assertThat(addNewImageRequest2.getHeader("content-disposition")).startsWith("attachement; filename=temperature-");
+        assertThat(readNewImageRequest2.getMethod()).isEqualTo("GET");
+        assertThat(readNewImageRequest2.getPath()).isEqualTo("/media/12345");
+        assertThat(addNewImageRequest3.getMethod()).isEqualTo("POST");
+        assertThat(addNewImageRequest3.getPath()).isEqualTo("/media");
+        assertThat(addNewImageRequest3.getHeader("content-disposition")).startsWith("attachement; filename=humidity-");
+        assertThat(readNewImageRequest3.getMethod()).isEqualTo("GET");
+        assertThat(readNewImageRequest3.getPath()).isEqualTo("/media/12345");
+        assertThat(addNewImageRequest4.getMethod()).isEqualTo("POST");
+        assertThat(addNewImageRequest4.getPath()).isEqualTo("/media");
+        assertThat(addNewImageRequest4.getHeader("content-disposition")).startsWith("attachement; filename=humidity-");
+        assertThat(readNewImageRequest4.getMethod()).isEqualTo("GET");
+        assertThat(readNewImageRequest4.getPath()).isEqualTo("/media/12345");
+        assertThat(readPostRequest.getMethod()).isEqualTo("GET");
+        assertThat(readPostRequest.getPath()).isEqualTo("/pages/60309");
+        assertThat(updatePostRequest.getMethod()).isEqualTo("POST");
+        assertThat(updatePostRequest.getPath()).isEqualTo("/pages/60309");
+        assertThat(deleteOldImageRequest1.getMethod()).isEqualTo("DELETE");
+        assertThat(deleteOldImageRequest1.getPath()).isEqualTo("/media/633623?force=true");
+        assertThat(deleteOldImageRequest2.getMethod()).isEqualTo("DELETE");
+        assertThat(deleteOldImageRequest2.getPath()).isEqualTo("/media/633624?force=true");
+        assertThat(deleteOldImageRequest3.getMethod()).isEqualTo("DELETE");
+        assertThat(deleteOldImageRequest3.getPath()).isEqualTo("/media/633625?force=true");
+        assertThat(deleteOldImageRequest4.getMethod()).isEqualTo("DELETE");
+        assertThat(deleteOldImageRequest4.getPath()).isEqualTo("/media/633626?force=true");
     }
 
     private static MockResponse createMockResponse(HttpStatus status, String resultJson, String[]... headers) {
