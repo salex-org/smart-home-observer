@@ -237,13 +237,17 @@ public class TestBlogPublishService {
         assertThat(updatePostRequest.getMethod()).isEqualTo("POST");
         assertThat(updatePostRequest.getPath()).isEqualTo("/pages/60309");
         assertThat(deleteOldImageRequest1.getMethod()).isEqualTo("DELETE");
-        assertThat(deleteOldImageRequest1.getPath()).isEqualTo("/media/633623?force=true");
+        assertThat(deleteOldImageRequest1.getPath()).startsWith("/media/63362");
+        assertThat(deleteOldImageRequest1.getPath()).endsWith("force=true");
         assertThat(deleteOldImageRequest2.getMethod()).isEqualTo("DELETE");
-        assertThat(deleteOldImageRequest2.getPath()).isEqualTo("/media/633624?force=true");
+        assertThat(deleteOldImageRequest2.getPath()).startsWith("/media/63362");
+        assertThat(deleteOldImageRequest2.getPath()).endsWith("force=true");
         assertThat(deleteOldImageRequest3.getMethod()).isEqualTo("DELETE");
-        assertThat(deleteOldImageRequest3.getPath()).isEqualTo("/media/633625?force=true");
+        assertThat(deleteOldImageRequest3.getPath()).startsWith("/media/63362");
+        assertThat(deleteOldImageRequest3.getPath()).endsWith("force=true");
         assertThat(deleteOldImageRequest4.getMethod()).isEqualTo("DELETE");
-        assertThat(deleteOldImageRequest4.getPath()).isEqualTo("/media/633626?force=true");
+        assertThat(deleteOldImageRequest4.getPath()).startsWith("/media/63362");
+        assertThat(deleteOldImageRequest4.getPath()).endsWith("force=true");
     }
 
     private static MockResponse createMockResponse(HttpStatus status, String resultJson, String[]... headers) {
