@@ -13,7 +13,7 @@
     </tr>
     <#list measurements as measurement>
     <tr>
-        <td rowspan="2"><span style="font-size: 18px; writing-mode: vertical-lr; text-orientation: mixed; color: ${measurement.sensor.color};">${measurement.sensor.name}</span></td>
+        <td rowspan="2"><span style="font-size: 18px; writing-mode: vertical-lr; text-orientation: upright; color: ${measurement.sensor.color};">${measurement.sensor.name}</span></td>
         <td colspan="2" style="padding: 20px 0px">
             <a href="${measurement.tempDiagram.full}">
                 <img class="aligncenter wp-image-${measurement.tempDiagram.id} size-medium" src="${measurement.tempDiagram.thumbnail}" alt="" width="${measurement.tempDiagram.thumbnailWidth}" height="${measurement.tempDiagram.thumbnailHeight}" />
