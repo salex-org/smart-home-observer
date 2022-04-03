@@ -22,7 +22,8 @@ org:
   salex:
     cron:
       measure: '0 5/10 * * * *'
-      statistics: '0 0 0 * * *'
+      statistics: '0 2/5 * * * *'
+#      statistics: '0 0 0 * * *'
     #      alert: '0 0 6 * * *'
     raspberry:
       script:
