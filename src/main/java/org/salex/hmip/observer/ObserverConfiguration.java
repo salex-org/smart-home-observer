@@ -1,6 +1,5 @@
 package org.salex.hmip.observer;
 
-import freemarker.core.TemplateNumberFormatFactory;
 import org.salex.hmip.client.HmIPClient;
 import org.salex.hmip.client.HmIPConfiguration;
 import org.salex.hmip.client.HmIPProperties;
@@ -9,18 +8,19 @@ import org.salex.hmip.observer.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import reactor.core.publisher.Mono;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -78,7 +78,7 @@ public class ObserverConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    BlogPublishService createNoOperatingPublishService() {
+    BlogPublishService createNoOperatingBlogPublishService() {
         LOG.warn("No service for blog publishing available, publishing climate information will be skipped!");
         return new BlogPublishService() {
             @Override
@@ -88,12 +88,31 @@ public class ObserverConfiguration {
 
             @Override
             public Mono<Map<Sensor, List<ClimateMeasurement>>> postDetails(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data) {
-                return Mono.empty();
+                return Mono.just(data);
             }
 
             @Override
             public Mono<Map<Sensor, List<ClimateMeasurementBoundaries>>> postHistory(Date start, Date end, Map<Sensor, List<ClimateMeasurementBoundaries>> data) {
-                return Mono.empty();
+                return Mono.just(data);
+            }
+        };
+    }
+
+    @Bean
+    @ConditionalOnProperty("org.salex.mail.climateAlertAddresses")
+    @ConditionalOnBean(JavaMailSender.class)
+    MailPublishService createMailPublishService(ContentGenerator contentGenerator, JavaMailSender mailSender, @Value("${org.salex.mail.climateAlertAddresses}") String alarmMailTarget) {
+        return new DefaultMailPublishService(contentGenerator, mailSender, alarmMailTarget);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    MailPublishService createNoOperatingMailPublishService() {
+        LOG.warn("No service for mail publishing available, sending mails will be skipped!");
+        return new MailPublishService() {
+            @Override
+            public Mono<Map<Sensor, List<ClimateMeasurement>>> sendClimateAlarm(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data) {
+                return Mono.just(data);
             }
         };
     }

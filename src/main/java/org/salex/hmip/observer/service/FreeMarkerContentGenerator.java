@@ -26,6 +26,8 @@ public class FreeMarkerContentGenerator implements ContentGenerator {
 
     private final Template historyTemplate;
 
+    private final Template climateAlarmTemplate;
+
     public FreeMarkerContentGenerator(FreeMarkerConfigurer freeMarkerConfigurer) throws Exception {
         final var customNumberFormats = new HashMap<String, TemplateNumberFormatFactory>();
         customNumberFormats.put("temp", FreeMarkerTemperatureFormat.factory());
@@ -43,6 +45,10 @@ public class FreeMarkerContentGenerator implements ContentGenerator {
         this.historyTemplate = freeMarkerConfigurer.getConfiguration().getTemplate("blog/wordpress/history.ftl");
         this.overviewTemplate.setDateFormat(DATE_FORMAT);
         this.historyTemplate.setCustomNumberFormats(customNumberFormats);
+
+        this.climateAlarmTemplate = freeMarkerConfigurer.getConfiguration().getTemplate("mail/climate-alarm.ftl");
+        this.climateAlarmTemplate.setDateTimeFormat(TIMESTAMP_FORMAT);
+        this.climateAlarmTemplate.setCustomNumberFormats(customNumberFormats);
     }
 
     @Override
@@ -138,4 +144,40 @@ public class FreeMarkerContentGenerator implements ContentGenerator {
                     }
                 });
     }
+
+    @Override
+    public Mono<String> generateAlarm(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data) {
+        if(data.isEmpty()) {
+            return Mono.empty();
+        }
+        return Flux.fromIterable(data.keySet())
+                .map(sensor -> {
+                    final var templateData = new HashMap<String, Object>();
+                    final var measurements = data.get(sensor);
+                    templateData.put("minTemp", measurements.stream().min(Comparator.comparing(ClimateMeasurement::getTemperature)).orElseThrow());
+                    templateData.put("maxTemp", measurements.stream().max(Comparator.comparing(ClimateMeasurement::getTemperature)).orElseThrow());
+                    templateData.put("minHum", measurements.stream().min(Comparator.comparing(ClimateMeasurement::getHumidity)).orElseThrow());
+                    templateData.put("maxHum", measurements.stream().max(Comparator.comparing(ClimateMeasurement::getHumidity)).orElseThrow());
+                    templateData.put("sensor", sensor);
+                    return templateData;
+                })
+                .collectList()
+                .map(measurements -> {
+                    final var templateData = new HashMap<String, Object>();
+                    templateData.put("measurements", measurements);
+                    templateData.put("periodStart", start);
+                    templateData.put("periodEnd", end);
+                    return templateData;
+                })
+                .flatMap(templateData -> {
+                    try {
+                        final var content = new StringWriter();
+                        this.climateAlarmTemplate.process(templateData, content);
+                        return Mono.just(content.toString());
+                    } catch (Exception e) {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
 }

@@ -143,6 +143,32 @@ public class TestContentGenerator {
                 .verifyComplete();
     }
 
+    @Test
+    void should_generate_alarm_mail_text_when_called_with_correct_data() {
+        final var now = new Date();
+        final var tenMinutesAgo = new Date(now.getTime() - TimeUnit.MINUTES.toMillis(10));
+        final var twentyMinutesAgo = new Date(now.getTime() - TimeUnit.MINUTES.toMillis(20));
+        final var reading = new Reading(now);
+        final var firstSensor = new Sensor(1L, "First", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000");
+        final var secondSensor = new Sensor(2L, "Second", Sensor.Type.HmIP_STHO, "test-sgtin-2", "#00FF00");
+        final var data = Map.of(
+                firstSensor, List.of(
+                        new ClimateMeasurement(reading, firstSensor, twentyMinutesAgo, 11.2, 52.7, 5.2386758493768),
+                        new ClimateMeasurement(reading, firstSensor, tenMinutesAgo, 13.2, 42.7, 5.2386758493768),
+                        new ClimateMeasurement(reading, firstSensor, now, 12.2, 32.7, 5.2386758493768)
+                ),
+                secondSensor, List.of(
+                        new ClimateMeasurement(reading, secondSensor, twentyMinutesAgo, 21.2, 82.7, 5.2386758493768),
+                        new ClimateMeasurement(reading, secondSensor, tenMinutesAgo, 23.2, 72.7, 5.2386758493768),
+                        new ClimateMeasurement(reading, secondSensor, now, 22.2, 62.7, 5.2386758493768)
+                )
+        );
+        StepVerifier
+                .create(generator.generateAlarm(twentyMinutesAgo, now, data))
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
     private Image createImage(String id, String full) {
         return createImage(id, full, null);
     }
