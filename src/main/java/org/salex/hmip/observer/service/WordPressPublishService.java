@@ -138,10 +138,10 @@ public class WordPressPublishService implements BlogPublishService {
                                 if (media.getDetails().getSizes().containsKey("full")) {
                                     image.setFull(media.getDetails().getSizes().get("full").getUrl());
                                 }
-                                if (media.getDetails().getSizes().containsKey("thumbnail")) {
-                                    image.setThumbnail(media.getDetails().getSizes().get("thumbnail").getUrl());
-                                    image.setThumbnailWidth(media.getDetails().getSizes().get("thumbnail").getWidth());
-                                    image.setThumbnailHeight(media.getDetails().getSizes().get("thumbnail").getHeight());
+                                if (media.getDetails().getSizes().containsKey("medium")) {
+                                    image.setThumbnail(media.getDetails().getSizes().get("medium").getUrl());
+                                    image.setThumbnailWidth(media.getDetails().getSizes().get("medium").getWidth());
+                                    image.setThumbnailHeight(media.getDetails().getSizes().get("medium").getHeight());
                                 }
                                 return image;
                             })
