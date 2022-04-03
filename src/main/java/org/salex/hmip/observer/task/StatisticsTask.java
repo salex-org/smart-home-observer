@@ -33,7 +33,7 @@ public class StatisticsTask {
         final var end = new Date();
         final var start = new Date(end.getTime() - TimeUnit.DAYS.toMillis(365));
         Mono.just(this.database.getClimateMeasurementBoundaries(start, end))
-                .map(data -> this.blogPublishService.postHistory(start, end, data))
+                .flatMap(data -> this.blogPublishService.postHistory(start, end, data))
                 .doOnError(error -> LOG.warn(String.format("Error '%s' occurred in statistics task", getRootCauseMessage(error))))
                 .subscribe();
     }

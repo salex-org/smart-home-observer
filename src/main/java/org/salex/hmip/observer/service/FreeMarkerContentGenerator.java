@@ -41,7 +41,7 @@ public class FreeMarkerContentGenerator implements ContentGenerator {
         this.detailsTemplate.setCustomNumberFormats(customNumberFormats);
 
         this.historyTemplate = freeMarkerConfigurer.getConfiguration().getTemplate("blog/wordpress/history.ftl");
-        this.historyTemplate.setDateTimeFormat(TIMESTAMP_FORMAT);
+        this.overviewTemplate.setDateFormat(DATE_FORMAT);
         this.historyTemplate.setCustomNumberFormats(customNumberFormats);
     }
 

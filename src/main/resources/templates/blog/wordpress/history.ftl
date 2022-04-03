@@ -1,4 +1,4 @@
-<h3>Zeitraum von ${periodStart?datetime} bis ${periodEnd?datetime}</h3>
+<h3>Zeitraum von ${periodStart?date} bis ${periodEnd?date}</h3>
 <table border="0">
     <tr>
         <th rowspan="2" width="80px">&nbsp;</th>
@@ -28,19 +28,19 @@
     <tr>
         <td align="center">
             <span style="font-size: 18px;">${measurement.minTemp.minimumTemperature?string.@temp}</span><br />
-            <span style="font-size: 10px; color: gray;">${measurement.minTemp.day?datetime}</span>
+            <span style="font-size: 10px; color: gray;">${measurement.minTemp.day?date}</span>
         </td>
         <td align="center">
             <span style="font-size: 18px;">${measurement.maxTemp.maximumTemperature?string.@temp}</span><br />
-            <span style="font-size: 10px; color: gray;">${measurement.maxTemp.day?datetime}</span>
+            <span style="font-size: 10px; color: gray;">${measurement.maxTemp.day?date}</span>
         </td>
         <td align="center">
             <span style="font-size: 18px;">${measurement.minHum.minimumHumidity?string.@hum}</span><br />
-            <span style="font-size: 10px; color: gray;">${measurement.minHum.day?datetime}</span>
+            <span style="font-size: 10px; color: gray;">${measurement.minHum.day?date}</span>
         </td>
         <td align="center">
             <span style="font-size: 18px;">${measurement.maxHum.maximumHumidity?string.@hum}</span><br />
-            <span style="font-size: 10px; color: gray;">${measurement.maxHum.day?datetime}</span>
+            <span style="font-size: 10px; color: gray;">${measurement.maxHum.day?date}</span>
         </td>
    </tr>
    </#list>
