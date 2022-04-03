@@ -94,7 +94,7 @@ public class JFreeChartGenerator implements ChartGenerator {
         if(!data.isEmpty()) {
             timeAxis.setRange(start, end);
         }
-        timeAxis.setDateFormatOverride(new SimpleDateFormat("MM.YYYY"));
+        timeAxis.setDateFormatOverride(new SimpleDateFormat("MM"));
         timeAxis.setTickUnit(new DateTickUnit(DateTickUnitType.MONTH, 1));
         plot.setRangeAxis(temperatureAxis);
         plot.setDomainAxis(timeAxis);
@@ -124,7 +124,7 @@ public class JFreeChartGenerator implements ChartGenerator {
         chart.setBackgroundPaint(null);
         try {
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ChartUtils.writeChartAsPNG(baos, chart, 600, 300);
+            ChartUtils.writeChartAsPNG(baos, chart, 520, 260);
             return Mono.just(baos.toByteArray());
         } catch (IOException e) {
             return Mono.error(e);
@@ -142,7 +142,7 @@ public class JFreeChartGenerator implements ChartGenerator {
         if(!data.isEmpty()) {
             timeAxis.setRange(start, end);
         }
-        timeAxis.setDateFormatOverride(new SimpleDateFormat("MM.YYYY"));
+        timeAxis.setDateFormatOverride(new SimpleDateFormat("MM"));
         timeAxis.setTickUnit(new DateTickUnit(DateTickUnitType.MONTH, 1));
         plot.setRangeAxis(humidityAxis);
         plot.setDomainAxis(timeAxis);
@@ -172,7 +172,7 @@ public class JFreeChartGenerator implements ChartGenerator {
         chart.setBackgroundPaint(null);
         try {
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ChartUtils.writeChartAsPNG(baos, chart, 600, 300);
+            ChartUtils.writeChartAsPNG(baos, chart, 520, 260);
             return Mono.just(baos.toByteArray());
         } catch (IOException e) {
             return Mono.error(e);
