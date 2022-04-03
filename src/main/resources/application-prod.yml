@@ -23,7 +23,7 @@ org:
     cron:
       measure: '0 5/10 * * * *'
       statistics: '0 0 0 * * *'
-    #      alert: '0 0 6 * * *'
+      alert: '0 0 6 * * *'
     raspberry:
       script:
         cpu: '/usr/bin/vcgencmd'
