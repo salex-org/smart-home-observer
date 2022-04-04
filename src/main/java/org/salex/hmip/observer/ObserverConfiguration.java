@@ -98,8 +98,8 @@ public class ObserverConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty("org.salex.mail.climateAlertAddress")
-    MailPublishService createMailPublishService(ContentGenerator contentGenerator, JavaMailSender mailSender, @Value("${org.salex.mail.climateAlertAddress}") List<String> alarmMailTargets) {
+    @ConditionalOnProperty("org.salex.mail.climateAlertAddresses")
+    MailPublishService createMailPublishService(ContentGenerator contentGenerator, JavaMailSender mailSender, @Value("${org.salex.mail.climateAlertAddresses}") List<String> alarmMailTargets) {
         return new DefaultMailPublishService(contentGenerator, mailSender, alarmMailTargets);
     }
 
