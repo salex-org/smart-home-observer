@@ -8,7 +8,6 @@ import org.salex.hmip.observer.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -100,8 +99,8 @@ public class ObserverConfiguration {
 
     @Bean
     @ConditionalOnProperty("org.salex.mail.climateAlertAddress")
-    MailPublishService createMailPublishService(ContentGenerator contentGenerator, JavaMailSender mailSender, @Value("${org.salex.mail.climateAlertAddress}") String alarmMailTarget) {
-        return new DefaultMailPublishService(contentGenerator, mailSender, alarmMailTarget);
+    MailPublishService createMailPublishService(ContentGenerator contentGenerator, JavaMailSender mailSender, @Value("${org.salex.mail.climateAlertAddress}") List<String> alarmMailTargets) {
+        return new DefaultMailPublishService(contentGenerator, mailSender, alarmMailTargets);
     }
 
     @Bean

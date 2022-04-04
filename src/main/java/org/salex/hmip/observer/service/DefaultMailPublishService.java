@@ -7,6 +7,7 @@ import reactor.core.publisher.Mono;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
@@ -21,12 +22,12 @@ public class DefaultMailPublishService implements MailPublishService {
 
     private final ContentGenerator contentGenerator;
 
-    private final String alarmMailTarget;
+    private final InternetAddress[] alarmMailTargets;
 
-    public DefaultMailPublishService(ContentGenerator contentGenerator, JavaMailSender mailSender, String alarmMailTarget) {
+    public DefaultMailPublishService(ContentGenerator contentGenerator, JavaMailSender mailSender, List<String> alarmMailTargets) {
         this.mailSender = mailSender;
         this.contentGenerator = contentGenerator;
-        this.alarmMailTarget = alarmMailTarget;
+        this.alarmMailTargets = alarmMailTargets.stream().map(this::createAddress).toList().toArray(new InternetAddress[0]);
     }
 
     @Override
@@ -37,6 +38,14 @@ public class DefaultMailPublishService implements MailPublishService {
                 .then(Mono.just(data));
     }
 
+    private InternetAddress createAddress(String address) {
+        try {
+            return new InternetAddress(address);
+        } catch(AddressException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private Mono<String> sendMail(String content) {
         try {
             final var textPart = new MimeBodyPart();
@@ -44,7 +53,7 @@ public class DefaultMailPublishService implements MailPublishService {
             textPart.setContent(content, "text/html");
             message.setFrom(new InternetAddress("noreply@salex.org", "Smart Home Observer"));
             message.setHeader("X-Priority", "1");
-            message.setRecipient(Message.RecipientType.TO, new InternetAddress(this.alarmMailTarget));
+            message.setRecipients(Message.RecipientType.TO, this.alarmMailTargets);
             message.setSubject("Temperaturalarm");
             message.setContent(new MimeMultipart(textPart));
             this.mailSender.send(message);

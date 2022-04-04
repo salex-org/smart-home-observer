@@ -53,7 +53,7 @@ public class TestMailPublishService {
         when(contentGenerator.generateAlarm(any(Date.class), any(Date.class), any())).thenReturn(Mono.just("Some mail content"));
 
         // Create and call the service
-        final var service = new DefaultMailPublishService(contentGenerator, mailSender, "test@mail.address");
+        final var service = new DefaultMailPublishService(contentGenerator, mailSender, List.of("test@mail.address"));
         StepVerifier
                 .create(service.sendClimateAlarm(twentyMinutesAgo, now, Map.of()))
                 .expectNextCount(1)
@@ -77,7 +77,7 @@ public class TestMailPublishService {
         when(contentGenerator.generateAlarm(any(Date.class), any(Date.class), any())).thenReturn(Mono.empty());
 
         // Create and call the service
-        final var service = new DefaultMailPublishService(contentGenerator, mailSender, "test@mail.address");
+        final var service = new DefaultMailPublishService(contentGenerator, mailSender, List.of("test@mail.address"));
         StepVerifier
                 .create(service.sendClimateAlarm(twentyMinutesAgo, now, Map.of()))
                 .expectNextCount(1)

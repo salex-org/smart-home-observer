@@ -32,7 +32,7 @@ org:
       username: '{cipher}feee61eb6640e1ab15505a24df7ae3e04205c1c9ec925f96ca32eac416fdaeaa'
       password: '{cipher}e5f886d41d4f6849a6fb17892d4d68c31ebc242208aad2cf98eabec2a6a215b2e844552a12d3c12ac4034736903ab66b'
     mail:
-      climateAlertAddress: 'sascha.gaertner@salex.org'
+      climateAlertAddresses: 'sascha.gaertner@salex.org'
     hmip:
       client:
         access-point-sgtin: '{cipher}cb5b21ee2d04ea7b6c6100393f46fbc9f09ce4dcd836fbc93d1a89f09b9d44cb7719fadc6fd9670fdf2b70ef4f783bbd'
