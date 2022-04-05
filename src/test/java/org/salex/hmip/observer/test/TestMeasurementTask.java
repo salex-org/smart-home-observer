@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.salex.hmip.observer.data.*;
 import org.salex.hmip.observer.service.BlogPublishService;
 import org.salex.hmip.observer.service.ClimateMeasurementService;
+import org.salex.hmip.observer.service.OperatingAlertService;
 import org.salex.hmip.observer.service.OperatingMeasurementService;
 import org.salex.hmip.observer.task.MeasurementTask;
 import reactor.core.publisher.Mono;
@@ -21,6 +22,7 @@ public class TestMeasurementTask {
     private ClimateMeasurementService climateMeasurementService;
     private OperatingMeasurementService operatingMeasurementService;
     private BlogPublishService blogPublishService;
+    private OperatingAlertService operatingAlertService;
 
     @BeforeEach
     void setup() {
@@ -28,6 +30,7 @@ public class TestMeasurementTask {
         climateMeasurementService = mock(ClimateMeasurementService.class);
         operatingMeasurementService = mock(OperatingMeasurementService.class);
         blogPublishService = mock(BlogPublishService.class);
+        operatingAlertService = mock(OperatingAlertService.class);
     }
 
     @Test
@@ -45,7 +48,7 @@ public class TestMeasurementTask {
         when(blogPublishService.postDetails(any(Date.class), any(Date.class), any())).thenReturn(Mono.just(new HashMap<Sensor, List<ClimateMeasurement>>()));
         when(database.addReading(any())).thenReturn(reading);
         when(database.getClimateMeasurements(any(Date.class), any(Date.class))).thenReturn(new HashMap<Sensor, List<ClimateMeasurement>>());
-        final var task = new MeasurementTask("test-cron", database, operatingMeasurementService, climateMeasurementService, blogPublishService);
+        final var task = new MeasurementTask("test-cron", database, operatingMeasurementService, climateMeasurementService, blogPublishService, operatingAlertService);
         task.measure();
         verify(climateMeasurementService, times(1)).measureClimateValues(any());
         verify(operatingMeasurementService, times(1)).measureOperatingValues(any());
@@ -53,10 +56,12 @@ public class TestMeasurementTask {
         verify(database, times(1)).getClimateMeasurements(any(Date.class), any(Date.class));
         verify(blogPublishService, times(1)).postOverview(reading);
         verify(blogPublishService, times(1)).postDetails(any(Date.class), any(Date.class), any());
+        verify(operatingAlertService, times(1)).check(any());
         verifyNoMoreInteractions(climateMeasurementService);
         verifyNoMoreInteractions(operatingMeasurementService);
         verifyNoMoreInteractions(database);
         verifyNoMoreInteractions(blogPublishService);
+        verifyNoMoreInteractions(operatingAlertService);
     }
 
     @Test
@@ -70,10 +75,11 @@ public class TestMeasurementTask {
         reading.addMeasurement(new OperatingMeasurement(reading, 1.0, 2.0, 3.0, 4.0));
         when(climateMeasurementService.measureClimateValues(any())).thenReturn(Mono.error(new Exception("test exception when reading climate measurements")));
         when(operatingMeasurementService.measureOperatingValues(any())).thenReturn(Mono.just(reading));
-        final var task = new MeasurementTask("test-cron", database, operatingMeasurementService, climateMeasurementService, blogPublishService);
+        final var task = new MeasurementTask("test-cron", database, operatingMeasurementService, climateMeasurementService, blogPublishService, operatingAlertService);
         task.measure();
         verifyNoInteractions(database);
         verifyNoInteractions(blogPublishService);
+        verifyNoInteractions(operatingAlertService);
     }
 
     @Test
@@ -87,9 +93,10 @@ public class TestMeasurementTask {
         reading.addMeasurement(new OperatingMeasurement(reading, 1.0, 2.0, 3.0, 4.0));
         when(climateMeasurementService.measureClimateValues(any())).thenReturn(Mono.just(reading));
         when(operatingMeasurementService.measureOperatingValues(any())).thenReturn(Mono.error(new Exception("test exception when reading operating measurements")));
-        final var task = new MeasurementTask("test-cron", database, operatingMeasurementService, climateMeasurementService, blogPublishService);
+        final var task = new MeasurementTask("test-cron", database, operatingMeasurementService, climateMeasurementService, blogPublishService, operatingAlertService);
         task.measure();
         verifyNoInteractions(database);
         verifyNoInteractions(blogPublishService);
+        verifyNoInteractions(operatingAlertService);
     }
 }

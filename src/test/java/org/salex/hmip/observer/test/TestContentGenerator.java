@@ -3,12 +3,10 @@ package org.salex.hmip.observer.test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.salex.hmip.observer.blog.Image;
-import org.salex.hmip.observer.data.ClimateMeasurement;
-import org.salex.hmip.observer.data.ClimateMeasurementBoundaries;
-import org.salex.hmip.observer.data.Reading;
-import org.salex.hmip.observer.data.Sensor;
+import org.salex.hmip.observer.data.*;
 import org.salex.hmip.observer.service.ContentGenerator;
 import org.salex.hmip.observer.service.FreeMarkerContentGenerator;
+import org.salex.hmip.observer.service.OperatingAlertService;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import reactor.test.StepVerifier;
 
@@ -144,7 +142,7 @@ public class TestContentGenerator {
     }
 
     @Test
-    void should_generate_alarm_mail_text_when_called_with_correct_data() {
+    void should_generate_climate_alert_mail_text_when_called_with_correct_data() {
         final var now = new Date();
         final var tenMinutesAgo = new Date(now.getTime() - TimeUnit.MINUTES.toMillis(10));
         final var twentyMinutesAgo = new Date(now.getTime() - TimeUnit.MINUTES.toMillis(20));
@@ -164,7 +162,18 @@ public class TestContentGenerator {
                 )
         );
         StepVerifier
-                .create(generator.generateAlarm(twentyMinutesAgo, now, data))
+                .create(generator.generateClimateAlert(twentyMinutesAgo, now, data))
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void should_generate_operating_alert_mail_text_when_called_with_correct_data() {
+        final var events = List.of(
+                new OperatingAlertService.Error(new RuntimeException("Some test exception")),
+                new OperatingAlertService.Exceedance(new OperatingMeasurement(new Reading(), 48.1, 2.875, 90.1, 90.1)));
+        StepVerifier
+                .create(generator.generateOperatingAlert(events))
                 .expectNextCount(1)
                 .verifyComplete();
     }

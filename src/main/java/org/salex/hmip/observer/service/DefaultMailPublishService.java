@@ -31,10 +31,18 @@ public class DefaultMailPublishService implements MailPublishService {
     }
 
     @Override
-    public Mono<Map<Sensor, List<ClimateMeasurement>>> sendClimateAlarm(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data) {
-        return contentGenerator.generateAlarm(start, end, data)
+    public Mono<Map<Sensor, List<ClimateMeasurement>>> sendClimateAlert(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data) {
+        return contentGenerator.generateClimateAlert(start, end, data)
                 .mapNotNull(content -> content)
-                .flatMap(content -> sendMail(content))
+                .flatMap(content -> sendMail("Klimaalarm", content))
+                .then(Mono.just(data));
+    }
+
+    @Override
+    public Mono<List<OperatingAlertService.Event>> sendOperatingAlert(List<OperatingAlertService.Event> data) {
+        return contentGenerator.generateOperatingAlert(data)
+                .mapNotNull(content -> content)
+                .flatMap(content -> sendMail("Betriebsalarm", content))
                 .then(Mono.just(data));
     }
 
@@ -46,7 +54,7 @@ public class DefaultMailPublishService implements MailPublishService {
         }
     }
 
-    private Mono<String> sendMail(String content) {
+    private Mono<String> sendMail(String subject, String content) {
         try {
             final var textPart = new MimeBodyPart();
             final var message = this.mailSender.createMimeMessage();
@@ -54,7 +62,7 @@ public class DefaultMailPublishService implements MailPublishService {
             message.setFrom(new InternetAddress("noreply@salex.org", "Smart Home Observer"));
             message.setHeader("X-Priority", "1");
             message.setRecipients(Message.RecipientType.TO, this.alarmMailTargets);
-            message.setSubject("Temperaturalarm");
+            message.setSubject(subject);
             message.setContent(new MimeMultipart(textPart));
             this.mailSender.send(message);
             return Mono.just(content);

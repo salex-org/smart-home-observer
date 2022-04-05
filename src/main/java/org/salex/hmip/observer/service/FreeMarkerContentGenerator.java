@@ -3,16 +3,14 @@ package org.salex.hmip.observer.service;
 import freemarker.core.TemplateNumberFormatFactory;
 import freemarker.template.Template;
 import org.salex.hmip.observer.blog.Image;
-import org.salex.hmip.observer.data.ClimateMeasurement;
-import org.salex.hmip.observer.data.ClimateMeasurementBoundaries;
-import org.salex.hmip.observer.data.Reading;
-import org.salex.hmip.observer.data.Sensor;
+import org.salex.hmip.observer.data.*;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.StringWriter;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class FreeMarkerContentGenerator implements ContentGenerator {
@@ -26,12 +24,16 @@ public class FreeMarkerContentGenerator implements ContentGenerator {
 
     private final Template historyTemplate;
 
-    private final Template climateAlarmTemplate;
+    private final Template climateAlertTemplate;
+
+    private final Template operatingAlertTemplate;
 
     public FreeMarkerContentGenerator(FreeMarkerConfigurer freeMarkerConfigurer) throws Exception {
         final var customNumberFormats = new HashMap<String, TemplateNumberFormatFactory>();
         customNumberFormats.put("temp", FreeMarkerTemperatureFormat.factory());
         customNumberFormats.put("hum", FreeMarkerHumidityFormat.factory());
+        customNumberFormats.put("memUsage", FreeMarkerMemUsageFormat.factory());
+        customNumberFormats.put("cpuTemp", FreeMarkerCPUTemperatureFormat.factory());
 
         this.overviewTemplate = freeMarkerConfigurer.getConfiguration().getTemplate("blog/wordpress/overview.ftl");
         this.overviewTemplate.setDateFormat(DATE_FORMAT);
@@ -46,9 +48,13 @@ public class FreeMarkerContentGenerator implements ContentGenerator {
         this.overviewTemplate.setDateFormat(DATE_FORMAT);
         this.historyTemplate.setCustomNumberFormats(customNumberFormats);
 
-        this.climateAlarmTemplate = freeMarkerConfigurer.getConfiguration().getTemplate("mail/climate-alarm.ftl");
-        this.climateAlarmTemplate.setDateTimeFormat(TIMESTAMP_FORMAT);
-        this.climateAlarmTemplate.setCustomNumberFormats(customNumberFormats);
+        this.climateAlertTemplate = freeMarkerConfigurer.getConfiguration().getTemplate("mail/climate-alert.ftl");
+        this.climateAlertTemplate.setDateTimeFormat(TIMESTAMP_FORMAT);
+        this.climateAlertTemplate.setCustomNumberFormats(customNumberFormats);
+
+        this.operatingAlertTemplate = freeMarkerConfigurer.getConfiguration().getTemplate("mail/operating-alert.ftl");
+        this.operatingAlertTemplate.setDateTimeFormat(TIMESTAMP_FORMAT);
+        this.operatingAlertTemplate.setCustomNumberFormats(customNumberFormats);
     }
 
     @Override
@@ -146,7 +152,7 @@ public class FreeMarkerContentGenerator implements ContentGenerator {
     }
 
     @Override
-    public Mono<String> generateAlarm(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data) {
+    public Mono<String> generateClimateAlert(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data) {
         if(data.isEmpty()) {
             return Mono.empty();
         }
@@ -172,7 +178,7 @@ public class FreeMarkerContentGenerator implements ContentGenerator {
                 .flatMap(templateData -> {
                     try {
                         final var content = new StringWriter();
-                        this.climateAlarmTemplate.process(templateData, content);
+                        this.climateAlertTemplate.process(templateData, content);
                         return Mono.just(content.toString());
                     } catch (Exception e) {
                         return Mono.error(e);
@@ -180,4 +186,28 @@ public class FreeMarkerContentGenerator implements ContentGenerator {
                 });
     }
 
+    @Override
+    public Mono<String> generateOperatingAlert(List<OperatingAlertService.Event> data) {
+        return Mono.just(new HashMap<String, Object>())
+                .map(templateData -> {
+                    templateData.put("exceedances", data.stream()
+                            .filter(event -> event instanceof OperatingAlertService.Exceedance)
+                            .map(OperatingAlertService.Exceedance.class::cast)
+                            .collect(Collectors.toList()));
+                    templateData.put("errors", data.stream()
+                            .filter(event -> event instanceof OperatingAlertService.Error)
+                            .map(OperatingAlertService.Error.class::cast)
+                            .collect(Collectors.toList()));
+                    return templateData;
+                })
+                .flatMap(templateData -> {
+                    try {
+                        final var content = new StringWriter();
+                        this.operatingAlertTemplate.process(templateData, content);
+                        return Mono.just(content.toString());
+                    } catch (Exception e) {
+                        return Mono.error(e);
+                    }
+                });
+    }
 }

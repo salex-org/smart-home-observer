@@ -18,5 +18,7 @@ public interface ContentGenerator {
 
     Mono<String> generateHistory(Date start, Date end, Map<Sensor, List<ClimateMeasurementBoundaries>> data, Map<Sensor, Map<String, Image>> diagrams);
 
-    Mono<String> generateAlarm(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data);
+    Mono<String> generateClimateAlert(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data);
+
+    Mono<String> generateOperatingAlert(List<OperatingAlertService.Event> data);
 }

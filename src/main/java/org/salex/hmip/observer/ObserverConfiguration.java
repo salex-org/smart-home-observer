@@ -109,7 +109,11 @@ public class ObserverConfiguration {
         LOG.warn("No service for mail publishing available, sending mails will be skipped!");
         return new MailPublishService() {
             @Override
-            public Mono<Map<Sensor, List<ClimateMeasurement>>> sendClimateAlarm(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data) {
+            public Mono<Map<Sensor, List<ClimateMeasurement>>> sendClimateAlert(Date start, Date end, Map<Sensor, List<ClimateMeasurement>> data) {
+                return Mono.just(data);
+            }
+            @Override
+            public Mono<List<OperatingAlertService.Event>> sendOperatingAlert(List<OperatingAlertService.Event> data) {
                 return Mono.just(data);
             }
         };
@@ -131,5 +135,10 @@ public class ObserverConfiguration {
         freeMarkerConfigurer.setTemplateLoaderPath("classpath:/templates");
         freeMarkerConfigurer.setDefaultEncoding("UTF-8");
         return freeMarkerConfigurer;
+    }
+
+    @Bean
+    public OperatingAlertService createOperatingAlertService() {
+        return new DefaultOperatingAlertService();
     }
 }

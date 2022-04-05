@@ -23,7 +23,8 @@ org:
     cron:
       measure: '0 5/10 * * * *'
       statistics: '0 0 0 * * *'
-      alert: '0 0 6 * * *'
+      climateAlert: '0 0 6 * * *'
+      operatingAlert: '0 10/20 * * * *'
     raspberry:
       script:
         cpu: '/usr/bin/vcgencmd'
@@ -33,6 +34,7 @@ org:
       password: '{cipher}e5f886d41d4f6849a6fb17892d4d68c31ebc242208aad2cf98eabec2a6a215b2e844552a12d3c12ac4034736903ab66b'
     mail:
       climateAlertAddresses: 'sascha.gaertner@salex.org'
+      operatingAlertAddresses: 'sascha.gaertner@salex.org'
     hmip:
       client:
         access-point-sgtin: '{cipher}cb5b21ee2d04ea7b6c6100393f46fbc9f09ce4dcd836fbc93d1a89f09b9d44cb7719fadc6fd9670fdf2b70ef4f783bbd'

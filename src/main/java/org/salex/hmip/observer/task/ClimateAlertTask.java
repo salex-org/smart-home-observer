@@ -18,45 +18,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@ConditionalOnProperty("org.salex.cron.alert")
+@ConditionalOnProperty("org.salex.cron.climateAlert")
 @Service
-public class AlarmTask {
+public class ClimateAlertTask {
     private static final Logger LOG = LoggerFactory.getLogger(StatisticsTask.class);
 
     private final ObserverDatabase database;
 
     private final MailPublishService mailPublishService;
 
-    public AlarmTask(@Value("${org.salex.cron.alert}") String cron, ObserverDatabase database, MailPublishService mailPublishService) {
+    public ClimateAlertTask(@Value("${org.salex.cron.climateAlert}") String cron, ObserverDatabase database, MailPublishService mailPublishService) {
         this.database = database;
         this.mailPublishService = mailPublishService;
-        LOG.info(String.format("Alarm task started scheduled with cron %s", cron));
+        LOG.info(String.format("Climate alert task started scheduled with cron %s", cron));
     }
 
-    @Scheduled(cron = "${org.salex.cron.alert}")
-    public void checkAndSendAlarm() {
+    @Scheduled(cron = "${org.salex.cron.climateAlert}")
+    public void checkAndSendAlert() {
         final var end = new Date();
         final var start = new Date(end.getTime() - TimeUnit.HOURS.toMillis(24));
         Mono.just(this.database.getClimateMeasurements(start, end))
                 .filter(this::shouldSendAlarm)
-                .flatMap(data -> this.mailPublishService.sendClimateAlarm(start, end, data))
-                .doOnError(error -> LOG.warn(String.format("Error '%s' occurred in alarm task", getRootCauseMessage(error))))
+                .flatMap(data -> this.mailPublishService.sendClimateAlert(start, end, data))
                 .subscribe();
-    }
-
-    private String getRootCauseMessage(Throwable error) {
-        if(error.getCause() != null) {
-            return getRootCauseMessage(error.getCause());
-        } else {
-            return error.getMessage();
-        }
     }
 
     private boolean shouldSendAlarm(Map<Sensor, List<ClimateMeasurement>> data) {
         return data.values().stream()
                 .map(sensorData -> sensorData.stream().min(Comparator.comparing(ClimateMeasurement::getTemperature)).orElseThrow())
-                .map(ClimateMeasurement::getTemperature)
-                .filter(minTemperature -> minTemperature < 3.0)
+                .filter(climateMeasurement -> climateMeasurement.getTemperature() < 3.0 || climateMeasurement.getHumidity() < 10.0 || climateMeasurement.getHumidity() > 90.0)
                 .count() > 0;
     }
 }

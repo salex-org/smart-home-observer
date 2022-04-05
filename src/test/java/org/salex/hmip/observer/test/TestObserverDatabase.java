@@ -3,8 +3,12 @@ package org.salex.hmip.observer.test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.salex.hmip.observer.data.*;
+import org.salex.hmip.observer.service.DefaultOperatingAlertService;
+import org.salex.hmip.observer.service.OperatingAlertService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import java.util.Calendar;
@@ -13,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @DataJpaTest
-@Import(JpaObserverDatabase.class)
+@Import({JpaObserverDatabase.class, TestObserverConfiguration.class })
 public class TestObserverDatabase {
     @Autowired
     JpaObserverDatabase database;

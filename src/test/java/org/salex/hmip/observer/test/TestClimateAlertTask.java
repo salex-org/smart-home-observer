@@ -3,10 +3,8 @@ package org.salex.hmip.observer.test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.salex.hmip.observer.data.*;
-import org.salex.hmip.observer.service.BlogPublishService;
 import org.salex.hmip.observer.service.MailPublishService;
-import org.salex.hmip.observer.task.AlarmTask;
-import org.salex.hmip.observer.task.MeasurementTask;
+import org.salex.hmip.observer.task.ClimateAlertTask;
 import reactor.core.publisher.Mono;
 
 import java.util.Date;
@@ -18,7 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
-public class TestAlarmTask {
+public class TestClimateAlertTask {
     private ObserverDatabase database;
 
     private MailPublishService mailPublishService;
@@ -50,11 +48,11 @@ public class TestAlarmTask {
                 )
         );
         when(database.getClimateMeasurements(any(Date.class), any(Date.class))).thenReturn(data);
-        when(mailPublishService.sendClimateAlarm(any(Date.class), any(Date.class), any())).thenReturn(Mono.just(data));
-        final var task = new AlarmTask("test-cron", database, mailPublishService);
-        task.checkAndSendAlarm();
+        when(mailPublishService.sendClimateAlert(any(Date.class), any(Date.class), any())).thenReturn(Mono.just(data));
+        final var task = new ClimateAlertTask("test-cron", database, mailPublishService);
+        task.checkAndSendAlert();
         verify(database, times(1)).getClimateMeasurements(any(Date.class), any(Date.class));
-        verify(mailPublishService, times(1)).sendClimateAlarm(any(Date.class), any(Date.class), any());
+        verify(mailPublishService, times(1)).sendClimateAlert(any(Date.class), any(Date.class), any());
         verifyNoMoreInteractions(database);
         verifyNoMoreInteractions(mailPublishService);
     }
@@ -80,9 +78,9 @@ public class TestAlarmTask {
                 )
         );
         when(database.getClimateMeasurements(any(Date.class), any(Date.class))).thenReturn(data);
-        when(mailPublishService.sendClimateAlarm(any(Date.class), any(Date.class), any())).thenReturn(Mono.just(data));
-        final var task = new AlarmTask("test-cron", database, mailPublishService);
-        task.checkAndSendAlarm();
+        when(mailPublishService.sendClimateAlert(any(Date.class), any(Date.class), any())).thenReturn(Mono.just(data));
+        final var task = new ClimateAlertTask("test-cron", database, mailPublishService);
+        task.checkAndSendAlert();
         verify(database, times(1)).getClimateMeasurements(any(Date.class), any(Date.class));
         verifyNoMoreInteractions(database);
         verifyNoInteractions(mailPublishService);
