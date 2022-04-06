@@ -32,9 +32,6 @@ public class DefaultOperatingAlertService implements OperatingAlertService {
             this.events.addAll(measurements.stream()
                 .filter(measurement -> measurement.getCpuTemperature() > 48.0 || measurement.getMemoryUsage() > 90.0 || measurement.getDiskUsage() > 90.0)
                 .map(Exceedance::new)
-                .map(exceedance -> {
-                    return exceedance;
-                })
                 .collect(Collectors.toList()));
         }
     }

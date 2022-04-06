@@ -157,6 +157,7 @@ public class FreeMarkerContentGenerator implements ContentGenerator {
             return Mono.empty();
         }
         return Flux.fromIterable(data.keySet())
+                .filter(sensor -> !data.get(sensor).isEmpty())
                 .map(sensor -> {
                     final var templateData = new HashMap<String, Object>();
                     final var measurements = data.get(sensor);
@@ -168,9 +169,9 @@ public class FreeMarkerContentGenerator implements ContentGenerator {
                     return templateData;
                 })
                 .collectList()
-                .map(measurements -> {
+                .map(boundaries -> {
                     final var templateData = new HashMap<String, Object>();
-                    templateData.put("measurements", measurements);
+                    templateData.put("boundaries", boundaries);
                     templateData.put("periodStart", start);
                     templateData.put("periodEnd", end);
                     return templateData;
