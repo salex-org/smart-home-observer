@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 public class DefaultOperatingAlertService implements OperatingAlertService {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultOperatingAlertService.class);
+    private static final Logger ERROR_LOG = LoggerFactory.getLogger("error");
 
     private final List<Event> events;
 
@@ -19,8 +20,8 @@ public class DefaultOperatingAlertService implements OperatingAlertService {
 
     @Override
     public void signal(Throwable error) {
-        LOG.warn(error.getMessage());
-        LOG.debug(error.getMessage(), error);
+        LOG.error(error.getMessage());
+        ERROR_LOG.error(error.getMessage(), error);
         synchronized (this.events) {
             events.add(new Error(error));
         }

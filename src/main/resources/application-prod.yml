@@ -1,4 +1,6 @@
 spring:
+  main:
+    banner-mode: "off"
   datasource:
     url: 'jdbc:derby:database;user=APP'
   jpa:
