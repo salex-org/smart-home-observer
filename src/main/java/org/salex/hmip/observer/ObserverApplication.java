@@ -20,6 +20,7 @@ public class ObserverApplication {
     private OperatingAlertService operatingAlertService;
 
     public static void main(String[] args) {
+        System.setProperty("derby.stream.error.file", "logs/derby.log");
         var app = new SpringApplication(ObserverApplication.class);
         app.addListeners(new ApplicationPidFileWriter());
         app.run(args);
