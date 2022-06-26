@@ -31,7 +31,7 @@ public class DefaultOperatingAlertService implements OperatingAlertService {
     public void check(List<OperatingMeasurement> measurements) {
         synchronized (this.events) {
             this.events.addAll(measurements.stream()
-                .filter(measurement -> measurement.getCpuTemperature() > 48.0 || measurement.getMemoryUsage() > 90.0 || measurement.getDiskUsage() > 90.0)
+                .filter(measurement -> measurement.getCpuTemperature() > 60.0 || measurement.getMemoryUsage() > 90.0 || measurement.getDiskUsage() > 90.0)
                 .map(Exceedance::new)
                 .collect(Collectors.toList()));
         }
