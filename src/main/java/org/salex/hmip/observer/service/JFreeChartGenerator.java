@@ -66,8 +66,8 @@ public class JFreeChartGenerator implements ChartGenerator {
             final var sensorData = data.get(sensor);
             Collections.sort(sensorData, Comparator.comparing(HomematicMeasurement::getMeasuringTime));
             for(var measurement : sensorData) {
-                tempSeries.add(new Minute(measurement.getMeasuringTime()), measurement.getTemperature());
-                humSeries.add(new Minute(measurement.getMeasuringTime()), measurement.getHumidity());
+                tempSeries.addOrUpdate(new Minute(measurement.getMeasuringTime()), measurement.getTemperature());
+                humSeries.addOrUpdate(new Minute(measurement.getMeasuringTime()), measurement.getHumidity());
             }
         }
 
