@@ -27,6 +27,26 @@ public class TestChartGenerator {
     }
 
     @Test
+    void should_generate_24_hour_chart_for_duplicate_measurements() throws IOException {
+        final var now = new Date();
+        final var tenMinutesAgo = new Date(now.getTime() - TimeUnit.MINUTES.toMillis(10));
+        final var twentyMinutesAgo = new Date(now.getTime() - TimeUnit.MINUTES.toMillis(20));
+        final var firstReading = new Reading(tenMinutesAgo);
+        final var secondReading = new Reading(now);
+        final var sensor = new Sensor(1L, "First", Sensor.Type.HmIP_STHO, "test-sgtin-1", "#FF0000");
+        final var data = Map.of(
+                sensor, (List<ClimateMeasurement>) new ArrayList<ClimateMeasurement>(List.of(
+                        new ClimateMeasurement(firstReading, sensor, tenMinutesAgo, 11.2, 52.7, 5.2386758493768),
+                        new ClimateMeasurement(secondReading, sensor, tenMinutesAgo, 11.2, 52.7, 5.2386758493768)
+                ))
+        );
+        StepVerifier
+                .create(generator.create24HourChart(twentyMinutesAgo, now, data))
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
     void should_generate_24_hour_chart_for_measurements_per_sensor() throws IOException {
         final var now = new Date();
         final var tenMinutesAgo = new Date(now.getTime() - TimeUnit.MINUTES.toMillis(10));
