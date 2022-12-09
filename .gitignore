@@ -7,3 +7,8 @@ observer.pid
 logs
 database
 database-jethro
+
+docker/local/grafana/*
+docker/local/influx/*
+docker/local/mosquitto/data/*
+docker/local/mosquitto/log/*
