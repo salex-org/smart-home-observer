@@ -12,8 +12,8 @@ services:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=local
       - DOCKER_INFLUXDB_INIT_PASSWORD=localsecret
-      - DOCKER_INFLUXDB_INIT_ORG=smart-home-observer
-      - DOCKER_INFLUXDB_INIT_BUCKET=climate
+      - DOCKER_INFLUXDB_INIT_ORG=test-local
+      - DOCKER_INFLUXDB_INIT_BUCKET=sho
 
   mosquitto:
     image: eclipse-mosquitto:2.0.15
