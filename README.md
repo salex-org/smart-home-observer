@@ -19,6 +19,12 @@ make local-bootstrap
 
 All services will initially be created with a user named `local` using `localsecret` as the password.
 
+To open a CLI for the InfluxDB, you can open a shell in the container
+
+```shell
+docker exec -it 
+```
+
 ## Installation
 To install the observer on a Raspberry Pi first ensure, that mvn and java are available
 on the target system. After that create a folder named `observer` in the home directory
