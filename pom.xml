@@ -9,7 +9,7 @@
 
     <name>Smart Home Observer</name>
     <description>A Spring Boot Application observing measuring values in the Homematic IP Cloud</description>
-    <url>https://github.com/sagaert/smart-home-observer</url>
+    <url>https://github.com/salex-org/smart-home-observer</url>
 
     <licenses>
         <license>
@@ -28,9 +28,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/sagaert/smart-home-observer.git</connection>
-        <developerConnection>scm:git:ssh://github.com:sagaert/smart-home-observer.git</developerConnection>
-        <url>https://github.com/sagaert/smart-home-observer/tree/main</url>
+        <connection>scm:git:git://github.com/salex-org/smart-home-observer.git</connection>
+        <developerConnection>scm:git:ssh://github.com:salex-org/smart-home-observer.git</developerConnection>
+        <url>https://github.com/salex-org/smart-home-observer/tree/main</url>
     </scm>
 
     <properties>
@@ -171,7 +171,7 @@
                 <repository>
                     <id>github</id>
                     <name>GitHub Packages</name>
-                    <url>https://maven.pkg.github.com/sagaert/smart-home-observer</url>
+                    <url>https://maven.pkg.github.com/salex-org/smart-home-observer</url>
                 </repository>
             </distributionManagement>
         </profile>
