@@ -100,7 +100,7 @@
         <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jfreechart</artifactId>
-            <version>$sag{jfreechart.version}</version>
+            <version>${jfreechart.version}</version>
         </dependency>
 
         <dependency>
