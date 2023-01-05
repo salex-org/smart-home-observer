@@ -23,7 +23,7 @@
             <name>Sascha Gärtner</name>
             <email>sascha.gaertner@salex.org</email>
             <organization>salex.org</organization>
-            <organizationUrl>https://github.com/sagaert</organizationUrl>
+            <organizationUrl>https://github.com/salex-org</organizationUrl>
         </developer>
     </developers>
 
@@ -100,7 +100,7 @@
         <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jfreechart</artifactId>
-            <version>   ${jfreechart.version}</version>
+            <version>$sag{jfreechart.version}</version>
         </dependency>
 
         <dependency>
