@@ -1,12 +1,7 @@
 .idea
 *.iml
 .DS_Store
-target
-
-observer.pid
-logs
-database
-database-jethro
+bin
 
 docker/local/grafana/*
 docker/local/influx/*
