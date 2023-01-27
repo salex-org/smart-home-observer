@@ -41,7 +41,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Set Version in docker-compose.yml
-        uses: fjogeleit/yaml-update-action@main
+        uses: fjogeleit/yaml-update-action@v0.12.3
         with:
           valueFile: docker/prod/docker-compose.yml
           propertyPath: 'services.observer.image'
