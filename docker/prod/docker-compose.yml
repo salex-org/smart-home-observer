@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  observer:
+    image: ghcr.io/salex-org/smart-home-observer:2.0.0-beta1
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./observer/log:/log
+    networks:
+      - smart-home-observer
+
+  influx:
+    image: influxdb:2.5.1
+    ports:
+      - '8086:8086'
+    volumes:
+      - ./influx/data:/var/lib/influxdb2
+      - ./influx/config:/etc/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=local
+      - DOCKER_INFLUXDB_INIT_PASSWORD=localsecret
+      - DOCKER_INFLUXDB_INIT_ORG=test-local
+      - DOCKER_INFLUXDB_INIT_BUCKET=sho
+    networks:
+      - smart-home-observer
+
+  mosquitto:
+    image: eclipse-mosquitto:2.0.15
+    ports:
+      - '1883:1883'
+      - '9001:9001'
+    volumes:
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/log:/mosquitto/log
+    networks:
+      - smart-home-observer
+
+  grafana:
+    image: grafana/grafana-oss:9.3.1
+    ports:
+      - '3000:3000'
+    user: '472'
+    volumes:
+      - ./grafana/data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=local
+      - GF_SECURITY_ADMIN_PASSWORD=localsecret
+    networks:
+      - smart-home-observer
+
+networks:
+  smart-home-observer:
