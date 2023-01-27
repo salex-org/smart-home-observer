@@ -26,11 +26,16 @@ docker exec -it
 
 ## Installation
 
+TODO: Write documentation
 
 ## Starting and stopping
 
+TODO: Write documentation
 
 ## Logging
 
+TODO: Write documentation
 
 ## Profiles and configuration
+
+TODO: Write documentation
