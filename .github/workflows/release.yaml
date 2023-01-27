@@ -48,7 +48,7 @@ jobs:
           value: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version }}
           commitChange: false
 
-      - name: Create Tag
+      - name: Create Tag and package installation
         run: |
           git config --global user.email "buildmanager@salex.org"
           git config --global user.name "Bob the Builder"
@@ -56,6 +56,7 @@ jobs:
           git commit -m "updating version to ${{ github.event.inputs.version }} in docker-compose"
           git tag -a v${{ github.event.inputs.version }} -m "tagging version ${{ github.event.inputs.version }}"
           git push --tags
+          tar cfvz ./bin/scripts.tar.gz docker/prod/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -71,3 +72,13 @@ jobs:
             Release v${{ github.event.inputs.version }}
           draft: false
           prerelease: false
+
+      - name: upload installation artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./bin/scripts.tar.gz
+          asset_name: scripts.tar.gz
+          asset_content_type: application/gzip
