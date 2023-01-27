@@ -4,27 +4,6 @@ Records the measuring values in a database for statistical evaluation. Sends ala
 emails when the measuring values are outside the optimal range. Posts the
 current measuring values on a Word Press based blog.
 
-## Local Testing
-
-For local testing it is possible to start instances of Mosquitto, InfluxDB and Grafana by using Docker.
-The following commands can be used to start and stop the container:
-
-```shell
-# Start the container:
-make local-bootstrap
-
-# Stop the container:
-make local-bootstrap
-```
-
-All services will initially be created with a user named `local` using `localsecret` as the password.
-
-To open a CLI for the InfluxDB, you can open a shell in the container
-
-```shell
-docker exec -it 
-```
-
 ## Installation
 To install the observer on a Raspberry Pi first ensure, that mvn and java are available
 on the target system. After that create a folder named `observer` in the home directory
