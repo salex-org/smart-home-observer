@@ -48,7 +48,7 @@ jobs:
           value: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version }}
           commitChange: false
 
-      - name: Create Tag and package installation
+      - name: Create Tag and Scripts Asset
         run: |
           git config --global user.email "buildmanager@salex.org"
           git config --global user.name "Bob the Builder"
@@ -57,7 +57,7 @@ jobs:
           git tag -a v${{ github.event.inputs.version }} -m "tagging version ${{ github.event.inputs.version }}"
           git push --tags
           mkdir bin
-          tar cfvz ./bin/scripts.tar.gz docker/prod/
+          tar cfvz ./bin/scripts.tar.gz -C docker/prod/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
