@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}:${{ github.event.inputs.version }}
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   publish:
@@ -30,6 +30,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: type=semver,pattern={{version}},value=v${{ github.event.inputs.version }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
