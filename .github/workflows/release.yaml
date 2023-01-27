@@ -48,6 +48,17 @@ jobs:
           value: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version }}
           commitChange: false
 
+      - name: Create Tag
+        run: |
+          git config --global user.email "buildmanager@salex.org"
+          git config --global user.name "Bob the Builder"
+          git add docker/prod/docker-compose.yml
+          git commit -m "updating version to ${{ github.event.inputs.version }} in docker-compose"
+          git tag -a v${{ github.event.inputs.version }} -m "tagging version ${{ github.event.inputs.version }}"
+          git push --tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
