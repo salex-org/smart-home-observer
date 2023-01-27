@@ -20,19 +20,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata for Docker
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ghcr.io/${{ github.repository }}:${{ github.event.inputs.version }}
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: .
+          file: ./Dockerfile
           push: true
           tags: ${{ github.repository }}:${{ github.event.inputs.version }}
-          labels: ${{ github.repository }}:${{ github.event.inputs.version }}
 
       - name: Create Release
         id: create_release
