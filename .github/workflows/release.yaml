@@ -40,6 +40,14 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      - name: Set Version in docker-compose.yml
+        uses: fjogeleit/yaml-update-action@main
+        with:
+          valueFile: docker/prod/docker-compose.yml
+          propertyPath: 'services.observer.image'
+          value: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version }}
+          commitChange: false
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
