@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -25,4 +26,5 @@ func (h *HelloHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write(content)
 	}
+	fmt.Println("Answering 200")
 }
