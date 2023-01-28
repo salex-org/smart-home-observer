@@ -1,6 +1,7 @@
 name: Run tests
 on:
-  - push
+  - push:
+      - branch
   - pull_request
 
 jobs:
