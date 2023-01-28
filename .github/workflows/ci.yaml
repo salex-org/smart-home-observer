@@ -1,32 +1,11 @@
-name: Build and test
+name: Run tests
 on:
   - push
   - pull_request
 
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.19
-
-      - name: Build Linux ARM v7
-        run: CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -a -o bin/linux/arm/v7/smart-home-observer cmd/main.go
-
-      - name: Build Linux ARM64
-        run: CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o bin/linux/arm64/smart-home-observer cmd/main.go
-
-      - name: Build Linux AMD64
-        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin/linux/amd64/smart-home-observer cmd/main.go
-
   test:
-    name: Test
+    name: Run tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

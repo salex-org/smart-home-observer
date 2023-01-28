@@ -1,10 +1,8 @@
 name: Create and publish a release
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version number to release'
-        required: true
+  push:
+    tags:
+      - 'v*.*.*'
 
 env:
   REGISTRY: ghcr.io
@@ -16,7 +14,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+
+      - name: Build Linux ARM v7
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -a -o bin/linux/arm/v7/smart-home-observer cmd/main.go
+
+      - name: Build Linux ARM64
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o bin/linux/arm64/smart-home-observer cmd/main.go
+
+      - name: Build Linux AMD64
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin/linux/amd64/smart-home-observer cmd/main.go
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -37,7 +56,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: type=semver,pattern={{version}},value=v${{ github.event.inputs.version }}
+          tags: type=semver,pattern={{version}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
@@ -46,48 +65,4 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/arm/v7
-
-      - name: Set Version in docker-compose.yml
-        uses: fjogeleit/yaml-update-action@v0.12.3
-        with:
-          valueFile: docker/prod/docker-compose.yml
-          propertyPath: 'services.observer.image'
-          value: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version }}
-          commitChange: false
-
-      - name: Create Tag and Scripts Asset
-        run: |
-          git config --global user.email "buildmanager@salex.org"
-          git config --global user.name "Bob the Builder"
-          git add docker/prod/docker-compose.yml
-          git commit -m "updating version to ${{ github.event.inputs.version }} in docker-compose"
-          git tag -a v${{ github.event.inputs.version }} -m "tagging version ${{ github.event.inputs.version }}"
-          git push --tags
-          mkdir bin
-          tar cfvz ./bin/scripts.tar.gz -C docker/prod .
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ github.event.inputs.version }}
-          release_name: Release v${{ github.event.inputs.version }}
-          body: |
-            Release v${{ github.event.inputs.version }}
-          draft: false
-          prerelease: false
-
-      - name: Upload Scripts Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./bin/scripts.tar.gz
-          asset_name: scripts.tar.gz
-          asset_content_type: application/gzip
+          platforms: linux/arm/v7,linux/arm64,linux/amd64
