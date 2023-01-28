@@ -2,5 +2,5 @@
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM gcr.io/distroless/static-debian11
 ARG TARGETPLATFORM
-ADD /bin/${TARGETPLATFORM} /
+COPY /bin/${TARGETPLATFORM}/smart-home-observer /
 CMD ["/smart-home-observer"]
