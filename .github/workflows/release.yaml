@@ -46,7 +46,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/arm64
+          platforms: linux/arm/v7
 
       - name: Set Version in docker-compose.yml
         uses: fjogeleit/yaml-update-action@v0.12.3
