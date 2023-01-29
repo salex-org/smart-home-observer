@@ -14,6 +14,8 @@ jobs:
   release:
     name: Create a release
     runs-on: ubuntu-latest
+    outputs:
+      release_upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -50,9 +52,34 @@ jobs:
           draft: false
           prerelease: false
 
-  publish:
+  publish-scripts:
     needs: release
-    name: Publish docker image and scripts
+    name: Publish scripts asset
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: refs/tags/v${{ github.event.inputs.version }}
+
+      - name: Package scripts
+        run: |
+          mkdir bin
+          tar cfvz ./bin/scripts.tar.gz -C docker/prod .
+
+      - name: Upload scripts asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ needs.release.outputs.release_upload_url }}
+          asset_path: ./bin/scripts.tar.gz
+          asset_name: scripts.tar.gz
+          asset_content_type: application/gzip
+
+  publish-docker:
+    needs: release
+    name: Publish docker image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -104,16 +131,3 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/arm/v7,linux/arm64,linux/amd64
-
-      - name: Package scripts
-        run: tar cfvz ./bin/scripts.tar.gz -C docker/prod .
-
-      - name: Upload scripts asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./bin/scripts.tar.gz
-          asset_name: scripts.tar.gz
-          asset_content_type: application/gzip
