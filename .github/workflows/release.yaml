@@ -35,13 +35,15 @@ jobs:
           git tag -a v${{ github.event.inputs.version }} -m "tagging version ${{ github.event.inputs.version }}"
           git push --tags
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          # Use PERSONAL_ACCESS_TOKE (with write permission) instead of GITHUB_TOKEN to trigger other worflows reafcting on events !!!
 
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          # Use PERSONAL_ACCESS_TOKE (with write permission) instead of GITHUB_TOKEN to trigger other worflows reafcting on events !!!
         with:
           tag_name: v${{ github.event.inputs.version }}
           release_name: Release v${{ github.event.inputs.version }}
