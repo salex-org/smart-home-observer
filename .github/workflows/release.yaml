@@ -18,6 +18,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+        # Use PERSONAL_ACCESS_TOKEN (with write permission) instead of GITHUB_TOKEN to trigger
+        # other worflows reafcting on events !!!
+        # See: https://github.com/orgs/community/discussions/26220 for details
+      - name: Set GIT credentials
+        uses: oleksiyrudenko/gha-git-credentials@v2.1.1
+        with:
+          global: true
+          name: 'Bob the Builde'
+          email: 'buildmanager@salex.org'
+          actor: ${{ secrets.PERSONAL_ACCESS_USER }}
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
       - name: Set version in docker-compose.yml
         uses: fjogeleit/yaml-update-action@v0.12.3
         with:
@@ -26,16 +38,7 @@ jobs:
           value: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version }}
           commitChange: false
 
-        # Use PERSONAL_ACCESS_TOKEN (with write permission) instead of GITHUB_TOKEN to trigger
-        # other worflows reafcting on events !!!
-        # See: https://github.com/orgs/community/discussions/26220 for details
       - name: Create tag
-        uses: oleksiyrudenko/gha-git-credentials@v2.1.1
-        with:
-          name: 'Bob the Builde'
-          email: 'buildmanager@salex.org'
-          actor: ${{ secrets.PERSONAL_ACCESS_USER }}
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
           git add docker/prod/docker-compose.yml
           git commit -m "updating version to ${{ github.event.inputs.version }} in docker-compose"
@@ -45,8 +48,6 @@ jobs:
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ github.event.inputs.version }}
           release_name: Release v${{ github.event.inputs.version }}
