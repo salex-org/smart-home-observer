@@ -1,4 +1,4 @@
-name: Create and package a release
+name: Create release
 on:
   workflow_dispatch:
     inputs:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   release:
-    name: Create and package a release
+    name: Create a release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
