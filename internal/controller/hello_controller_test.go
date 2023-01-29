@@ -17,7 +17,7 @@ var _ = Describe("HelloController", func() {
 			recorder := httptest.NewRecorder()
 			handler.ServeHTTP(recorder, request)
 			Expect(recorder.Code).To(Equal(http.StatusOK))
-			Expect(recorder.Body.String()).To(Equal("{\"first-name\":\"Sascha\",\"family-name\":\"Gärtner\"}"))
+			Expect(recorder.Body.String()).To(Equal("{\"first-name\":\"Sascha\",\"family-name\":\"Gäärtner\"}"))
 		})
 	})
 })
