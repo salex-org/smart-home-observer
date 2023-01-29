@@ -39,6 +39,9 @@ jobs:
           commitChange: false
 
       - name: Create tag
+        env:
+          GITHUB_USER: ${{ secrets.PERSONAL_ACCESS_USER }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
           git add docker/prod/docker-compose.yml
           git commit -m "updating version to ${{ github.event.inputs.version }} in docker-compose"
