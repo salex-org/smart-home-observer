@@ -17,6 +17,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          # Use PERSONAL_ACCESS_TOKE (with write permission) instead of GITHUB_TOKEN to trigger
+          # other worflows reafcting on events !!!
+          # See: https://github.com/orgs/community/discussions/26220 for details
 
       - name: Set version in docker-compose.yml
         uses: fjogeleit/yaml-update-action@v0.12.3
@@ -36,14 +41,13 @@ jobs:
           git push --tags
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          # Use PERSONAL_ACCESS_TOKE (with write permission) instead of GITHUB_TOKEN to trigger other worflows reafcting on events !!!
+
 
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          # Use PERSONAL_ACCESS_TOKE (with write permission) instead of GITHUB_TOKEN to trigger other worflows reafcting on events !!!
         with:
           tag_name: v${{ github.event.inputs.version }}
           release_name: Release v${{ github.event.inputs.version }}
