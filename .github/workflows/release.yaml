@@ -6,6 +6,10 @@ on:
         description: 'Version number to release'
         required: true
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
   release:
     name: Create a release
