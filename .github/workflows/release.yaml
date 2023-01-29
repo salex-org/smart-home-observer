@@ -40,6 +40,7 @@ jobs:
           git tag -a v${{ github.event.inputs.version }} -m "tagging version ${{ github.event.inputs.version }}"
           git push --tags
         env:
+          GITHUB_USER: ${{ secrets.PERSONAL_ACCESS_USER }}
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
 
@@ -47,6 +48,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
+          GITHUB_USER: ${{ secrets.PERSONAL_ACCESS_USER }}
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         with:
           tag_name: v${{ github.event.inputs.version }}
