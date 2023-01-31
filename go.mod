@@ -3,9 +3,11 @@ module github.com/salex-org/smart-home-observer
 go 1.19
 
 require (
+	github.com/caitlinelfring/go-env-default v1.1.0
 	github.com/onsi/ginkgo/v2 v2.7.1
 	github.com/onsi/gomega v1.26.0
 	golang.org/x/term v0.4.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
