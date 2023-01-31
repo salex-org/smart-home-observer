@@ -28,7 +28,7 @@ type MQTTConfiguration struct {
 }
 
 func main() {
-	rawConfig, err := os.ReadFile("/config/observer-config.yaml")
+	rawConfig, err := os.ReadFile("/config/observer-config.yml")
 	var decryptedConfig []byte
 	if err != nil {
 		fmt.Println(err)
@@ -53,7 +53,7 @@ func main() {
 		// TODO Decrypting with 'key' using https://astaxie.gitbooks.io/build-web-application-with-golang/content/en/09.6.html
 	} else {
 		fmt.Println("Decrypting configuration skipped")
-		decryptedConfig = rawConfig;
+		decryptedConfig = rawConfig
 	}
 
 	var config Configuration
