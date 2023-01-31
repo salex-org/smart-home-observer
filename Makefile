@@ -1,7 +1,7 @@
 BIN ?= bin
 
 APP ?= smart-home-observer
-VERSION ?= 0.0.1
+VERSION ?= 0.0.0
 
 IMAGE ?= $(APP):$(VERSION)
 ifeq ($(OS),Windows_NT)
@@ -32,31 +32,21 @@ $(BIN):
 	mkdir $(BIN)
 
 # ===================================
-# Build and run docker image
+# Build and run docker image in local test environment
 # ===================================
 
 .PHONY: docker-build
 docker-build:
-	docker build -t ${IMAGE} .
+	docker build -f local.Dockerfile -t ${IMAGE} .
 
 .PHONY: docker-run
 docker-run: docker-build
-	docker run -d --name ${APP} ${IMAGE}
+	docker compose --file ./docker/local/docker-compose.yml --project-name local-sho up --detach
+
+.PHONY: docker-stop
+docker-stop:
+	docker compose --file ./docker/local/docker-compose.yml --project-name local-sho down
 
 .PHONY: docker-remove
 docker-remove:
-	docker stop ${APP}
-	docker rm ${APP}
 	docker image rm ${IMAGE}
-
-# =====================================
-# Start and stop local test environment
-# =====================================
-
-.PHONY: local-bootstrap
-local-bootstrap:
-	docker compose --file ./docker/local/docker-compose.yml --project-name local-sho up --detach
-
-.PHONY: local-teardown
-local-teardown:
-	docker compose --file ./docker/local/docker-compose.yml --project-name local-sho down
