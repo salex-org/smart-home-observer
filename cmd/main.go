@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/salex-org/smart-home-observer/internal/controller"
+	"golang.org/x/term"
 	"log"
 	"net/http"
 	"os"
@@ -26,17 +26,18 @@ type MQTTConfiguration struct {
 }
 
 func main() {
-	scanner := bufio.NewScanner(os.Stdin)
 	key := ""
 	for {
 		fmt.Printf("Enter config key: ")
-		scanner.Scan()
-		key = scanner.Text()
-		if len(key) != 0 {
-			break
+		buffer, err := term.ReadPassword(int(os.Stdin.Fd()))
+		if err == nil {
+			key = string(buffer)
+			if len(key) != 0 {
+				break
+			}
 		}
 	}
-	fmt.Printf("Thank you, using key '%s' for decrypting the configuration...\n", key)
+	fmt.Printf("\nThank you, using key '%s' for decrypting the configuration...\n", ";-) hätteste wohl gerne" /*key*/)
 
 	//data, err := os.ReadFile("/config/observer-config.yaml")
 	//if err != nil {

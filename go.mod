@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/onsi/ginkgo/v2 v2.7.1
 	github.com/onsi/gomega v1.26.0
-	gopkg.in/yaml.v2 v2.4.0
+	golang.org/x/term v0.4.0
 )
 
 require (
