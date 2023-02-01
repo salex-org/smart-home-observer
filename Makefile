@@ -18,11 +18,15 @@ endif
 
 .PHONY: build
 build: | $(BIN)
-	go build -o $(EXECUTABLE) cmd/main.go
+	go build -o $(EXECUTABLE) cmd/observer/main.go
 
 .PHONY: run
 run:
-	go run cmd/main.go
+	go run cmd/observer/main.go
+
+.PHONY: test
+test:
+	go test -v ./...
 
 .PHONY: clean
 clean:

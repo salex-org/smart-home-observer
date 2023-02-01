@@ -7,7 +7,7 @@ COPY go.mod go.mod
 COPY go.sum go.sum
 COPY cmd cmd/
 COPY internal internal/
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o smart-home-observer cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o smart-home-observer cmd/observer/main.go
 RUN chmod +x smart-home-observer
 
 # Use distroless as minimal base image to package the application
