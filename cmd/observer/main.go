@@ -11,22 +11,6 @@ import (
 	"os"
 )
 
-type Configuration struct {
-	database DatabaseConfiguration `yaml:"database"`
-	mqtt     MQTTConfiguration     `yaml:"mqtt-broker"`
-}
-
-type DatabaseConfiguration struct {
-	username string `yaml:"username"`
-	password string `yaml:"password"`
-}
-
-type MQTTConfiguration struct {
-	hostname string `yaml:"hostname"`
-	username string `yaml:"username"`
-	password string `yaml:"password"`
-}
-
 func main() {
 	rawConfig, err := os.ReadFile("/config/observer-config.yml")
 	var decryptedConfig []byte

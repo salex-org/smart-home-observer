@@ -16,6 +16,10 @@ endif
 # Build and run local
 # ===================================
 
+.PHONY: build-cet
+build-cet: | $(BIN)
+	go build -o $(BIN)/cet cmd/config/main.go
+
 .PHONY: build
 build: | $(BIN)
 	go build -o $(EXECUTABLE) cmd/observer/main.go
