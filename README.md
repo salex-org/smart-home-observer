@@ -37,8 +37,10 @@ Checkout the scripts, login to the container registry and pull the docker images
 
 ```shell
 # Checkout the scripts (example for v2.0.0):
-curl https://github.com/salex-org/smart-home-observer/releases/download/v2.0.0/scripts.tar.gz
-tar xfvz scripts.tar.gz
+curl -LO https://github.com/salex-org/smart-home-observer/releases/download/v2.0.0/scripts.tar.gz
+mkdir observer
+tar xfvz scripts.tar.gz -C observer
+rm scripts.tar.gz
 
 # Login to the ghcr.io private repository with access token:
 echo $GHCR_TOKEN | docker login ghcr.io -u sagaert --password-stdin
