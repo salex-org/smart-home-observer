@@ -80,6 +80,7 @@ func readKey() ([]byte, error) {
 			} else {
 				if len(buffer) > 0 {
 					key = buffer
+					fmt.Println("\nThank you, please disconnect using 'CTRL-p CTRL-q'.")
 					break
 				}
 			}
