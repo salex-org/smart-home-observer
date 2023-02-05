@@ -5,4 +5,4 @@ ARG TARGETPLATFORM
 WORKDIR /
 COPY bin/${TARGETPLATFORM}/smart-home-observer .
 USER 65532:65532
-ENTRYPOINT ["/smart-home-observer"]
+ENTRYPOINT ["/smart-home-observer", "run"]
