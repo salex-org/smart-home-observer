@@ -50,6 +50,12 @@ func printUsageAndExit() {
 }
 
 func runObserver() {
+	conf, err := config.GetConfiguration()
+	if err != nil {
+		fmt.Errorf("Error reading configuration: %v", err)
+		return
+	}
+	fmt.Printf("Using configuration - Database user is %s", conf.Database.Username)
 	port := 8080
 	mux := http.NewServeMux()
 	mux.Handle("/hello", &controller.HelloHandler{})

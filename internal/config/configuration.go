@@ -15,19 +15,19 @@ import (
 )
 
 type Configuration struct {
-	database DatabaseConfiguration `yaml:"database"`
-	mqtt     MQTTConfiguration     `yaml:"mqtt-broker"`
+	Database DatabaseConfiguration `yaml:"database"`
+	MQTT     MQTTConfiguration     `yaml:"mqtt-broker"`
 }
 
 type DatabaseConfiguration struct {
-	username string `yaml:"username"`
-	password string `yaml:"password"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }
 
 type MQTTConfiguration struct {
-	hostname string `yaml:"hostname"`
-	username string `yaml:"username"`
-	password string `yaml:"password"`
+	Hostname string `yaml:"hostname"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }
 
 var (
