@@ -26,9 +26,9 @@ func main() {
 	case "run":
 		runObserver()
 	case "encrypt-config":
-		processConfig(config.Encrypt)
+		processConfig(config.Encrypt, 0444) // encrypted file can only be read
 	case "decrypt-config":
-		processConfig(config.Decrypt)
+		processConfig(config.Decrypt, 0700) // decrypted file can be read and written by current user
 	default:
 		printUsageAndExit()
 	}
@@ -58,7 +58,7 @@ func runObserver() {
 	http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
 }
 
-func processConfig(processor func([]byte) ([]byte, error)) {
+func processConfig(processor func([]byte) ([]byte, error), perm os.FileMode) {
 	if len(inputArg) == 0 {
 		fmt.Printf("\nError: No input filename specified\n")
 		return
@@ -77,7 +77,7 @@ func processConfig(processor func([]byte) ([]byte, error)) {
 		fmt.Printf("\nError processing: %v\n", processErr)
 		return
 	}
-	outputErr := os.WriteFile(outputArg, output, 0)
+	outputErr := os.WriteFile(outputArg, output, perm)
 	if outputErr != nil {
 		fmt.Printf("\nError writing output: %v\n", outputErr)
 		return
