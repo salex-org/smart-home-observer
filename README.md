@@ -58,6 +58,9 @@ For starting and stopping the container, run the following commands:
 ./stop.sh
 ```
 
+Enter the encryption key for the configuration after starting the observer container.
+After entering the key disconnect with `CTRL-p CTRL-q`. **Do not use `CTRL-c` because this stops the continer!**
+
 ## Backup and restore
 Backup and restore of the data can be done by the following commands:
 
@@ -78,8 +81,25 @@ the backup files located in the folder `backup`. After that, the containers will
 
 ## Logging
 
-TODO: Write documentation
+The Log is managed by docker. Use the following command to see the Log:
+
+```shell
+docker logs smart-home-observer-1
+```
 
 ## Profiles and configuration
 
-TODO: Write documentation
+The configuration can be found in `observer/config/observer-config.yml` and
+is encrypted. To temporarily encrypt the configuration and (re-)encrypt it
+again user the following commands:
+
+```shell
+# Decrypt the configuration
+./decrypt-config.sh
+
+# Encrypt the configuration
+./encrypt-config.sh
+```
+
+**Ensure to remove the decrypted configuration after encryption and
+do not copy oder commit it to another location!**

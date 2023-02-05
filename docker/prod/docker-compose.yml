@@ -3,6 +3,9 @@ version: '3'
 services:
   observer:
     image: ghcr.io/salex-org/smart-home-observer:0.0.0
+    # Detach from container with "CTRL-p CTRL-q" when startet with "-i -t" without stopping the container
+    stdin_open: true    # docker run -i
+    tty: true           # docker run -t
     ports:
       - '8081:8080'
     networks:
