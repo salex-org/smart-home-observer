@@ -31,15 +31,18 @@ type MQTTConfiguration struct {
 }
 
 var (
-	configuration Configuration
-	once          sync.Once
+	configuration         Configuration
+	readConfigurationOnce sync.Once
+
+	key         []byte
+	readKeyOnce sync.Once
 )
 
 func GetConfiguration() (*Configuration, error) {
 	var err error
-	once.Do(func() {
+	readConfigurationOnce.Do(func() {
 		shouldDecrypt := goenv.GetBoolDefault("CONFIG_DECRYPTION_ENABLED", true)
-		raw, readErr := ReadConfiguration("/config/observer-config.yml", shouldDecrypt)
+		raw, readErr := readConfiguration("/config/observer-config.yml", shouldDecrypt)
 		if readErr != nil {
 			err = readErr
 		} else {
@@ -53,45 +56,48 @@ func GetConfiguration() (*Configuration, error) {
 	}
 }
 
-func ReadConfiguration(filename string, shouldDecrypt bool) ([]byte, error) {
+func readConfiguration(filename string, shouldDecrypt bool) ([]byte, error) {
 	raw, readErr := os.ReadFile(filename)
 	if readErr != nil {
 		return nil, readErr
 	}
 	if shouldDecrypt {
-		key, keyErr := readKey()
-		if keyErr != nil {
-			return nil, keyErr
-		}
-		return decrypt(raw, key)
+		return Decrypt(raw)
 	} else {
 		return raw, nil
 	}
 }
 
-func WriteConfiguration() {
-	// TODO implement
-}
-
 func readKey() ([]byte, error) {
-	// TODO use sync.Once and cache the key
-	var key string
-	for {
-		fmt.Printf("\nEnter config key: ")
-		buffer, err := term.ReadPassword(int(os.Stdin.Fd()))
-		if err != nil {
-			return nil, err
-		} else {
-			key = string(buffer)
-			if len(key) > 0 {
+	var err error
+	readKeyOnce.Do(func() {
+		for {
+			fmt.Printf("\nEnter config key: ")
+			buffer, inputErr := term.ReadPassword(int(os.Stdin.Fd()))
+			if inputErr != nil {
+				err = inputErr
 				break
+			} else {
+				if len(buffer) > 0 {
+					key = buffer
+					break
+				}
 			}
 		}
+	})
+	if err != nil {
+		return nil, err
+	} else {
+		return key, nil
 	}
-	return []byte(key), nil
 }
 
-func encrypt(plaintext []byte, key []byte) ([]byte, error) {
+func Encrypt(plaintext []byte) ([]byte, error) {
+	key, err := readKey()
+	if err != nil {
+		return nil, err
+	}
+
 	c, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -110,7 +116,12 @@ func encrypt(plaintext []byte, key []byte) ([]byte, error) {
 	return gcm.Seal(nonce, nonce, plaintext, nil), nil
 }
 
-func decrypt(ciphertext []byte, key []byte) ([]byte, error) {
+func Decrypt(ciphertext []byte) ([]byte, error) {
+	key, err := readKey()
+	if err != nil {
+		return nil, err
+	}
+
 	c, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err

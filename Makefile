@@ -16,17 +16,21 @@ endif
 # Build and run local
 # ===================================
 
-.PHONY: build-cet
-build-cet: | $(BIN)
-	go build -o $(BIN)/cet cmd/config/main.go
+.PHONY: encrypt-config
+encrypt-config:
+	go run cmd/main.go -o docker/local/observer/config/observer-config.yml -i docker/local/observer/config/observer-config.decrypted.yml encrypt-config
+
+.PHONY: decrypt-config
+decrypt-config:
+	go run cmd/main.go -i docker/local/observer/config/observer-config.yml -o docker/local/observer/config/observer-config.decrypted.yml decrypt-config
 
 .PHONY: build
 build: | $(BIN)
-	go build -o $(EXECUTABLE) cmd/observer/main.go
+	go build -o $(EXECUTABLE) cmd/main.go
 
 .PHONY: run
 run:
-	go run cmd/observer/main.go
+	go run cmd/main.go
 
 .PHONY: test
 test:
