@@ -33,6 +33,20 @@ docker exec -it
 ```
 
 ## Installation
+
+When the software gets installed on a system for the first time, create the users:
+
+```shell
+# Create the main user with docker permissions
+sudo useradd --create-home --user-group --groups docker smart-home
+
+# Create additional users for the services
+sudo useradd --shell /usr/sbin/nologin --no-create-home --home-dir /home/smart-home/observer --no-user-group --gid smart-home observer
+sudo useradd --shell /usr/sbin/nologin --no-create-home --home-dir /home/smart-home/mosquitto --no-user-group --gid smart-home mosquitto
+sudo useradd --shell /usr/sbin/nologin --no-create-home --home-dir /home/smart-home/influx --no-user-group --gid smart-home influx
+sudo useradd --shell /usr/sbin/nologin --no-create-home --home-dir /home/smart-home/grafana --no-user-group --gid smart-home grafana
+```
+
 Checkout the scripts, login to the container registry and pull the docker images
 
 ```shell

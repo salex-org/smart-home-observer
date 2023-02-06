@@ -4,5 +4,5 @@ FROM gcr.io/distroless/static:nonroot
 ARG TARGETPLATFORM
 WORKDIR /
 COPY bin/${TARGETPLATFORM}/smart-home-observer .
-USER 65532:65532
+USER observer:smart-home
 ENTRYPOINT ["/smart-home-observer", "run"]
