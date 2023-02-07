@@ -64,6 +64,18 @@ echo $GHCR_TOKEN | docker login ghcr.io -u sagaert --password-stdin
 ```
 
 ## Starting and stopping
+Set the following variables for the users the container are run with.
+You may add this to your `.bachrc` or `.zshrc` file.
+
+```shell
+# Set Smart-Home user for docker compose
+export SMART_HOME_USER_OBSERVER=$(id -u observer):$(id -g smart-home)
+export SMART_HOME_USER_MOSQUITTO=$(id -u mosquitto):$(id -g smart-home)
+export SMART_HOME_USER_INFLUX=$(id -u influx):$(id -g smart-home)
+export SMART_HOME_USER_GRAFANA=$(id -u grafana):$(id -g smart-home)
+```
+
+
 For starting and stopping the container, run the following commands:
 
 ```shell
