@@ -34,6 +34,8 @@ docker exec -it
 
 ## Installation
 
+### Create users
+
 When the software gets installed on a system for the first time, create the users:
 
 ```shell
@@ -41,11 +43,36 @@ When the software gets installed on a system for the first time, create the user
 sudo useradd --create-home --user-group --groups docker smart-home
 
 # Create additional users for the services
-sudo useradd --shell /usr/sbin/nologin --no-create-home --home-dir /home/smart-home/observer --no-user-group --gid smart-home observer
-sudo useradd --shell /usr/sbin/nologin --no-create-home --home-dir /home/smart-home/mosquitto --no-user-group --gid smart-home mosquitto
-sudo useradd --shell /usr/sbin/nologin --no-create-home --home-dir /home/smart-home/influx --no-user-group --gid smart-home influx
-sudo useradd --shell /usr/sbin/nologin --no-create-home --home-dir /home/smart-home/grafana --no-user-group --gid smart-home grafana
+sudo useradd --shell /usr/sbin/nologin --no-create-home --home-dir /home/smart-home/observer --no-user-group --gid smart-home --groups docker observer
+sudo useradd --shell /usr/sbin/nologin --no-create-home --home-dir /home/smart-home/mosquitto --no-user-group --gid smart-home --groups docker mosquitto
+sudo useradd --shell /usr/sbin/nologin --no-create-home --home-dir /home/smart-home/influx --no-user-group --gid smart-home --groups docker influx
+sudo useradd --shell /usr/sbin/nologin --no-create-home --home-dir /home/smart-home/grafana --no-user-group --gid smart-home --groups docker grafana
 ```
+
+Set the following environment variables for the users used by docker compose to run the container
+You may add this to your `.bachrc` or `.zshrc` file.
+
+```shell
+# Set Smart-Home user for docker compose
+export SMART_HOME_USER_OBSERVER=$(id -u observer):$(id -g smart-home)
+export SMART_HOME_USER_MOSQUITTO=$(id -u mosquitto):$(id -g smart-home)
+export SMART_HOME_USER_INFLUX=$(id -u influx):$(id -g smart-home)
+export SMART_HOME_USER_GRAFANA=$(id -u grafana):$(id -g smart-home)
+```
+
+### Optional: Allow 'su' into service users
+
+To allow user smart-home to 'su' to the four service users without password add the
+following lines in the file `/etc/pam.d/su` after `auth sufficient pam_rootok.so`:
+
+```shell
+auth       [success=ignore default=1] pam_succeed_if.so user ingroup smart-home
+auth       sufficient   pam_succeed_if.so use_uid user = smart-home
+```
+
+**To be available to 'su' to a service user, the user must have a shell (i.e. `/bin/bash` not `/usr/sbin/nologin`)**
+
+### Checkout the scripts and pull thr docker images
 
 Checkout the scripts, login to the container registry and pull the docker images
 
@@ -64,18 +91,6 @@ echo $GHCR_TOKEN | docker login ghcr.io -u sagaert --password-stdin
 ```
 
 ## Starting and stopping
-Set the following variables for the users the container are run with.
-You may add this to your `.bachrc` or `.zshrc` file.
-
-```shell
-# Set Smart-Home user for docker compose
-export SMART_HOME_USER_OBSERVER=$(id -u observer):$(id -g smart-home)
-export SMART_HOME_USER_MOSQUITTO=$(id -u mosquitto):$(id -g smart-home)
-export SMART_HOME_USER_INFLUX=$(id -u influx):$(id -g smart-home)
-export SMART_HOME_USER_GRAFANA=$(id -u grafana):$(id -g smart-home)
-```
-
-
 For starting and stopping the container, run the following commands:
 
 ```shell
