@@ -43,6 +43,13 @@ When the software gets installed on a system for the first time, create the user
 sudo useradd --create-home --user-group --groups docker smart-home
 ```
 
+Set the environment variable `SMART_HOME_USER` in the `.bashrc` or `.zshrc` file:
+
+```shell
+# Set Smart-Home user for docker compose
+export SMART_HOME_USER=$UID:$GID
+```
+
 ### Checkout the scripts
 
 Login as User `smart-home` and change to the home folder.
