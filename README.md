@@ -43,21 +43,36 @@ When the software gets installed on a system for the first time, create the user
 sudo useradd --create-home --user-group --groups docker smart-home
 ```
 
-### Checkout the scripts and pull thr docker images
+### Checkout the scripts
 
 Login as User `smart-home` and change to the home folder.
-Checkout the scripts, login to the container registry and pull the docker images
+If installing for the first time, use `curl` and `tar` to download and extract the scripts
+(replace `v2.0.0` in the example by the version you want to checkout):
 
 ```shell
-# Checkout the scripts (example for v2.0.0):
 curl -LO https://github.com/salex-org/smart-home-observer/releases/download/v2.0.0/scripts.tar.gz
 tar xfvz scripts.tar.gz
 rm scripts.tar.gz
+```
 
-# Login to the ghcr.io private repository with access token:
+If installing an update you can use a script:
+
+```shell
+./install.sh 2.0.0
+```
+
+### Login to the ghcr.io private repository with access token
+
+This must only be once on the system.
+
+```shell
+export GHCR_TOKEN=<the token> 
 echo $GHCR_TOKEN | docker login ghcr.io -u sagaert --password-stdin
+```
 
-# Pull the docker images from the repository:
+### Pull the docker images from the repository
+
+```shell
 ./init.sh
 ```
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Stopping container..."
-SMART_HOME_USER=$(id -u smart-home):$(id -g smart-home) docker compose --file ./docker-compose.yml --project-name smart-home down
+docker compose --file ./docker-compose.yml --project-name smart-home down
 if [ $? == 0 ]; then
     echo "Stopping container successful"
 else
@@ -47,7 +47,7 @@ else
 fi
 
 echo "Starting container..."
-SMART_HOME_USER=$(id -u smart-home):$(id -g smart-home) docker compose --file ./docker-compose.yml --project-name smart-home up --detach
+docker compose --file ./docker-compose.yml --project-name smart-home up --detach
 if [ $? == 0 ]; then
     echo "Starting container successful"
 else
