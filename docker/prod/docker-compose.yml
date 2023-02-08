@@ -5,7 +5,7 @@ services:
     container_name: smart-home-observer
     image: ghcr.io/salex-org/smart-home-observer:0.0.0
     # Run the container with the user running docker compose
-    user: ${UID}:${GID}
+    user: '${UID}:${GID}'
     # Detach from container with "CTRL-p CTRL-q" when startet with "-i -t" without stopping the container
     stdin_open: true    # docker run -i
     tty: true           # docker run -t
@@ -20,7 +20,7 @@ services:
     container_name: smart-home-influx
     image: influxdb:2.5.1
     # Run the container with the user running docker compose
-    user: ${UID}:${GID}
+    user: '${UID}:${GID}'
     ports:
       - '8086:8086'
     volumes:
@@ -33,7 +33,7 @@ services:
     container_name: smart-home-mosquitto
     image: eclipse-mosquitto:2.0.15
     # Run the container with the user running docker compose
-    user: ${UID}:${GID}
+    user: '${UID}:${GID}'
     ports:
       - '1883:1883'
       - '9001:9001'
@@ -48,7 +48,7 @@ services:
     container_name: smart-home-grafana
     image: grafana/grafana-oss:9.3.1
     # Run the container with the user running docker compose
-    user: ${UID}:${GID}
+    user: '${UID}:${GID}'
     ports:
       - '3000:3000'
     volumes:
