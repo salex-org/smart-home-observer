@@ -2,32 +2,35 @@ version: '3'
 
 services:
   observer:
+    container_name: smart-home-observer
     image: ghcr.io/salex-org/smart-home-observer:0.0.0
-    user: ${SMART_HOME_USER_OBSERVER}
+    user: ${SMART_HOME_USER}
     # Detach from container with "CTRL-p CTRL-q" when startet with "-i -t" without stopping the container
     stdin_open: true    # docker run -i
     tty: true           # docker run -t
     ports:
       - '8081:8080'
     networks:
-      - smart-home-observer
+      - smart-home
     volumes:
       - ./observer/config:/config
 
   influx:
+    container_name: smart-home-influx
     image: influxdb:2.5.1
-    user: ${SMART_HOME_USER_INFLUX}
+    user: ${SMART_HOME_USER}
     ports:
       - '8086:8086'
     volumes:
       - ./influx/data:/var/lib/influxdb2
       - ./influx/config:/etc/influxdb2
     networks:
-      - smart-home-observer
+      - smart-home
 
   mosquitto:
+    container_name: smart-home-mosquitto
     image: eclipse-mosquitto:2.0.15
-    user: ${SMART_HOME_USER_MOSQUITTO}
+    user: ${SMART_HOME_USER}
     ports:
       - '1883:1883'
       - '9001:9001'
@@ -36,17 +39,19 @@ services:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/log:/mosquitto/log
     networks:
-      - smart-home-observer
+      - smart-home
 
   grafana:
+    container_name: smart-home-grafana
     image: grafana/grafana-oss:9.3.1
-    user: ${SMART_HOME_USER_GRAFANA}
+    user: ${SMART_HOME_USER}
     ports:
       - '3000:3000'
     volumes:
       - ./grafana/data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
     networks:
-      - smart-home-observer
+      - smart-home
 
 networks:
-  smart-home-observer:
+  smart-home:

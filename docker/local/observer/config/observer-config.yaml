@@ -1,0 +1,7 @@
+database:
+  username: local
+  password: localsecret
+mqtt-broker:
+  hostname: smart-home-mosquitto:1883
+  username: local
+  password: localsecret

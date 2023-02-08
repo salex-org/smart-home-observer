@@ -1,10 +1,11 @@
 version: '3'
 
 networks:
-  smart-home-observer:
+  smart-home:
 
 services:
   observer:
+    container_name: smart-home-observer
     image: smart-home-observer:0.0.0
     # Detach from container with "CTRL-p CTRL-q" when startet with "-i -t" without stopping the container
     stdin_open: true    # docker run -i
@@ -12,11 +13,14 @@ services:
     ports:
       - '8081:8080'
     networks:
-      - smart-home-observer
+      - smart-home
     volumes:
       - ./observer/config:/config
+    environment:
+      CONFIG_DECRYPTION_ENABLED: false
 
   mosquitto:
+    container_name: smart-home-mosquitto
     image: eclipse-mosquitto:2.0.15
     ports:
       - '1883:1883'
@@ -26,34 +30,36 @@ services:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/log:/mosquitto/log
     networks:
-      - smart-home-observer
+      - smart-home
 
-#  influx:
-#    image: influxdb:2.5.1
-#    ports:
-#      - '8086:8086'
-#    volumes:
-#      - ./influx/data:/var/lib/influxdb2
-#      - ./influx/config:/etc/influxdb2
-#    environment:
-#      - DOCKER_INFLUXDB_INIT_MODE=setup
-#      - DOCKER_INFLUXDB_INIT_USERNAME=local
-#      - DOCKER_INFLUXDB_INIT_PASSWORD=localsecret
-#      - DOCKER_INFLUXDB_INIT_ORG=test-local
-#      - DOCKER_INFLUXDB_INIT_BUCKET=sho
-#    networks:
-#      - smart-home-observer
+  influx:
+    container_name: smart-home-influx
+    image: influxdb:2.5.1
+    ports:
+      - '8086:8086'
+    volumes:
+      - ./influx/data:/var/lib/influxdb2
+      - ./influx/config:/etc/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=local
+      - DOCKER_INFLUXDB_INIT_PASSWORD=localsecret
+      - DOCKER_INFLUXDB_INIT_ORG=test-local
+      - DOCKER_INFLUXDB_INIT_BUCKET=sho
+    networks:
+      - smart-home
 
-#  grafana:
-#    image: grafana/grafana-oss:9.3.1
-#    ports:
-#      - '3000:3000'
-#    user: '472'
-#    volumes:
-#      - ./grafana/data:/var/lib/grafana
-#    environment:
-#      - GF_SECURITY_ADMIN_USER=local
-#      - GF_SECURITY_ADMIN_PASSWORD=localsecret
-#    networks:
-#      - smart-home-observer
+  grafana:
+    container_name: smart-home-grafana
+    image: grafana/grafana-oss:9.3.1
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./grafana/data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=local
+      - GF_SECURITY_ADMIN_PASSWORD=localsecret
+    networks:
+      - smart-home
 
