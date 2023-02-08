@@ -45,13 +45,13 @@ sudo useradd --create-home --user-group --groups docker smart-home
 
 ### Checkout the scripts and pull thr docker images
 
+Login as User `smart-home` and change to the home folder.
 Checkout the scripts, login to the container registry and pull the docker images
 
 ```shell
 # Checkout the scripts (example for v2.0.0):
 curl -LO https://github.com/salex-org/smart-home-observer/releases/download/v2.0.0/scripts.tar.gz
-mkdir observer
-tar xfvz scripts.tar.gz -C observer
+tar xfvz scripts.tar.gz
 rm scripts.tar.gz
 
 # Login to the ghcr.io private repository with access token:
