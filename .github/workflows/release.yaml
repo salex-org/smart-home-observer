@@ -20,23 +20,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-# Prod-Scripts will no longer be managed in this repo, please find then here: https://github.com/sagaert/smart-home
-#
-#      - name: Set version in docker-compose.yml
-#        uses: fjogeleit/yaml-update-action@v0.12.3
-#        with:
-#          valueFile: docker/prod/docker-compose.yml
-#          propertyPath: 'services.observer.image'
-#          value: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version }}
-#          commitChange: false
       - name: Create tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.email "buildmanager@salex.org"
           git config --global user.name "Bob the Builder"
-#          git add docker/prod/docker-compose.yml
-#          git commit -m "updating version to ${{ github.event.inputs.version }} in docker-compose"
           git tag -a v${{ github.event.inputs.version }} -m "tagging version ${{ github.event.inputs.version }}"
           git push --tags
 
@@ -52,33 +41,6 @@ jobs:
             Release v${{ github.event.inputs.version }}
           draft: false
           prerelease: false
-
-# Prod-Scripts will no longer be managed in this repo, please find then here: https://github.com/sagaert/smart-home
-#
-#  publish-scripts:
-#    needs: release
-#    name: Publish scripts asset
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v3
-#        with:
-#          ref: refs/tags/v${{ github.event.inputs.version }}
-#
-#      - name: Package scripts
-#        run: |
-#          mkdir bin
-#          tar cfvz ./bin/scripts.tar.gz -C docker/prod .
-#
-#      - name: Upload scripts asset
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ github.token }}
-#        with:
-#          upload_url: ${{ needs.release.outputs.release_upload_url }}
-#          asset_path: ./bin/scripts.tar.gz
-#          asset_name: scripts.tar.gz
-#          asset_content_type: application/gzip
 
   publish-docker:
     needs: release
