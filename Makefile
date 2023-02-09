@@ -16,14 +16,6 @@ endif
 # Build and run local
 # ===================================
 
-.PHONY: encrypt-config
-encrypt-config:
-	go run cmd/main.go -o docker/local/observer/config/observer-config.yml -i docker/local/observer/config/observer-config.decrypted.yml encrypt-config
-
-.PHONY: decrypt-config
-decrypt-config:
-	go run cmd/main.go -i docker/local/observer/config/observer-config.yml -o docker/local/observer/config/observer-config.decrypted.yml decrypt-config
-
 .PHONY: build
 build: | $(BIN)
 	go build -o $(EXECUTABLE) cmd/main.go
@@ -53,11 +45,11 @@ docker-build:
 
 .PHONY: docker-run
 docker-run: docker-build
-	docker compose --file ./docker/local/docker-compose.yml --project-name local-sho up --detach
+	docker compose --file ./docker/docker-compose.yml --project-name smart-home up --detach
 
 .PHONY: docker-stop
 docker-stop:
-	docker compose --file ./docker/local/docker-compose.yml --project-name local-sho down
+	docker compose --file ./docker/docker-compose.yml --project-name smart-home down
 
 .PHONY: docker-remove
 docker-remove:

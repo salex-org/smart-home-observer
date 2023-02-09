@@ -1,37 +1,24 @@
 version: '3'
 
+networks:
+  smart-home:
+
 services:
   observer:
     container_name: smart-home-observer
-    image: ghcr.io/salex-org/smart-home-observer:0.0.0
-    user: ${SMART_HOME_USER}
-    # Detach from container with "CTRL-p CTRL-q" when startet with "-i -t" without stopping the container
-    stdin_open: true    # docker run -i
-    tty: true           # docker run -t
+    image: smart-home-observer:0.0.0
     ports:
       - '8081:8080'
     networks:
       - smart-home
     volumes:
       - ./observer/config:/config
-
-  influx:
-    container_name: smart-home-influx
-    image: influxdb:2.5.1
-    user: ${SMART_HOME_USER}
-    ports:
-      - '8086:8086'
-    volumes:
-      - ./influx/data:/var/lib/influxdb2
-      - ./influx/config:/etc/influxdb2
-    networks:
-      - smart-home
+    environment:
+      CONFIG_DECRYPTION_ENABLED: false
 
   mosquitto:
     container_name: smart-home-mosquitto
     image: eclipse-mosquitto:2.0.15
-    # Run the container with the user running docker compose
-    user: ${SMART_HOME_USER}
     ports:
       - '1883:1883'
       - '9001:9001'
@@ -42,18 +29,34 @@ services:
     networks:
       - smart-home
 
+  influx:
+    container_name: smart-home-influx
+    image: influxdb:2.5.1
+    ports:
+      - '8086:8086'
+    volumes:
+      - ./influx/data:/var/lib/influxdb2
+      - ./influx/config:/etc/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=local
+      - DOCKER_INFLUXDB_INIT_PASSWORD=localsecret
+      - DOCKER_INFLUXDB_INIT_ORG=test-local
+      - DOCKER_INFLUXDB_INIT_BUCKET=sho
+    networks:
+      - smart-home
+
   grafana:
     container_name: smart-home-grafana
     image: grafana/grafana-oss:9.3.1
-    # Run the container with the user running docker compose
-    user: ${SMART_HOME_USER}
     ports:
       - '3000:3000'
     volumes:
       - ./grafana/data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=local
+      - GF_SECURITY_ADMIN_PASSWORD=localsecret
     networks:
       - smart-home
 
-networks:
-  smart-home:
