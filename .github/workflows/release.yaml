@@ -29,7 +29,6 @@ jobs:
 #          propertyPath: 'services.observer.image'
 #          value: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version }}
 #          commitChange: false
-
       - name: Create tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
