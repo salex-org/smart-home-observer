@@ -22,7 +22,6 @@ func main() {
 	if len(flag.Args()) < 1 {
 		printUsageAndExit()
 	}
-	fmt.Printf("command: %s\n", flag.Arg(0))
 	switch flag.Arg(0) {
 	case "run":
 		runObserver()
@@ -53,7 +52,7 @@ func printUsageAndExit() {
 func runObserver() {
 	conf, err := config.GetConfiguration()
 	if err != nil {
-		fmt.Errorf("Error reading configuration: %v", err)
+		fmt.Printf("Error reading configuration: %v", err)
 		return
 	}
 	fmt.Printf("Database url: %s", conf.Database.URL)
