@@ -22,6 +22,7 @@ func main() {
 	if len(flag.Args()) < 1 {
 		printUsageAndExit()
 	}
+	fmt.Printf("command: %s\n", flag.Arg(0))
 	switch flag.Arg(0) {
 	case "run":
 		runObserver()
@@ -55,7 +56,8 @@ func runObserver() {
 		fmt.Errorf("Error reading configuration: %v", err)
 		return
 	}
-	fmt.Printf("Using configuration - Database user is %s", conf.Database.Username)
+	fmt.Printf("Database url: %s", conf.Database.URL)
+	fmt.Printf("MQTT-Broker url: %s", conf.MQTT.URL)
 	port := 8080
 	mux := http.NewServeMux()
 	mux.Handle("/hello", &controller.HelloHandler{})

@@ -1,7 +1,0 @@
-database:
-  username: secret-db-user
-  password: secret-db-password
-mqtt-broker:
-  hostname: mqtt-hostname
-  username: secret-mqtt-user
-  password: secret-mqtt-password

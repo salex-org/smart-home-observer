@@ -3,8 +3,7 @@
 .DS_Store
 bin
 
-docker/*/observer/log/*
-docker/*/grafana/*
-docker/*/influx/*
-docker/*/mosquitto/data/*
-docker/*/mosquitto/log/*
+docker/grafana/*
+docker/influx/*
+docker/mosquitto/data/*
+docker/mosquitto/log/*
