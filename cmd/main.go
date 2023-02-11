@@ -55,8 +55,8 @@ func runObserver() {
 		fmt.Printf("Error reading configuration: %v", err)
 		return
 	}
-	fmt.Printf("Database url: %s", conf.Database.URL)
-	fmt.Printf("MQTT-Broker url: %s", conf.MQTT.URL)
+	fmt.Printf("\nDatabase url: %s\n", conf.Database.URL)
+	fmt.Printf("MQTT-Broker url: %s\n\n", conf.MQTT.URL)
 	port := 8080
 	mux := http.NewServeMux()
 	mux.Handle("/hello", &controller.HelloHandler{})
