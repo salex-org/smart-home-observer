@@ -1,7 +1,7 @@
 database:
-  username: local
+  url: smart-home-influx:8086
   password: localsecret
 mqtt-broker:
-  hostname: smart-home-mosquitto:1883
+  url: smart-home-mosquitto:1883
   username: local
   password: localsecret
