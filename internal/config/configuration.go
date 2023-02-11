@@ -20,12 +20,12 @@ type Configuration struct {
 }
 
 type DatabaseConfiguration struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
+	URL   string `yaml:"url"`
+	Token string `yaml:"token"`
 }
 
 type MQTTConfiguration struct {
-	Hostname string `yaml:"hostname"`
+	URL      string `yaml:"url"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
 }
