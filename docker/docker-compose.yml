@@ -40,8 +40,9 @@ services:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=local
       - DOCKER_INFLUXDB_INIT_PASSWORD=localsecret
-      - DOCKER_INFLUXDB_INIT_ORG=test-local
-      - DOCKER_INFLUXDB_INIT_BUCKET=sho
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=localadmintoken
+      - DOCKER_INFLUXDB_INIT_ORG=smart-home
+      - DOCKER_INFLUXDB_INIT_BUCKET=consumption
     networks:
       - smart-home
 
