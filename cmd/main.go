@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/salex-org/smart-home-observer/internal/config"
 	"github.com/salex-org/smart-home-observer/internal/controller"
+	"github.com/salex-org/smart-home-observer/internal/database"
 	"log"
 	"net/http"
 	"os"
@@ -50,13 +52,17 @@ func printUsageAndExit() {
 }
 
 func runObserver() {
-	conf, err := config.GetConfiguration()
+	db, err := database.ConnectToInflux()
 	if err != nil {
-		fmt.Printf("Error reading configuration: %v", err)
+		fmt.Printf("Error connecting to database: %v", err)
 		return
 	}
-	fmt.Printf("\nDatabase url: %s\n", conf.Database.URL)
-	fmt.Printf("MQTT-Broker url: %s\n\n", conf.MQTT.URL)
+	consumptionBucket := db.WriteAPI("smart-home", "consumption")
+	point := influxdb2.NewPointWithMeasurement("electricity").
+		AddTag("unit", "KWh").
+		AddField("avg", 3.45)
+	consumptionBucket.WritePoint(point)
+	consumptionBucket.Flush()
 	port := 8080
 	mux := http.NewServeMux()
 	mux.Handle("/hello", &controller.HelloHandler{})

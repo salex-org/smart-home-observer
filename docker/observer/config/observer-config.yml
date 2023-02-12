@@ -1,5 +1,5 @@
 database:
-  url: smart-home-influx:8086
+  url: http://smart-home-influx:8086
   token: localadmintoken
 mqtt-broker:
   url: smart-home-mosquitto:1883
