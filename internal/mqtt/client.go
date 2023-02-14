@@ -9,7 +9,7 @@ type Client struct {
 	mqtt *mqtt.Client
 }
 
-func ConnectToMQTT() (*Client, error) {
+func ConnectToMQTT(onConnectHandler mqtt.OnConnectHandler) (*Client, error) {
 	configuration, configErr := config.GetConfiguration()
 	if configErr != nil {
 		return nil, configErr
@@ -20,6 +20,7 @@ func ConnectToMQTT() (*Client, error) {
 	options.SetUsername(configuration.MQTT.Username)
 	options.SetPassword(configuration.MQTT.Password)
 	options.SetClientID("smart-home-observer")
+	options.SetOnConnectHandler(onConnectHandler)
 	client := mqtt.NewClient(options)
 	token := client.Connect()
 	if token.Wait() && token.Error() != nil {
@@ -29,12 +30,4 @@ func ConnectToMQTT() (*Client, error) {
 	return &Client{
 		mqtt: &client,
 	}, nil
-}
-
-func (client *Client) AddSubscriber(topic string, handler mqtt.MessageHandler) error {
-	token := (*client.mqtt).Subscribe(topic, 2, handler)
-	if token.Wait() && token.Error() != nil {
-		return token.Error()
-	}
-	return nil
 }

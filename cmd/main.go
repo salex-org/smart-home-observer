@@ -73,15 +73,9 @@ func runObserver() {
 		return
 	}
 	consumptionBucket = db.WriteAPI(configuration.Database.Org, configuration.Database.Buckets.Consumption)
-	broker, brokerErr := mqtti.ConnectToMQTT()
+	_, brokerErr := mqtti.ConnectToMQTT(handleOnConnect)
 	if brokerErr != nil {
 		fmt.Printf("Error connecting to MQTT broker: %v", brokerErr)
-		return
-	}
-
-	subscriptionErr := broker.AddSubscriber(configuration.MQTT.Topics.Consumption.Electricity, handleConsumptionMessage)
-	if subscriptionErr != nil {
-		fmt.Printf("Error adding MQTT subscriber: %v", subscriptionErr)
 		return
 	}
 
@@ -89,6 +83,18 @@ func runObserver() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handle404)
 	http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
+}
+
+var handleOnConnect mqtt.OnConnectHandler = func(client mqtt.Client) {
+	configuration, confErr := config.GetConfiguration()
+	if confErr != nil {
+		fmt.Printf("Error reading configuration: %v", confErr)
+		return
+	}
+	token := client.Subscribe(configuration.MQTT.Topics.Consumption.Electricity, 2, handleConsumptionMessage)
+	if token.Wait() && token.Error() != nil {
+		fmt.Printf("Error adding MQTT subscriber: %v", token.Error())
+	}
 }
 
 var handleConsumptionMessage mqtt.MessageHandler = func(client mqtt.Client, message mqtt.Message) {
