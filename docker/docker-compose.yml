@@ -7,6 +7,9 @@ services:
   observer:
     container_name: smart-home-observer
     image: smart-home-observer:0.0.0
+    depends_on:
+      - influx
+      - mosquitto
     ports:
       - '8081:8080'
     networks:
@@ -49,6 +52,8 @@ services:
   grafana:
     container_name: smart-home-grafana
     image: grafana/grafana-oss:9.3.1
+    depends_on:
+      - influx
     ports:
       - '3000:3000'
     volumes:

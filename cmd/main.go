@@ -1,21 +1,30 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	"github.com/influxdata/influxdb-client-go/v2/api"
 	"github.com/salex-org/smart-home-observer/internal/config"
-	"github.com/salex-org/smart-home-observer/internal/controller"
-	"github.com/salex-org/smart-home-observer/internal/database"
-	"log"
+	"github.com/salex-org/smart-home-observer/internal/influx"
+	mqtti "github.com/salex-org/smart-home-observer/internal/mqtt"
 	"net/http"
 	"os"
+	"time"
 )
 
 var (
-	inputArg  = ""
-	outputArg = ""
+	inputArg          = ""
+	outputArg         = ""
+	consumptionBucket api.WriteAPI
 )
+
+type Measurement struct {
+	Timestamp time.Time `json:"time"`
+	Value     float64   `json:"value"`
+}
 
 func main() {
 	flag.StringVar(&inputArg, "i", "", "")
@@ -52,23 +61,55 @@ func printUsageAndExit() {
 }
 
 func runObserver() {
-	db, err := database.ConnectToInflux()
-	if err != nil {
-		fmt.Printf("Error connecting to database: %v", err)
+	configuration, confErr := config.GetConfiguration()
+	if confErr != nil {
+		fmt.Printf("Error reading configuration: %v", confErr)
 		return
 	}
-	consumptionBucket := db.WriteAPI("smart-home", "consumption")
-	point := influxdb2.NewPointWithMeasurement("electricity").
-		AddTag("unit", "KWh").
-		AddField("avg", 3.45)
-	consumptionBucket.WritePoint(point)
-	consumptionBucket.Flush()
+
+	db, dbErr := influx.ConnectToInflux()
+	if dbErr != nil {
+		fmt.Printf("Error connecting to database: %v", dbErr)
+		return
+	}
+	consumptionBucket = db.WriteAPI(configuration.Database.Org, configuration.Database.Buckets.Consumption)
+	broker, brokerErr := mqtti.ConnectToMQTT()
+	if brokerErr != nil {
+		fmt.Printf("Error connecting to MQTT broker: %v", brokerErr)
+		return
+	}
+
+	subscriptionErr := broker.AddSubscriber(configuration.MQTT.Topics.Consumption.Electricity, handleConsumptionMessage)
+	if subscriptionErr != nil {
+		fmt.Printf("Error adding MQTT subscriber: %v", subscriptionErr)
+		return
+	}
+
 	port := 8080
 	mux := http.NewServeMux()
-	mux.Handle("/hello", &controller.HelloHandler{})
 	mux.HandleFunc("/", handle404)
-	fmt.Printf("Starting server on port %d\n", port)
 	http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
+}
+
+var handleConsumptionMessage mqtt.MessageHandler = func(client mqtt.Client, message mqtt.Message) {
+
+	var measurement Measurement
+	jsonErr := json.Unmarshal(message.Payload(), &measurement)
+	if jsonErr != nil {
+		fmt.Printf("Error unmarchalling json from MQTT message: %v\n", jsonErr)
+		return
+	}
+	fmt.Printf("Measurement %v received on topic %s\n", measurement, message.Topic())
+
+	point := influxdb2.NewPointWithMeasurement("electricity").
+		AddTag("unit", "KWh").
+		AddTag("sensor", "main").
+		AddField("avg", measurement.Value).
+		SetTime(measurement.Timestamp)
+	fmt.Printf("Created point from message: %v\n", point)
+
+	consumptionBucket.WritePoint(point)
+	consumptionBucket.Flush()
 }
 
 func processConfig(processor func([]byte) ([]byte, error), perm os.FileMode) {
@@ -98,6 +139,5 @@ func processConfig(processor func([]byte) ([]byte, error), perm os.FileMode) {
 }
 
 func handle404(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "%s Hamwanich!", r.URL.Path)
-	log.Printf("Answering 404 on %s\n", r.URL.Path)
+	fmt.Fprintf(w, "%s not found.", r.URL.Path)
 }
