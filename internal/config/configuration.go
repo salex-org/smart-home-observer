@@ -38,12 +38,7 @@ type MQTTConfiguration struct {
 }
 
 type MQTTTopics struct {
-	Consumption MQTTConsumptionTopics `yaml:"consumption"`
-}
-
-type MQTTConsumptionTopics struct {
-	Electricity string `yaml:"electricity"`
-	Gas         string `yaml:"gas"`
+	Consumption string `yaml:"consumption"`
 }
 
 var (

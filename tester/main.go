@@ -10,6 +10,9 @@ import (
 type Measurement struct {
 	Timestamp time.Time `json:"time"`
 	Value     float64   `json:"value"`
+	Unit      string    `json:"unit"`
+	Sensor    string    `json:"sensor"`
+	Kind      string    `json:"kind"`
 }
 
 func main() {
@@ -32,9 +35,12 @@ func main() {
 		measurement := Measurement{
 			Timestamp: time.Now(),
 			Value:     (rand.Float64() * 3) + 3,
+			Unit:      "kWh",
+			Kind:      "electricity",
+			Sensor:    "main",
 		}
 		value, _ := json.Marshal(&measurement)
-		token = client.Publish("consumption.electricity.main", 2, false, value)
+		token = client.Publish("consumption", 2, false, value)
 		token.Wait()
 		if token.Error() != nil {
 			panic(token.Error())

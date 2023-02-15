@@ -9,6 +9,4 @@ mqtt-broker:
   username: 'local'
   password: 'localsecret'
   topics:
-    consumption:
-      electricity: 'consumption.electricity.main'
-      gas: 'consumption.gas.main'
+    consumption: 'consumption'
