@@ -20,25 +20,17 @@ type Configuration struct {
 }
 
 type DatabaseConfiguration struct {
-	URL     string          `yaml:"url"`
-	Token   string          `yaml:"token"`
-	Org     string          `yaml:"org"`
-	Buckets DatabaseBuckets `yaml:"buckets"`
-}
-
-type DatabaseBuckets struct {
-	Consumption string `yaml:"consumption"`
+	URL    string `yaml:"url"`
+	Token  string `yaml:"token"`
+	Org    string `yaml:"org"`
+	Bucket string `yaml:"bucket"`
 }
 
 type MQTTConfiguration struct {
-	URL      string     `yaml:"url"`
-	Username string     `yaml:"username"`
-	Password string     `yaml:"password"`
-	Topics   MQTTTopics `yaml:"topics"`
-}
-
-type MQTTTopics struct {
-	Consumption string `yaml:"consumption"`
+	URL      string `yaml:"url"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Topic    string `yaml:"topic"`
 }
 
 var (

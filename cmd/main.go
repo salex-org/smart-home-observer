@@ -3,29 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
-	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/influxdata/influxdb-client-go/v2/api"
 	"github.com/salex-org/smart-home-observer/internal/config"
 	"github.com/salex-org/smart-home-observer/internal/controller"
 	mqtti "github.com/salex-org/smart-home-observer/internal/mqtt"
 	"net/http"
 	"os"
-	"time"
 )
 
 var (
-	inputArg          = ""
-	outputArg         = ""
-	consumptionBucket api.WriteAPI
+	inputArg  = ""
+	outputArg = ""
 )
-
-type Measurement struct {
-	Timestamp time.Time `json:"time"`
-	Value     float64   `json:"value"`
-	Unit      string    `json:"unit"`
-	Sensor    string    `json:"sensor"`
-	Kind      string    `json:"kind"`
-}
 
 func main() {
 	flag.StringVar(&inputArg, "i", "", "")
@@ -62,14 +50,12 @@ func printUsageAndExit() {
 }
 
 func runObserver() {
-	consumptionController, controllerErr := controller.NewConsumptionController()
+	mqttController, controllerErr := controller.NewMQTTController()
 	if controllerErr != nil {
-		fmt.Printf("Error creating consumption controller: %v\n", controllerErr)
+		fmt.Printf("Error creating MQTT controller: %v\n", controllerErr)
 		return
 	}
-	_, brokerErr := mqtti.ConnectToMQTT(func(client mqtt.Client) {
-		consumptionController.HandleConnect(client)
-	})
+	_, brokerErr := mqtti.ConnectToMQTT(mqttController.HandleConnect)
 	if brokerErr != nil {
 		fmt.Printf("Error connecting to MQTT broker: %v\n", brokerErr)
 		return
