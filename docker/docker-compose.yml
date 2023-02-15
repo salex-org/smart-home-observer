@@ -7,6 +7,11 @@ services:
   observer:
     container_name: smart-home-observer
     image: smart-home-observer:0.0.0
+    depends_on:
+      influx:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
     ports:
       - '8081:8080'
     networks:
@@ -40,14 +45,23 @@ services:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=local
       - DOCKER_INFLUXDB_INIT_PASSWORD=localsecret
-      - DOCKER_INFLUXDB_INIT_ORG=test-local
-      - DOCKER_INFLUXDB_INIT_BUCKET=sho
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=localadmintoken
+      - DOCKER_INFLUXDB_INIT_ORG=smart-home
+      - DOCKER_INFLUXDB_INIT_BUCKET=consumption
     networks:
       - smart-home
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8086/ping" ]
+      interval: 3s
+      timeout: 10s
+      retries: 1
 
   grafana:
     container_name: smart-home-grafana
     image: grafana/grafana-oss:9.3.1
+    depends_on:
+      influx:
+        condition: service_healthy
     ports:
       - '3000:3000'
     volumes:
