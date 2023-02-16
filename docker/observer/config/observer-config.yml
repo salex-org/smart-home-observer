@@ -1,14 +1,10 @@
 database:
   url: 'http://smart-home-influx:8086'
   token: 'localadmintoken'
-  org: 'smart-home'
-  buckets:
-    consumption: 'consumption'
+  org: 'salex'
+  bucket: 'smart-home'
 mqtt-broker:
   url: 'tcp://smart-home-mosquitto:1883'
   username: 'local'
   password: 'localsecret'
-  topics:
-    consumption:
-      electricity: 'consumption.electricity.main'
-      gas: 'consumption.gas.main'
+  topic: 'smart-home'

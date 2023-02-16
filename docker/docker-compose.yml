@@ -46,8 +46,8 @@ services:
       - DOCKER_INFLUXDB_INIT_USERNAME=local
       - DOCKER_INFLUXDB_INIT_PASSWORD=localsecret
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=localadmintoken
-      - DOCKER_INFLUXDB_INIT_ORG=smart-home
-      - DOCKER_INFLUXDB_INIT_BUCKET=consumption
+      - DOCKER_INFLUXDB_INIT_ORG=salex
+      - DOCKER_INFLUXDB_INIT_BUCKET=smart-home
     networks:
       - smart-home
     healthcheck:
