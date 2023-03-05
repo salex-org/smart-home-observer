@@ -16,7 +16,6 @@ import (
 
 type Configuration struct {
 	Database DatabaseConfiguration `yaml:"database"`
-	MQTT     MQTTConfiguration     `yaml:"mqtt-broker"`
 }
 
 type DatabaseConfiguration struct {
@@ -24,13 +23,6 @@ type DatabaseConfiguration struct {
 	Token  string `yaml:"token"`
 	Org    string `yaml:"org"`
 	Bucket string `yaml:"bucket"`
-}
-
-type MQTTConfiguration struct {
-	URL      string `yaml:"url"`
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	Topic    string `yaml:"topic"`
 }
 
 var (

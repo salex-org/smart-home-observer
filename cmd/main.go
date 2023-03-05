@@ -4,8 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/salex-org/smart-home-observer/internal/config"
-	"github.com/salex-org/smart-home-observer/internal/controller"
-	mqtti "github.com/salex-org/smart-home-observer/internal/mqtt"
 	"net/http"
 	"os"
 )
@@ -50,17 +48,6 @@ func printUsageAndExit() {
 }
 
 func runObserver() {
-	mqttController, controllerErr := controller.NewMQTTController()
-	if controllerErr != nil {
-		fmt.Printf("Error creating MQTT controller: %v\n", controllerErr)
-		return
-	}
-	_, brokerErr := mqtti.ConnectToMQTT(mqttController.HandleConnect)
-	if brokerErr != nil {
-		fmt.Printf("Error connecting to MQTT broker: %v\n", brokerErr)
-		return
-	}
-
 	port := 8080
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handle404)
