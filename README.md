@@ -1,7 +1,7 @@
 # Smart Home Observer
 A Golang Application managing consumption data in an InfluxDB for visualization
 in a Grafan Dashboard. The data will be sent by [Smart Home Agents](https://github.com/salex-org/smart-home-agent)
-via MQTT.
+via HTTP.
 
 ## Local Testing
 

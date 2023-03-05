@@ -3,8 +3,4 @@ database:
   token: 'localadmintoken'
   org: 'salex'
   bucket: 'smart-home'
-mqtt-broker:
-  url: 'tcp://smart-home-mosquitto:1883'
-  username: 'local'
-  password: 'localsecret'
-  topic: 'smart-home'
+

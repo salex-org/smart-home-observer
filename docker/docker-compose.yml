@@ -10,8 +10,6 @@ services:
     depends_on:
       influx:
         condition: service_healthy
-      mosquitto:
-        condition: service_started
     ports:
       - '8081:8080'
     networks:
@@ -20,19 +18,6 @@ services:
       - ./observer/config:/config
     environment:
       CONFIG_DECRYPTION_ENABLED: false
-
-  mosquitto:
-    container_name: smart-home-mosquitto
-    image: eclipse-mosquitto:2.0.15
-    ports:
-      - '1883:1883'
-      - '9001:9001'
-    volumes:
-      - ./mosquitto/data:/mosquitto/data
-      - ./mosquitto/config:/mosquitto/config
-      - ./mosquitto/log:/mosquitto/log
-    networks:
-      - smart-home
 
   influx:
     container_name: smart-home-influx
@@ -53,7 +38,7 @@ services:
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8086/ping" ]
       interval: 3s
-      timeout: 10s
+      timeout: 60s
       retries: 1
 
   grafana:
