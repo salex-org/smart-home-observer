@@ -5,5 +5,3 @@ bin
 
 docker/grafana/*
 docker/influx/*
-docker/mosquitto/data/*
-docker/mosquitto/log/*
