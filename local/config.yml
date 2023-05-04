@@ -1,0 +1,12 @@
+database:
+  url: 'http://smart-home-influx:8086'
+  token: 'localadmintoken'
+  org: 'salex'
+  bucket: 'smart-home'
+hmip:
+  accessPointSGTIN: '3014-F711-A000-03DD-89AD-F7FE'
+  deviceID: 'ab4e011b-3108-4c22-ab70-e8716d8b6c0a'
+  clientID: '31058877-601a-4e4c-9ebc-e006a1c26753'
+  clientAuthToken: 'E83F5195D4FD16EAB67FA1EE00F706B117D2A2B4CAE48B9D71B9716B871D878E5721774FAAD3E48124943BBEEC25E0A16620BA5D847C26A6947A42C88D57DAD8'
+  authToken: 'B00CFE3CCC40DEA4D5DA37252BF09FBD7F613F6EF3F9A7C149E92960F0EF1297'
+  lookupURL: 'https://lookup.homematic.com:48335/getHost'
