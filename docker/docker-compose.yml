@@ -4,6 +4,23 @@ networks:
   smart-home:
 
 services:
+  vault:
+    container_name: smart-home-vault
+    image: hashicorp/vault:1.13.0
+    user: ${SMART_HOME_USER}
+    cap_add:
+      - IPC_LOCK
+    command:
+      - server
+    ports:
+      - '8200:8200'
+    networks:
+      - smart-home
+    volumes:
+      - ./vault/config:/vault/config
+      - ./vault/logs:/vault/logs
+      - ./vault/data:/vault/file
+
   observer:
     container_name: smart-home-observer
     image: smart-home-observer:0.0.0
