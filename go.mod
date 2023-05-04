@@ -17,7 +17,6 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/influxdata/line-protocol v0.0.0-20200327222509-2487e7298839 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/salex-org/hmip-go-client v1.0.1 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
