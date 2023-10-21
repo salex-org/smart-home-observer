@@ -1,75 +1,66 @@
 package hmip
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"regexp"
-	"runtime"
+	"github.com/salex-org/hmip-go-client/pkg/hmip"
+	"github.com/salex-org/smart-home-observer/internal/util"
 	"time"
 )
 
-type Client struct {
-	config     *Config
-	httpClient *http.Client
+type Client interface {
+	ReadMeasurements(time time.Time) ([]ClimateMeasurement, error)
 }
 
-func NewClient(config *Config) (*Client, error) {
-	return &Client{
-		config: config,
-		httpClient: &http.Client{
-			Timeout: time.Duration(1) * time.Minute,
-		},
-	}, nil
+type HmIPClient struct {
+	client hmip.Client
 }
 
-func (client *Client) GetCurrentState() error {
-	return nil
+type ClimateMeasurement struct {
+	Time        time.Time `json:"time"`
+	Sensor      string    `json:"sensor"`
+	Humidity    int       `json:"humidity"`
+	Temperature float64   `json:"temperature"`
 }
 
-func trimSGTIN(sgtin string) string {
-	expression, _ := regexp.Compile("[^a-fA-F0-9]")
-	return expression.ReplaceAllString(sgtin, "")
+func NewClient() (Client, error) {
+	client := HmIPClient{}
+	config, err := hmip.GetConfig()
+	if err != nil {
+		return client, err
+	}
+	initializeConfig(config)
+	client.client, err = hmip.GetClientWithConfig(config)
+	return client, err
 }
 
-func (client *Client) Connect() error {
-	fmt.Printf("Connecting to Homematic-IP Cloud...")
-	var err error
-	var requestBodyJSON, responseBodyJSON []byte
-	var requestBody = GetHostsRequest{
-		AccessPointSGTIN: trimSGTIN(client.config.AccessPointSGTIN),
-		ClientCharacteristics: ClientCharacteristics{
-			APIVersion:         "12",
-			ClientName:         "GoLang Client",
-			ClientVersion:      "1.0.0",
-			DeviceManufacturer: "none",
-			DeviceType:         "computer",
-			Language:           "de-DE",
-			OSType:             runtime.GOOS,
-			OSVersion:          "",
-		},
-	}
-	var response *http.Response
-	requestBodyJSON, err = json.Marshal(requestBody)
+func initializeConfig(config *hmip.Config) {
+	config.AccessPointSGTIN = util.ReadEnvVar("HMIP_AP_SGTIN")
+	config.DeviceID = util.ReadEnvVar("HMIP_DEVICE_ID")
+	config.ClientID = util.ReadEnvVar("HMIP_CLIENT_ID")
+	config.ClientName = util.ReadEnvVar("HMIP_CLIENT_NAME")
+	config.ClientAuthToken = util.ReadEnvVar("HMIP_CLIENT_AUTH_TOKEN")
+	config.AuthToken = util.ReadEnvVar("HMIP_AUTH_TOKEN")
+}
+
+func (client HmIPClient) ReadMeasurements(time time.Time) ([]ClimateMeasurement, error) {
+	measurements := []ClimateMeasurement{}
+	state, err := client.client.LoadCurrentState()
 	if err != nil {
-		return err
+		return measurements, err
 	}
-	response, err = client.httpClient.Post(client.config.LookupURL, "application/json", bytes.NewBuffer(requestBodyJSON))
-	if err != nil {
-		return err
+	for _, device := range state.Devices {
+		if device.Type == "TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR" {
+			for _, channel := range device.Channels {
+				if channel.Type == "CLIMATE_SENSOR_CHANNEL" {
+					measurement := ClimateMeasurement{
+						Time:        time,
+						Sensor:      device.Name,
+						Humidity:    channel.Humidity,
+						Temperature: channel.Temperature,
+					}
+					measurements = append(measurements, measurement)
+				}
+			}
+		}
 	}
-	defer response.Body.Close()
-	responseBodyJSON, err = io.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-	responseBody := &GetHostsResponse{}
-	err = json.Unmarshal(responseBodyJSON, responseBody)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("success\nUsing REST-API at %s\n", responseBody.RestURL)
-	return nil
+	return measurements, nil
 }

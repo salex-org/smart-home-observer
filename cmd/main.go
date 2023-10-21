@@ -1,86 +1,105 @@
 package main
 
 import (
-	"flag"
+	"encoding/json"
 	"fmt"
-	"github.com/salex-org/smart-home-observer/internal/config"
+	"github.com/salex-org/smart-home-observer/internal/hmip"
+	"github.com/salex-org/smart-home-observer/internal/influx"
+	"log"
 	"net/http"
-	"os"
+	"time"
 )
 
 var (
-	inputArg  = ""
-	outputArg = ""
+	health = Health{
+		Status: "starting",
+	}
+	hmipClient   hmip.Client
+	influxClient influx.Client
+	measurements []hmip.ClimateMeasurement
 )
 
+type Health struct {
+	Error  error
+	Status string
+}
+
 func main() {
-	flag.StringVar(&inputArg, "i", "", "")
-	flag.StringVar(&outputArg, "o", "", "")
-	flag.Parse()
-	if len(flag.Args()) < 1 {
-		printUsageAndExit()
+	hmipClient, health.Error = hmip.NewClient()
+	if health.Error != nil {
+		log.Fatalf("Error connecting to the HomematicIP Cloud: %v\n", health.Error)
+	} else {
+		log.Printf("Successfully connected to the HomematicIP Cloud")
 	}
-	switch flag.Arg(0) {
-	case "run":
-		runObserver()
-	case "encrypt-config":
-		processConfig(config.Encrypt, 0600)
-	case "decrypt-config":
-		processConfig(config.Decrypt, 0660)
-	default:
-		printUsageAndExit()
+
+	influxClient, health.Error = influx.NewClient()
+	if health.Error != nil {
+		log.Fatalf("Error connecting to the InfluxDB: %v\n", health.Error)
+	} else {
+		log.Printf("Successfully connected to the InfluxDB")
 	}
-}
 
-func printUsageAndExit() {
-	fmt.Println("Usage:")
-	fmt.Println("\tsmart-home-observer run")
-	fmt.Println("\tsmart-home-observer -i <input-file> -o <output-file> encrypt-config")
-	fmt.Println("\tsmart-home-observer -i <input-file> -o <output-file> decrypt-config")
-	fmt.Println("\nCommands:")
-	fmt.Println("\trun\t\tRun the observer in operating mode")
-	fmt.Println("\tencrypt-config\t\tEncrypts the config reading from input-file and writing to output-file")
-	fmt.Println("\tdecrypt-config\t\tDecrypts the config reading from input-file and writing to output-file")
-	fmt.Println("\nOptions:")
-	fmt.Println("\t-i\tThe input file for encryption/decryption")
-	fmt.Println("\t-o\tThe output file for encryption/decryption")
-	os.Exit(1)
-}
-
-func runObserver() {
+	ticker := time.NewTicker(time.Minute)
+	done := make(chan bool)
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+			case t := <-ticker.C:
+				process(t)
+			}
+		}
+	}()
 	port := 8080
 	mux := http.NewServeMux()
+	mux.HandleFunc("/health", handleHealth)
+	mux.HandleFunc("/data", handleData)
 	mux.HandleFunc("/", handle404)
 	fmt.Printf("Started HTTP server (Port: %d)\n", port)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
-}
-
-func processConfig(processor func([]byte) ([]byte, error), perm os.FileMode) {
-	if len(inputArg) == 0 {
-		fmt.Printf("\nError: No input filename specified\n")
-		return
-	}
-	if len(outputArg) == 0 {
-		fmt.Printf("\nError: No output filename specified\n")
-		return
-	}
-	input, inputErr := os.ReadFile(inputArg)
-	if inputErr != nil {
-		fmt.Printf("\nError reading input: %v\n", inputErr)
-		return
-	}
-	output, processErr := processor(input)
-	if processErr != nil {
-		fmt.Printf("\nError processing: %v\n", processErr)
-		return
-	}
-	outputErr := os.WriteFile(outputArg, output, perm)
-	if outputErr != nil {
-		fmt.Printf("\nError writing output: %v\n", outputErr)
-		return
+	health.Status = "ok"
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
+	if err != nil {
+		log.Fatalf("Error starting HTTP server: %v\n", health.Error)
 	}
 }
 
 func handle404(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "%s not found.", r.URL.Path)
+	w.WriteHeader(http.StatusNotFound)
+	_, _ = fmt.Fprintf(w, "%s not found.", r.URL.Path)
+}
+
+func handleHealth(w http.ResponseWriter, r *http.Request) {
+	if health.Error == nil {
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprint(w, health.Status)
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = fmt.Fprintf(w, "%v", health.Error)
+	}
+}
+
+func handleData(w http.ResponseWriter, r *http.Request) {
+	var data []byte
+	data, health.Error = json.Marshal(measurements)
+	if health.Error == nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprint(w, string(data))
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = fmt.Fprintf(w, "Error marshaling measurements: %v", health.Error)
+	}
+}
+
+func process(time time.Time) {
+	measurements, health.Error = hmipClient.ReadMeasurements(time)
+	if health.Error != nil {
+		fmt.Printf("Error reading measurements from the HomematicIP Cloud: %v", health.Error)
+	} else {
+		health.Error = influxClient.SaveMeasurements(measurements)
+		if health.Error != nil {
+			fmt.Printf("Error saving measurements to the InfluxDB: %v", health.Error)
+		}
+	}
 }
