@@ -58,13 +58,19 @@ jobs:
           go-version: 1.19
 
       - name: Build Linux ARM v7
-        run: CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -a -o bin/linux/arm/v7/smart-home-observer cmd/main.go
+        run: | 
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -a -o bin/linux/arm/v7/observer cmd/observer/main.go
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -a -o bin/linux/arm/v7/healthcheck cmd/healthcheck/main.go
 
       - name: Build Linux ARM64
-        run: CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o bin/linux/arm64/smart-home-observer cmd/main.go
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o bin/linux/arm64/observer cmd/observer/main.go
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o bin/linux/arm64/healthcheck cmd/healthcheck/main.go
 
       - name: Build Linux AMD64
-        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin/linux/amd64/smart-home-observer cmd/main.go
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin/linux/amd64/observer cmd/observer/main.go
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o bin/linux/amd64/healthcheck cmd/healthcheck/main.go
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1

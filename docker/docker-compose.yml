@@ -11,13 +11,21 @@ services:
       influx:
         condition: service_healthy
     ports:
-      - '8081:8080'
+      - '8080:8080'
     networks:
       - smart-home
-    volumes:
-      - ./observer/config:/config
     environment:
-      CONFIG_DECRYPTION_ENABLED: false
+      - INFLUX_URL=http://influx:8086
+      - INFLUX_TOKEN=localadmintoken
+      - INFLUX_BUCKET=smart-home
+      - INFLUX_ORGANIZATION=salex
+    env_file:
+      - .env.observer
+    healthcheck:
+      test: [ "CMD", "/healthcheck" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
 
   influx:
     container_name: smart-home-influx
@@ -25,7 +33,7 @@ services:
     ports:
       - '8086:8086'
     volumes:
-      - ./influx/data:/var/lib/influxdb2
+      - ./influx/data:/var/lib/influxdb2d
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=local
@@ -41,20 +49,4 @@ services:
       timeout: 60s
       retries: 1
 
-  grafana:
-    container_name: smart-home-grafana
-    image: grafana/grafana-oss:9.3.1
-    depends_on:
-      influx:
-        condition: service_healthy
-    ports:
-      - '3000:3000'
-    volumes:
-      - ./grafana/data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-    environment:
-      - GF_SECURITY_ADMIN_USER=local
-      - GF_SECURITY_ADMIN_PASSWORD=localsecret
-    networks:
-      - smart-home
 

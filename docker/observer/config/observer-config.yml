@@ -1,6 +1,0 @@
-database:
-  url: 'http://smart-home-influx:8086'
-  token: 'localadmintoken'
-  org: 'salex'
-  bucket: 'smart-home'
-

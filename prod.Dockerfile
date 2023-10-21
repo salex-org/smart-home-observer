@@ -3,5 +3,6 @@
 FROM gcr.io/distroless/static:nonroot
 ARG TARGETPLATFORM
 WORKDIR /
-COPY bin/${TARGETPLATFORM}/smart-home-observer .
-ENTRYPOINT ["/smart-home-observer", "run"]
+COPY bin/${TARGETPLATFORM}/observer .
+COPY bin/${TARGETPLATFORM}/healthcheck .
+ENTRYPOINT ["/observer", "run"]
