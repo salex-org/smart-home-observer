@@ -93,7 +93,7 @@ func handleData(w http.ResponseWriter, r *http.Request) {
 }
 
 func process(time time.Time) {
-	measurements, health.Error = hmipClient.ReadMeasurements(time)
+	measurements, health.Error = hmipClient.ReadMeasurements()
 	if health.Error != nil {
 		fmt.Printf("Error reading measurements from the HomematicIP Cloud: %v", health.Error)
 	} else {

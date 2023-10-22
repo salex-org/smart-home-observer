@@ -7,7 +7,7 @@ import (
 )
 
 type Client interface {
-	ReadMeasurements(time time.Time) ([]ClimateMeasurement, error)
+	ReadMeasurements() ([]ClimateMeasurement, error)
 }
 
 type HmIPClient struct {
@@ -19,6 +19,7 @@ type ClimateMeasurement struct {
 	Sensor      string    `json:"sensor"`
 	Humidity    int       `json:"humidity"`
 	Temperature float64   `json:"temperature"`
+	VaporAmount float64   `json:"vaporAmount"`
 }
 
 func NewClient() (Client, error) {
@@ -41,7 +42,7 @@ func initializeConfig(config *hmip.Config) {
 	config.AuthToken = util.ReadEnvVar("HMIP_AUTH_TOKEN")
 }
 
-func (client HmIPClient) ReadMeasurements(time time.Time) ([]ClimateMeasurement, error) {
+func (client HmIPClient) ReadMeasurements() ([]ClimateMeasurement, error) {
 	measurements := []ClimateMeasurement{}
 	state, err := client.client.LoadCurrentState()
 	if err != nil {
@@ -52,10 +53,11 @@ func (client HmIPClient) ReadMeasurements(time time.Time) ([]ClimateMeasurement,
 			for _, channel := range device.Channels {
 				if channel.Type == "CLIMATE_SENSOR_CHANNEL" {
 					measurement := ClimateMeasurement{
-						Time:        time,
+						Time:        device.LastStatusUpdate.Time,
 						Sensor:      device.Name,
 						Humidity:    channel.Humidity,
 						Temperature: channel.Temperature,
+						VaporAmount: channel.VapourAmount,
 					}
 					measurements = append(measurements, measurement)
 				}
