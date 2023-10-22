@@ -2,9 +2,13 @@ package influx
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/salex-org/smart-home-observer/internal/hmip"
 	"github.com/salex-org/smart-home-observer/internal/util"
+	"log"
+	"os"
 )
 
 type Client interface {
@@ -18,8 +22,28 @@ type InfluxClient struct {
 }
 
 func NewClient() (Client, error) {
+	certFilename, hasAdditionalRootCA := os.LookupEnv("ADDITIONAL_ROOT_CA")
+	rootCAs, _ := x509.SystemCertPool()
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+	if hasAdditionalRootCA {
+		cert, err := os.ReadFile(certFilename)
+		if err != nil {
+			log.Fatalf("Error reading additional root CA: %v\n", err)
+		} else {
+			rootCAs.AppendCertsFromPEM(cert)
+			log.Printf("Using additional root CA from %s\n", certFilename)
+		}
+	}
 	client := InfluxClient{
-		client:       influxdb2.NewClient(util.ReadEnvVar("INFLUX_URL"), util.ReadEnvVar("INFLUX_TOKEN")),
+		client: influxdb2.NewClientWithOptions(
+			util.ReadEnvVar("INFLUX_URL"),
+			util.ReadEnvVar("INFLUX_TOKEN"),
+			influxdb2.DefaultOptions().
+				SetTLSConfig(&tls.Config{
+					RootCAs: rootCAs,
+				})),
 		organization: util.ReadEnvVar("INFLUX_ORGANIZATION"),
 		bucket:       util.ReadEnvVar("INFLUX_BUCKET"),
 	}
