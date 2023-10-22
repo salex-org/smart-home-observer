@@ -33,6 +33,7 @@ func (client InfluxClient) SaveMeasurement(measurement hmip.ClimateMeasurement) 
 	point.SetTime(measurement.Time)
 	point.AddField("temperature", measurement.Temperature)
 	point.AddField("humidity", measurement.Humidity)
+	point.AddField("vapor_amount", measurement.VaporAmount)
 	point.AddTag("sensor", measurement.Sensor)
 	return api.WritePoint(context.Background(), point)
 }
