@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/salex-org/smart-home-observer/internal/hmip"
 	"github.com/salex-org/smart-home-observer/internal/influx"
+	"github.com/salex-org/smart-home-observer/internal/util"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -29,17 +31,24 @@ func main() {
 	if health.Error != nil {
 		log.Fatalf("Error connecting to the HomematicIP Cloud: %v\n", health.Error)
 	} else {
-		log.Printf("Successfully connected to the HomematicIP Cloud")
+		log.Printf("Successfully connected to the HomematicIP Cloud\n")
 	}
 
 	influxClient, health.Error = influx.NewClient()
 	if health.Error != nil {
 		log.Fatalf("Error connecting to the InfluxDB: %v\n", health.Error)
 	} else {
-		log.Printf("Successfully connected to the InfluxDB")
+		log.Printf("Successfully connected to the InfluxDB\n")
 	}
 
-	ticker := time.NewTicker(time.Minute)
+	rate, err := strconv.Atoi(util.ReadEnvVarWithDefault("PROCESS_INTERVAL", "10"))
+	if err != nil {
+		log.Fatalf("Error reading process interval: %v\n", err)
+	} else {
+		log.Printf("Processing every %d mionutes\n", rate)
+	}
+
+	ticker := time.NewTicker(time.Minute * time.Duration(rate))
 	done := make(chan bool)
 	go func() {
 		for {
@@ -58,7 +67,7 @@ func main() {
 	mux.HandleFunc("/", handle404)
 	fmt.Printf("Started HTTP server (Port: %d)\n", port)
 	health.Status = "ok"
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
+	err = http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
 	if err != nil {
 		log.Fatalf("Error starting HTTP server: %v\n", health.Error)
 	}

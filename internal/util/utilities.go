@@ -12,3 +12,12 @@ func ReadEnvVar(name string) string {
 	}
 	return value
 }
+
+func ReadEnvVarWithDefault(name, defaultValue string) string {
+	value, present := os.LookupEnv(name)
+	if !present {
+		return defaultValue
+	} else {
+		return value
+	}
+}
