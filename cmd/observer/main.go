@@ -102,13 +102,35 @@ func handleData(w http.ResponseWriter, r *http.Request) {
 }
 
 func process(time time.Time) {
-	measurements, health.Error = hmipClient.ReadMeasurements()
+	var newMeasurements []hmip.ClimateMeasurement
+	newMeasurements, health.Error = hmipClient.ReadMeasurements()
 	if health.Error != nil {
 		fmt.Printf("Error reading measurements from the HomematicIP Cloud: %v", health.Error)
 	} else {
-		health.Error = influxClient.SaveMeasurements(measurements)
+		var changedMeasurements []hmip.ClimateMeasurement
+		for _, newMeasurement := range newMeasurements {
+			oldMeasurement := getMeasurement(newMeasurement.Sensor)
+			if oldMeasurement != nil {
+				if oldMeasurement.Time.Compare(newMeasurement.Time) < 0 {
+					changedMeasurements = append(changedMeasurements, newMeasurement)
+				}
+			} else {
+				changedMeasurements = append(changedMeasurements, newMeasurement)
+			}
+		}
+		measurements = newMeasurements
+		health.Error = influxClient.SaveMeasurements(changedMeasurements)
 		if health.Error != nil {
 			fmt.Printf("Error saving measurements to the InfluxDB: %v", health.Error)
 		}
 	}
+}
+
+func getMeasurement(sensor string) *hmip.ClimateMeasurement {
+	for _, each := range measurements {
+		if each.Sensor == sensor {
+			return &each
+		}
+	}
+	return nil
 }
