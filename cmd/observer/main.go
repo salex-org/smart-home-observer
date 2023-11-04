@@ -6,8 +6,10 @@ import (
 	"github.com/salex-org/smart-home-observer/internal/hmip"
 	"github.com/salex-org/smart-home-observer/internal/influx"
 	"github.com/salex-org/smart-home-observer/internal/util"
+	"github.com/salex-org/smart-home-observer/internal/wordpress"
 	"log"
 	"net/http"
+	"slices"
 	"strconv"
 	"time"
 )
@@ -16,9 +18,11 @@ var (
 	health = Health{
 		Status: "starting",
 	}
-	hmipClient   hmip.Client
-	influxClient influx.Client
-	measurements []hmip.ClimateMeasurement
+	hmipClient        hmip.Client
+	influxClient      influx.Client
+	wordpressClient   wordpress.Client
+	wordpressRenderer wordpress.Renderer
+	measurements      []hmip.ClimateMeasurement
 )
 
 type Health struct {
@@ -41,11 +45,19 @@ func main() {
 		log.Printf("Successfully connected to the InfluxDB\n")
 	}
 
+	wordpressClient = wordpress.NewClient()
+	wordpressRenderer, health.Error = wordpress.NewRenderer()
+	if health.Error != nil {
+		log.Fatalf("Error creating wordpress renderer: %v\n", health.Error)
+	} else {
+		log.Printf("Successfully created wordpress renderer\n")
+	}
+
 	rate, err := strconv.Atoi(util.ReadEnvVarWithDefault("PROCESS_INTERVAL", "10"))
 	if err != nil {
 		log.Fatalf("Error reading process interval: %v\n", err)
 	} else {
-		log.Printf("Processing every %d mionutes\n", rate)
+		log.Printf("Processing every %d minutes\n", rate)
 	}
 
 	ticker := time.NewTicker(time.Minute * time.Duration(rate))
@@ -123,6 +135,10 @@ func process(time time.Time) {
 		if health.Error != nil {
 			fmt.Printf("Error saving measurements to the InfluxDB: %v", health.Error)
 		}
+		health.Error = updateBlog()
+		if health.Error != nil {
+			fmt.Printf("Error updating blog: %v", health.Error)
+		}
 	}
 }
 
@@ -133,4 +149,26 @@ func getMeasurement(sensor string) *hmip.ClimateMeasurement {
 		}
 	}
 	return nil
+}
+
+func updateBlog() error {
+	post, err := wordpressClient.GetPost(wordpress.OverviewID, wordpress.OverviewType)
+	if err != nil {
+		return err
+	}
+	post.Content.Rendered, err = wordpressRenderer.RenderOverview(filterMeasurements([]string{"Maschinenraum", "Bankraum"}))
+	if err != nil {
+		return err
+	}
+	return wordpressClient.UpdatePost(post)
+}
+
+func filterMeasurements(sensors []string) []hmip.ClimateMeasurement {
+	filteredMeasurements := []hmip.ClimateMeasurement{}
+	for _, measurement := range measurements {
+		if slices.Contains(sensors, measurement.Sensor) {
+			filteredMeasurements = append(filteredMeasurements, measurement)
+		}
+	}
+	return filteredMeasurements
 }
