@@ -76,7 +76,13 @@ func (c *WordpressClient) GetPost(id int, t Type) (*Post, error) {
 
 func (c *WordpressClient) UpdatePost(post *Post) error {
 	url := fmt.Sprintf("%s/%s/%s/%d", c.endpoint, API_PATH, post.Type, post.ID)
-	requestBody, _ := json.Marshal(post)
+	var requestData struct {
+		ID      int    `json:"id"`
+		Content string `json:"content"`
+	}
+	requestData.Content = post.Content.Rendered
+	requestData.ID = post.ID
+	requestBody, _ := json.Marshal(requestData)
 	var response *http.Response
 	request, err := http.NewRequest("POST", url, bytes.NewReader(requestBody))
 	if err != nil {

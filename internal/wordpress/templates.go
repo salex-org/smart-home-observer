@@ -11,7 +11,7 @@ var (
 <span class="salex_no-series-meta-information">
 	{{range .}}
 	<p style="text-align: left;">{{.Sensor}}: {{template "temperature" .Temperature}} bei {{template "humidity" .Humidity}}</p>
-	<p style="text-align: left;"><span style="color: #808080;">Gemessen am {{template "timestamp" .Time}} }}</span></p>
+	<p style="text-align: left;"><span style="color: #808080;">Gemessen am {{template "timestamp" .Time}}</span></p>
 	{{end}}
 </span>
 `

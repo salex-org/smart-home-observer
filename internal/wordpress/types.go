@@ -1,7 +1,7 @@
 package wordpress
 
 const (
-	API_PATH     = "/wp-json/wp/v2"
+	API_PATH     = "wp-json/wp/v2"
 	OverviewID   = 146
 	OverviewType = CONTENT_BLOCK
 )
