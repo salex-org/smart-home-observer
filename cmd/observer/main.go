@@ -31,6 +31,13 @@ type Health struct {
 }
 
 func main() {
+	time.Local, health.Error = time.LoadLocation("CET")
+	if health.Error != nil {
+		log.Fatalf("Error loading timezon: %v\n", health.Error)
+	} else {
+		log.Printf("Successfully loaded timezone CET\n")
+	}
+
 	hmipClient, health.Error = hmip.NewClient()
 	if health.Error != nil {
 		log.Fatalf("Error connecting to the HomematicIP Cloud: %v\n", health.Error)
