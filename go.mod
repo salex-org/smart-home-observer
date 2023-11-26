@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/influxdata/influxdb-client-go/v2 v2.12.2
-	github.com/salex-org/hmip-go-client v1.2.0
+	github.com/salex-org/hmip-go-client v1.3.0
 )
 
 require (
