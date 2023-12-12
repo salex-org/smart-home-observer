@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/influxdata/influxdb-client-go/v2 v2.12.2
-	github.com/salex-org/hmip-go-client v1.2.0
+	github.com/salex-org/hmip-go-client v1.4.1
 )
 
 require (
@@ -14,5 +14,5 @@ require (
 	github.com/influxdata/line-protocol v0.0.0-20200327222509-2487e7298839 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
 )

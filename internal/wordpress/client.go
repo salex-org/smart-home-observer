@@ -14,6 +14,7 @@ import (
 type Client interface {
 	GetPost(id int, t Type) (*Post, error)
 	UpdatePost(post *Post) error
+	Health() error
 }
 
 type WordpressClient struct {
@@ -95,5 +96,10 @@ func (c *WordpressClient) UpdatePost(post *Post) error {
 	if response.StatusCode != 200 {
 		return errors.New(fmt.Sprintf("Error updating post (%s)", response.Status))
 	}
+	return nil
+}
+
+func (c *WordpressClient) Health() error {
+	// TODO implement
 	return nil
 }
