@@ -17,7 +17,8 @@ services:
     environment:
       - INFLUX_URL=http://influx:8086
       - INFLUX_TOKEN=localadmintoken
-      - INFLUX_BUCKET=smart-home
+      - INFLUX_CLIMATE_BUCKET=smart-home
+      - INFLUX_CONSUMPTION_BUCKET=smart-home
       - INFLUX_ORGANIZATION=salex
     env_file:
       - .env.observer

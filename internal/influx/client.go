@@ -48,8 +48,9 @@ func NewClient() (Client, error) {
 				SetTLSConfig(&tls.Config{
 					RootCAs: rootCAs,
 				})),
-		organization:  util.ReadEnvVar("INFLUX_ORGANIZATION"),
-		climateBucket: util.ReadEnvVar("INFLUX_BUCKET"),
+		organization:      util.ReadEnvVar("INFLUX_ORGANIZATION"),
+		climateBucket:     util.ReadEnvVar("INFLUX_CLIMATE_BUCKET"),
+		consumptionBucket: util.ReadEnvVar("INFLUX_CONSUMPTION_BUCKET"),
 	}
 	_, err := client.client.Health(context.Background())
 	return client, err
