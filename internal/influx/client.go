@@ -5,20 +5,24 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
-	"github.com/salex-org/smart-home-observer/internal/hmip"
+	"github.com/salex-org/smart-home-observer/internal/data"
 	"github.com/salex-org/smart-home-observer/internal/util"
 	"log"
 	"os"
 )
 
 type Client interface {
-	SaveMeasurement(measurement hmip.ClimateMeasurement) error
-	SaveMeasurements(measurements []hmip.ClimateMeasurement) error
+	SaveClimateMeasurement(measurement data.ClimateMeasurement) error
+	SaveClimateMeasurements(measurements []data.ClimateMeasurement) error
+	SaveConsumptionMeasurement(measurement data.ConsumptionMeasurement) error
+	SaveConsumptionMeasurements(measurements []data.ConsumptionMeasurement) error
+	Shutdown() error
+	Health() error
 }
 
 type InfluxClient struct {
-	client               influxdb2.Client
-	organization, bucket string
+	client                                         influxdb2.Client
+	organization, consumptionBucket, climateBucket string
 }
 
 func NewClient() (Client, error) {
@@ -44,15 +48,19 @@ func NewClient() (Client, error) {
 				SetTLSConfig(&tls.Config{
 					RootCAs: rootCAs,
 				})),
-		organization: util.ReadEnvVar("INFLUX_ORGANIZATION"),
-		bucket:       util.ReadEnvVar("INFLUX_BUCKET"),
+		organization:  util.ReadEnvVar("INFLUX_ORGANIZATION"),
+		climateBucket: util.ReadEnvVar("INFLUX_BUCKET"),
 	}
 	_, err := client.client.Health(context.Background())
 	return client, err
 }
 
-func (client InfluxClient) SaveMeasurement(measurement hmip.ClimateMeasurement) error {
-	api := client.client.WriteAPIBlocking(client.organization, client.bucket)
+func (client InfluxClient) Shutdown() error {
+	return client.Shutdown()
+}
+
+func (client InfluxClient) SaveClimateMeasurement(measurement data.ClimateMeasurement) error {
+	api := client.client.WriteAPIBlocking(client.organization, client.climateBucket)
 	point := influxdb2.NewPointWithMeasurement("climate")
 	point.SetTime(measurement.Time)
 	point.AddField("temperature", measurement.Temperature)
@@ -62,13 +70,38 @@ func (client InfluxClient) SaveMeasurement(measurement hmip.ClimateMeasurement) 
 	return api.WritePoint(context.Background(), point)
 }
 
-func (client InfluxClient) SaveMeasurements(measurements []hmip.ClimateMeasurement) error {
+func (client InfluxClient) SaveClimateMeasurements(measurements []data.ClimateMeasurement) error {
 	var err error
 	for _, measurement := range measurements {
-		err = client.SaveMeasurement(measurement)
+		err = client.SaveClimateMeasurement(measurement)
 		if err != nil {
 			return err
 		}
 	}
+	return nil
+}
+
+func (client InfluxClient) SaveConsumptionMeasurement(measurement data.ConsumptionMeasurement) error {
+	api := client.client.WriteAPIBlocking(client.organization, client.consumptionBucket)
+	point := influxdb2.NewPointWithMeasurement("consumption")
+	point.SetTime(measurement.Time)
+	point.AddField("electricity", measurement.CurrentConsumption)
+	point.AddTag("sensor", measurement.Sensor)
+	return api.WritePoint(context.Background(), point)
+}
+
+func (client InfluxClient) SaveConsumptionMeasurements(measurements []data.ConsumptionMeasurement) error {
+	var err error
+	for _, measurement := range measurements {
+		err = client.SaveConsumptionMeasurement(measurement)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (client InfluxClient) Health() error {
+	// TODO implement
 	return nil
 }

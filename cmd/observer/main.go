@@ -1,161 +1,93 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
+	"context"
+	"github.com/salex-org/smart-home-observer/internal/data"
 	"github.com/salex-org/smart-home-observer/internal/hmip"
 	"github.com/salex-org/smart-home-observer/internal/influx"
-	"github.com/salex-org/smart-home-observer/internal/util"
+	"github.com/salex-org/smart-home-observer/internal/photo"
+	"github.com/salex-org/smart-home-observer/internal/webserver"
 	"github.com/salex-org/smart-home-observer/internal/wordpress"
 	"log"
-	"net/http"
-	"slices"
-	"strconv"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 	"time"
 )
 
 var (
-	health = Health{
-		Status: "starting",
-	}
 	hmipClient        hmip.Client
 	influxClient      influx.Client
 	wordpressClient   wordpress.Client
 	wordpressRenderer wordpress.Renderer
-	measurements      []hmip.ClimateMeasurement
+	webServer         webserver.Server
+	photographer      photo.Photographer
+	measurementCache  data.MeasurementCache
 )
 
-type Health struct {
-	Error  error
-	Status string
-}
-
 func main() {
-	time.Local, health.Error = time.LoadLocation("CET")
-	if health.Error != nil {
-		log.Fatalf("Error loading timezon: %v\n", health.Error)
-	} else {
-		log.Printf("Successfully loaded timezone CET\n")
-	}
-
-	hmipClient, health.Error = hmip.NewClient()
-	if health.Error != nil {
-		log.Fatalf("Error connecting to the HomematicIP Cloud: %v\n", health.Error)
-	} else {
-		log.Printf("Successfully connected to the HomematicIP Cloud\n")
-	}
-
-	influxClient, health.Error = influx.NewClient()
-	if health.Error != nil {
-		log.Fatalf("Error connecting to the InfluxDB: %v\n", health.Error)
-	} else {
-		log.Printf("Successfully connected to the InfluxDB\n")
-	}
-
-	wordpressClient = wordpress.NewClient()
-	wordpressRenderer, health.Error = wordpress.NewRenderer()
-	if health.Error != nil {
-		log.Fatalf("Error creating wordpress renderer: %v\n", health.Error)
-	} else {
-		log.Printf("Successfully created wordpress renderer\n")
-	}
-
-	rate, err := strconv.Atoi(util.ReadEnvVarWithDefault("PROCESS_INTERVAL", "10"))
+	// Startup function
+	err := startup()
 	if err != nil {
-		log.Fatalf("Error reading process interval: %v\n", err)
-	} else {
-		log.Printf("Processing every %d minutes\n", rate)
+		log.Fatalf("Error during startup: %v", err)
 	}
 
-	ticker := time.NewTicker(time.Minute * time.Duration(rate))
-	done := make(chan bool)
+	// Notification context for reacting on process termination - used by shutdown function
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	// Waiting group used to await finishing the shutdown process when stopping
+	var wait sync.WaitGroup
+
+	// Loop function for photographer
+	wait.Add(1)
 	go func() {
-		for {
-			select {
-			case <-done:
-				return
-			case t := <-ticker.C:
-				process(t)
-			}
-		}
+		defer wait.Done()
+		_ = photographer.Start()
 	}()
-	port := 8080
-	mux := http.NewServeMux()
-	mux.HandleFunc("/health", handleHealth)
-	mux.HandleFunc("/data", handleData)
-	mux.HandleFunc("/", handle404)
-	fmt.Printf("Started HTTP server (Port: %d)\n", port)
-	health.Status = "ok"
-	err = http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
+
+	// Loop function for measuring
+	wait.Add(1)
+	go func() {
+		defer wait.Done()
+		_ = hmipClient.Start(handleClimateMeasurements, handleConsumptionMeasurements)
+	}()
+
+	// Loop function for webserver
+	wait.Add(1)
+	go func() {
+		defer wait.Done()
+		_ = webServer.Start()
+	}()
+
+	// Shutdown function waiting for the SIGTERM notification to start the shutdown process
+	wait.Add(1)
+	go func() {
+		defer wait.Done()
+		<-ctx.Done()
+		log.Printf("\n\U0001F6D1 Shutdown started\n")
+		shutdown()
+	}()
+
+	// Wait for all functions to end
+	wait.Wait()
+	log.Printf("\U0001F3C1 Shutdown finished\n")
+	os.Exit(0)
+}
+
+func handleClimateMeasurements(climateMeasurements []data.ClimateMeasurement) error {
+	updatedMeasurements := measurementCache.UpdateClimateMeasurements(climateMeasurements)
+	err := influxClient.SaveClimateMeasurements(updatedMeasurements)
 	if err != nil {
-		log.Fatalf("Error starting HTTP server: %v\n", health.Error)
+		return err
 	}
+	return updateBlog()
 }
 
-func handle404(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotFound)
-	_, _ = fmt.Fprintf(w, "%s not found.", r.URL.Path)
-}
-
-func handleHealth(w http.ResponseWriter, r *http.Request) {
-	if health.Error == nil {
-		w.WriteHeader(http.StatusOK)
-		_, _ = fmt.Fprint(w, health.Status)
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "%v", health.Error)
-	}
-}
-
-func handleData(w http.ResponseWriter, r *http.Request) {
-	var data []byte
-	data, health.Error = json.Marshal(measurements)
-	if health.Error == nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		_, _ = fmt.Fprint(w, string(data))
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "Error marshaling measurements: %v", health.Error)
-	}
-}
-
-func process(time time.Time) {
-	var newMeasurements []hmip.ClimateMeasurement
-	newMeasurements, health.Error = hmipClient.ReadMeasurements()
-	if health.Error != nil {
-		fmt.Printf("Error reading measurements from the HomematicIP Cloud: %v", health.Error)
-	} else {
-		var changedMeasurements []hmip.ClimateMeasurement
-		for _, newMeasurement := range newMeasurements {
-			oldMeasurement := getMeasurement(newMeasurement.Sensor)
-			if oldMeasurement != nil {
-				if oldMeasurement.Time.Compare(newMeasurement.Time) < 0 {
-					changedMeasurements = append(changedMeasurements, newMeasurement)
-				}
-			} else {
-				changedMeasurements = append(changedMeasurements, newMeasurement)
-			}
-		}
-		measurements = newMeasurements
-		health.Error = influxClient.SaveMeasurements(changedMeasurements)
-		if health.Error != nil {
-			fmt.Printf("Error saving measurements to the InfluxDB: %v", health.Error)
-		}
-		health.Error = updateBlog()
-		if health.Error != nil {
-			fmt.Printf("Error updating blog: %v", health.Error)
-		}
-	}
-}
-
-func getMeasurement(sensor string) *hmip.ClimateMeasurement {
-	for _, each := range measurements {
-		if each.Sensor == sensor {
-			return &each
-		}
-	}
-	return nil
+func handleConsumptionMeasurements(consumptionMeasurements []data.ConsumptionMeasurement) error {
+	updatedMeasurements := measurementCache.UpdateConsumptionMeasurements(consumptionMeasurements)
+	return influxClient.SaveConsumptionMeasurements(updatedMeasurements)
 }
 
 func updateBlog() error {
@@ -163,19 +95,74 @@ func updateBlog() error {
 	if err != nil {
 		return err
 	}
-	post.Content.Rendered, err = wordpressRenderer.RenderOverview(filterMeasurements([]string{"Maschinenraum", "Bankraum"}))
+	post.Content.Rendered, err = wordpressRenderer.RenderOverview(measurementCache.GetClimateMeasurementsBySensors(([]string{"Maschinenraum", "Bankraum"})))
 	if err != nil {
 		return err
 	}
 	return wordpressClient.UpdatePost(post)
 }
 
-func filterMeasurements(sensors []string) []hmip.ClimateMeasurement {
-	filteredMeasurements := []hmip.ClimateMeasurement{}
-	for _, measurement := range measurements {
-		if slices.Contains(sensors, measurement.Sensor) {
-			filteredMeasurements = append(filteredMeasurements, measurement)
-		}
+func startup() error {
+	measurementCache = data.NewMeasurementCache()
+
+	webServer = webserver.NewServer(healthCheck, &measurementCache)
+
+	photographer = photo.NewPhotographer(time.Minute * 10) // TODO make interval configurable
+
+	var err error
+	time.Local, err = time.LoadLocation("CET")
+	if err != nil {
+		return err
+	} else {
+		log.Printf("Successfully loaded timezone CET\n")
 	}
-	return filteredMeasurements
+
+	hmipClient, err = hmip.NewClient()
+	if err != nil {
+		return err
+	} else {
+		log.Printf("Successfully connected to the HomematicIP Cloud\n")
+	}
+
+	influxClient, err = influx.NewClient()
+	if err != nil {
+		return err
+	} else {
+		log.Printf("Successfully connected to the InfluxDB\n")
+	}
+
+	wordpressClient = wordpress.NewClient()
+
+	wordpressRenderer, err = wordpress.NewRenderer()
+	if err != nil {
+		return err
+	} else {
+		log.Printf("Successfully created wordpress renderer\n")
+	}
+
+	return nil
+}
+
+func shutdown() {
+	_ = photographer.Shutdown()
+	_ = hmipClient.Shutdown()
+	_ = influxClient.Shutdown()
+	_ = webServer.Shutdown()
+}
+
+func healthCheck() map[string]error {
+	errors := make(map[string]error)
+	if err := influxClient.Health(); err != nil {
+		errors["InfluxDB Client"] = err
+	}
+	if err := hmipClient.Health(); err != nil {
+		errors["HomematicIP Client"] = err
+	}
+	if err := wordpressClient.Health(); err != nil {
+		errors["WordPress Client"] = err
+	}
+	if err := photographer.Health(); err != nil {
+		errors["Photographer"] = err
+	}
+	return errors
 }
