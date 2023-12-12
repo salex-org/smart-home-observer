@@ -12,7 +12,10 @@ type MeasurementCache interface {
 }
 
 func NewMeasurementCache() MeasurementCache {
-	return &MeasurementCacheImpl{}
+	return &MeasurementCacheImpl{
+		ClimateMeasurements:     make(map[string]ClimateMeasurement),
+		ConsumptionMeasurements: make(map[string]ConsumptionMeasurement),
+	}
 }
 
 type MeasurementCacheImpl struct {
@@ -56,10 +59,9 @@ func filterChangedMeasurements[M ComparableMeasurement](oldMeasurements map[stri
 }
 
 func (c *MeasurementCacheImpl) GetClimateMeasurementBySensor(sensor string) *ClimateMeasurement {
-	for _, each := range c.ClimateMeasurements {
-		if each.Sensor == sensor {
-			return &each
-		}
+	measurement, found := c.ClimateMeasurements[sensor]
+	if found {
+		return &measurement
 	}
 	return nil
 }
