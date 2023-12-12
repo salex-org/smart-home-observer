@@ -2,7 +2,7 @@ package wordpress
 
 import (
 	"bytes"
-	"github.com/salex-org/smart-home-observer/internal/hmip"
+	"github.com/salex-org/smart-home-observer/internal/data"
 	"text/template"
 )
 
@@ -26,7 +26,7 @@ var (
 )
 
 type Renderer interface {
-	RenderOverview(measurements []hmip.ClimateMeasurement) (string, error)
+	RenderOverview(measurements []data.ClimateMeasurement) (string, error)
 }
 
 type WordpressRenderer struct {
@@ -44,7 +44,7 @@ func NewRenderer() (Renderer, error) {
 	return renderer, nil
 }
 
-func (r *WordpressRenderer) RenderOverview(measurements []hmip.ClimateMeasurement) (string, error) {
+func (r *WordpressRenderer) RenderOverview(measurements []data.ClimateMeasurement) (string, error) {
 	var buffer bytes.Buffer
 	err := r.overviewTemplate.Execute(&buffer, measurements)
 	if err != nil {
