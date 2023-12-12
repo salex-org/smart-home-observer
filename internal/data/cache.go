@@ -16,15 +16,17 @@ func NewMeasurementCache() MeasurementCache {
 }
 
 type MeasurementCacheImpl struct {
-	ClimateMeasurements     []ClimateMeasurement     `json:"climateMeasurements"`
-	ConsumptionMeasurements []ConsumptionMeasurement `json:"consumptionMeasurements"`
+	ClimateMeasurements     map[string]ClimateMeasurement     `json:"climateMeasurements"`
+	ConsumptionMeasurements map[string]ConsumptionMeasurement `json:"consumptionMeasurements"`
 }
 
 // UpdateClimateMeasurements updates the climate measurements
 // returns the measurements that have newer timestamps than the previously cached ones
 func (c *MeasurementCacheImpl) UpdateClimateMeasurements(newMeasurements []ClimateMeasurement) []ClimateMeasurement {
 	changedMeasurements := filterChangedMeasurements(c.ClimateMeasurements, newMeasurements)
-	c.ClimateMeasurements = newMeasurements
+	for _, eachMeasurement := range changedMeasurements {
+		c.ClimateMeasurements[eachMeasurement.Sensor] = eachMeasurement
+	}
 	return changedMeasurements
 }
 
@@ -32,16 +34,18 @@ func (c *MeasurementCacheImpl) UpdateClimateMeasurements(newMeasurements []Clima
 // returns the measurements that have newer timestamps than the previously cached ones
 func (c *MeasurementCacheImpl) UpdateConsumptionMeasurements(newMeasurements []ConsumptionMeasurement) []ConsumptionMeasurement {
 	changedMeasurements := filterChangedMeasurements(c.ConsumptionMeasurements, newMeasurements)
-	c.ConsumptionMeasurements = newMeasurements
+	for _, eachMeasurement := range changedMeasurements {
+		c.ConsumptionMeasurements[eachMeasurement.Sensor] = eachMeasurement
+	}
 	return changedMeasurements
 }
 
-func filterChangedMeasurements[M ComparableMeasurement](oldMeasurements, newMeasurements []M) []M {
+func filterChangedMeasurements[M ComparableMeasurement](oldMeasurements map[string]M, newMeasurements []M) []M {
 	var changedMeasurements []M
 	for _, newMeasurement := range newMeasurements {
-		oldMeasurement := findMeasurementBySensor(oldMeasurements, newMeasurement.GetSensor())
-		if oldMeasurement != nil {
-			if (*oldMeasurement).GetTime().Compare(newMeasurement.GetTime()) < 0 {
+		oldMeasurement, found := oldMeasurements[newMeasurement.GetSensor()]
+		if found {
+			if oldMeasurement.GetTime().Compare(newMeasurement.GetTime()) < 0 {
 				changedMeasurements = append(changedMeasurements, newMeasurement)
 			}
 		} else {
@@ -49,15 +53,6 @@ func filterChangedMeasurements[M ComparableMeasurement](oldMeasurements, newMeas
 		}
 	}
 	return changedMeasurements
-}
-
-func findMeasurementBySensor[M ComparableMeasurement](measurements []M, sensor string) *M {
-	for _, measurement := range measurements {
-		if measurement.GetSensor() == sensor {
-			return &measurement
-		}
-	}
-	return nil
 }
 
 func (c *MeasurementCacheImpl) GetClimateMeasurementBySensor(sensor string) *ClimateMeasurement {
