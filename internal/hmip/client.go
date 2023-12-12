@@ -46,25 +46,30 @@ func (client ClientImpl) Shutdown() error {
 }
 
 func (client ClientImpl) Start(climateMeasurementHandler ClimateMeasurementHandler, consumptionMeasurementHandler ConsumptionMeasurementHandler) error {
+	// Register event handler for climate measuring
 	client.client.RegisterEventHandler(func(event hmip.Event, _ hmip.Origin) {
-		climateMeasurements := []data.ClimateMeasurement{}
+		var climateMeasurements []data.ClimateMeasurement
 		for _, channel := range event.GetFunctionalChannels(hmip.DEVICE_TYPE_TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR, hmip.CHANNEL_TYPE_CLIMATE_SENSOR) {
 			climateMeasurements = append(climateMeasurements, createClimateMeasurement(*event.Device, channel))
 		}
 		client.processingError = climateMeasurementHandler(climateMeasurements)
 	}, hmip.EVENT_TYPE_DEVICE_CHANGED)
+
+	// Register event handler for consumption measuring
 	client.client.RegisterEventHandler(func(event hmip.Event, _ hmip.Origin) {
-		consumptionMeasurements := []data.ConsumptionMeasurement{}
+		var consumptionMeasurements []data.ConsumptionMeasurement
 		for _, channel := range event.GetFunctionalChannels(hmip.DEVICE_TYPE_PLUGABLE_SWITCH_MEASURING, hmip.CHANNEL_TYPE_SWITCH_MEASURING) {
 			consumptionMeasurements = append(consumptionMeasurements, createConsumptionMeasurement(*event.Device, channel))
 		}
 		client.processingError = consumptionMeasurementHandler(consumptionMeasurements)
 	}, hmip.EVENT_TYPE_DEVICE_CHANGED)
+
+	// Read data initially
 	var state *hmip.State
 	state, client.processingError = client.client.LoadCurrentState()
 	if client.processingError != nil {
-		climateMeasurements := []data.ClimateMeasurement{}
-		consumptionMeasurements := []data.ConsumptionMeasurement{}
+		var climateMeasurements []data.ClimateMeasurement
+		var consumptionMeasurements []data.ConsumptionMeasurement
 		for _, device := range state.GetDevicesByType(hmip.DEVICE_TYPE_TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR) {
 			for _, channel := range device.GetFunctionalChannelsByType(hmip.CHANNEL_TYPE_CLIMATE_SENSOR) {
 				climateMeasurements = append(climateMeasurements, createClimateMeasurement(device, channel))
@@ -78,6 +83,8 @@ func (client ClientImpl) Start(climateMeasurementHandler ClimateMeasurementHandl
 		client.processingError = climateMeasurementHandler(climateMeasurements)
 		client.processingError = consumptionMeasurementHandler(consumptionMeasurements)
 	}
+
+	// Start the event listening
 	return client.client.ListenForEvents()
 }
 
