@@ -56,7 +56,8 @@ func NewClient() (Client, error) {
 }
 
 func (client InfluxClient) Shutdown() error {
-	return client.Shutdown()
+	client.client.Close()
+	return nil
 }
 
 func (client InfluxClient) SaveClimateMeasurement(measurement data.ClimateMeasurement) error {
