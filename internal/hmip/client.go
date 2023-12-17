@@ -67,7 +67,7 @@ func (client ClientImpl) Start(climateMeasurementHandler ClimateMeasurementHandl
 	// Read data initially
 	var state *hmip.State
 	state, client.processingError = client.client.LoadCurrentState()
-	if client.processingError != nil {
+	if client.processingError == nil {
 		var climateMeasurements []data.ClimateMeasurement
 		var consumptionMeasurements []data.ConsumptionMeasurement
 		for _, device := range state.GetDevicesByType(hmip.DEVICE_TYPE_TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR) {

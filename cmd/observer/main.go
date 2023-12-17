@@ -80,8 +80,6 @@ func main() {
 		shutdown()
 	}()
 
-	fmt.Printf("\n\U0001F3C1 Observer startup finished\n\n")
-
 	// Wait for all functions to end
 	wait.Wait()
 	fmt.Printf("\n\U0001F3C1 Observer shutdown finished\n")
@@ -145,7 +143,7 @@ func startup() error {
 	fmt.Printf("Measurement cache created\n")
 
 	webServer = webserver.NewServer(healthCheck, &measurementCache)
-	fmt.Printf("Web server crated\n")
+	fmt.Printf("Web server created\n")
 
 	photographer = photo.NewPhotographer(time.Minute * 10) // TODO make interval configurable
 	fmt.Printf("Photographer created\n")
