@@ -84,6 +84,7 @@ func (client ClientImpl) Start(climateMeasurementHandler ClimateMeasurementHandl
 	if client.processingError == nil {
 		var climateMeasurements []data.ClimateMeasurement
 		var consumptionMeasurements []data.ConsumptionMeasurement
+		var switchStates []data.SwitchState
 		for _, device := range state.GetDevicesByType(hmip.DEVICE_TYPE_TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR) {
 			for _, channel := range device.GetFunctionalChannelsByType(hmip.CHANNEL_TYPE_CLIMATE_SENSOR) {
 				climateMeasurements = append(climateMeasurements, createClimateMeasurement(device, channel))
@@ -92,10 +93,17 @@ func (client ClientImpl) Start(climateMeasurementHandler ClimateMeasurementHandl
 		for _, device := range state.GetDevicesByType(hmip.DEVICE_TYPE_PLUGABLE_SWITCH_MEASURING) {
 			for _, channel := range device.GetFunctionalChannelsByType(hmip.CHANNEL_TYPE_SWITCH_MEASURING) {
 				consumptionMeasurements = append(consumptionMeasurements, createConsumptionMeasurement(device, channel))
+				switchStates = append(switchStates, createSwitchState(device, channel))
+			}
+		}
+		for _, device := range state.GetDevicesByType(hmip.DEVICE_TYPE_PLUGABLE_SWITCH) {
+			for _, channel := range device.GetFunctionalChannelsByType(hmip.CHANNEL_TYPE_SWITCH) {
+				switchStates = append(switchStates, createSwitchState(device, channel))
 			}
 		}
 		client.processingError = climateMeasurementHandler(climateMeasurements)
 		client.processingError = consumptionMeasurementHandler(consumptionMeasurements)
+		client.processingError = switchStateChangedHandler(switchStates)
 	}
 
 	// Start the event listening
