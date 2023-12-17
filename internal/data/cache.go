@@ -16,6 +16,7 @@ func NewMeasurementCache() MeasurementCache {
 	return &MeasurementCacheImpl{
 		ClimateMeasurements:     make(map[string]ClimateMeasurement),
 		ConsumptionMeasurements: make(map[string]ConsumptionMeasurement),
+		SwitchStates:            make(map[string]SwitchState),,
 	}
 }
 
