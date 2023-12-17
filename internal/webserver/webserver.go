@@ -44,15 +44,12 @@ type ServerImpl struct {
 }
 
 func (s *ServerImpl) Start() error {
-	fmt.Printf("Starting HTTP server at %s\n", s.httpServer.Addr)
 	return s.httpServer.ListenAndServe()
 }
 
 func (s *ServerImpl) Shutdown() error {
-	fmt.Printf("Stopping HTTP server\n")
 	err := s.httpServer.Shutdown(context.Background())
 	if err != nil {
-		fmt.Printf("Error stopping HTTP server: %v\n", err)
 		return err
 	}
 	return nil

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/salex-org/smart-home-observer/internal/data"
 	"github.com/salex-org/smart-home-observer/internal/hmip"
 	"github.com/salex-org/smart-home-observer/internal/influx"
@@ -28,9 +29,15 @@ var (
 
 func main() {
 	// Startup function
+	asciiArt := `       _                                  
+  ___ | |__  ___  ___ _ ____   _____ _ __ 
+ / _ \| '_ \/ __|/ _ \ '__\ \ / / _ \ '__|
+| (_) | |_) \__ \  __/ |   \ V /  __/ |   
+ \___/|_.__/|___/\___|_|    \_/ \___|_| starting...`
+	fmt.Printf("%s\n\n", asciiArt)
 	err := startup()
 	if err != nil {
-		log.Fatalf("Error during startup: %v", err)
+		log.Fatalf("Error during startup: %v\n", err)
 	}
 
 	// Notification context for reacting on process termination - used by shutdown function
@@ -40,25 +47,28 @@ func main() {
 	// Waiting group used to await finishing the shutdown process when stopping
 	var wait sync.WaitGroup
 
-	// Loop function for photographer
+	// Loop function for webserver
 	wait.Add(1)
 	go func() {
 		defer wait.Done()
-		_ = photographer.Start()
+		fmt.Printf("Web server started\n")
+		_ = webServer.Start()
 	}()
 
 	// Loop function for measuring
 	wait.Add(1)
 	go func() {
 		defer wait.Done()
+		fmt.Printf("Measuring started\n")
 		_ = hmipClient.Start(handleClimateMeasurements, handleConsumptionMeasurements)
 	}()
 
-	// Loop function for webserver
+	// Loop function for photographer
 	wait.Add(1)
 	go func() {
 		defer wait.Done()
-		_ = webServer.Start()
+		fmt.Printf("Photographer started\n")
+		_ = photographer.Start()
 	}()
 
 	// Shutdown function waiting for the SIGTERM notification to start the shutdown process
@@ -66,28 +76,48 @@ func main() {
 	go func() {
 		defer wait.Done()
 		<-ctx.Done()
-		log.Printf("\n\U0001F6D1 Shutdown started\n")
+		fmt.Printf("\n\U0001F6D1 Observer shutting down...\n\n")
 		shutdown()
 	}()
 
+	fmt.Printf("\n\U0001F3C1 Observer startup finished\n\n")
+
 	// Wait for all functions to end
 	wait.Wait()
-	log.Printf("\U0001F3C1 Shutdown finished\n")
+	fmt.Printf("\n\U0001F3C1 Observer shutdown finished\n")
 	os.Exit(0)
 }
 
 func handleClimateMeasurements(climateMeasurements []data.ClimateMeasurement) error {
 	updatedMeasurements := measurementCache.UpdateClimateMeasurements(climateMeasurements)
-	err := influxClient.SaveClimateMeasurements(updatedMeasurements)
-	if err != nil {
-		return err
+	if len(updatedMeasurements) > 0 {
+		err := influxClient.SaveClimateMeasurements(updatedMeasurements)
+		if err != nil {
+			fmt.Printf("Error saving climate measurements in InfluxDB: %v\n", err)
+			return err
+		}
+		fmt.Printf("New climate measurement data received and stored to InfluxDB\n")
+		err = updateBlog()
+		if err != nil {
+			fmt.Printf("Error updating climate data on WordPress Blog: %v\n", err)
+			return err
+		}
+		fmt.Printf("Climate data on WordPress Blog updated\n")
 	}
-	return updateBlog()
+	return nil
 }
 
 func handleConsumptionMeasurements(consumptionMeasurements []data.ConsumptionMeasurement) error {
 	updatedMeasurements := measurementCache.UpdateConsumptionMeasurements(consumptionMeasurements)
-	return influxClient.SaveConsumptionMeasurements(updatedMeasurements)
+	if len(updatedMeasurements) > 0 {
+		err := influxClient.SaveConsumptionMeasurements(updatedMeasurements)
+		if err != nil {
+			fmt.Printf("Error saving consumption measurements in InfluxDB: %v\n", err)
+			return err
+		}
+		fmt.Printf("New consumption measurement data received and stored to InfluxDB\n")
+	}
+	return nil
 }
 
 func updateBlog() error {
@@ -103,51 +133,78 @@ func updateBlog() error {
 }
 
 func startup() error {
-	measurementCache = data.NewMeasurementCache()
-
-	webServer = webserver.NewServer(healthCheck, &measurementCache)
-
-	photographer = photo.NewPhotographer(time.Minute * 10) // TODO make interval configurable
-
 	var err error
 	time.Local, err = time.LoadLocation("CET")
 	if err != nil {
 		return err
 	} else {
-		log.Printf("Successfully loaded timezone CET\n")
+		fmt.Printf("Timezone CET loaded\n")
 	}
+
+	measurementCache = data.NewMeasurementCache()
+	fmt.Printf("Measurement cache created\n")
+
+	webServer = webserver.NewServer(healthCheck, &measurementCache)
+	fmt.Printf("Web server crated\n")
+
+	photographer = photo.NewPhotographer(time.Minute * 10) // TODO make interval configurable
+	fmt.Printf("Photographer created\n")
 
 	hmipClient, err = hmip.NewClient()
 	if err != nil {
 		return err
 	} else {
-		log.Printf("Successfully connected to the HomematicIP Cloud\n")
+		fmt.Printf("HomematicIP client created\n")
+	}
+
+	wordpressClient = wordpress.NewClient()
+	fmt.Printf("WordPress client created\n")
+
+	wordpressRenderer, err = wordpress.NewRenderer()
+	if err != nil {
+		return err
+	} else {
+		fmt.Printf("WordPress renderer created\n")
 	}
 
 	influxClient, err = influx.NewClient()
 	if err != nil {
 		return err
 	} else {
-		log.Printf("Successfully connected to the InfluxDB\n")
-	}
-
-	wordpressClient = wordpress.NewClient()
-
-	wordpressRenderer, err = wordpress.NewRenderer()
-	if err != nil {
-		return err
-	} else {
-		log.Printf("Successfully created wordpress renderer\n")
+		fmt.Printf("Connected to the InfluxDB\n")
 	}
 
 	return nil
 }
 
 func shutdown() {
-	_ = photographer.Shutdown()
-	_ = hmipClient.Shutdown()
-	_ = influxClient.Shutdown()
-	_ = webServer.Shutdown()
+	err := photographer.Shutdown()
+	if err != nil {
+		fmt.Printf("Error stopping photographer: %v\n", err)
+	} else {
+		fmt.Printf("Photographer stopped\n")
+	}
+
+	err = hmipClient.Shutdown()
+	if err != nil {
+		fmt.Printf("Error stopping measuring: %v\n", err)
+	} else {
+		fmt.Printf("Measuring stopped\n")
+	}
+
+	err = influxClient.Shutdown()
+	if err != nil {
+		fmt.Printf("Error disconnecting from InfluxDB: %v\n", err)
+	} else {
+		fmt.Printf("Disconnected from InfluxDB\n")
+	}
+
+	err = webServer.Shutdown()
+	if err != nil {
+		fmt.Printf("Error stopping web server: %v\n", err)
+	} else {
+		fmt.Printf("Web server stopped\n")
+	}
 }
 
 func healthCheck() map[string]error {

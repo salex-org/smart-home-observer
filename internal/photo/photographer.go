@@ -13,26 +13,24 @@ type Photographer interface {
 
 func NewPhotographer(interval time.Duration) Photographer {
 	return &PhotographerImpl{
-		stopChannel:     make(chan bool),
 		processingError: nil,
 		interval:        interval,
 	}
 }
 
 type PhotographerImpl struct {
-	stopChannel     chan bool
+	done            chan bool
 	processingError error
 	interval        time.Duration
 }
 
 func (p *PhotographerImpl) Start() error {
-	fmt.Printf("Photographer starting\n")
 	ticker := time.NewTicker(p.interval)
+	p.done = make(chan bool)
 	defer ticker.Stop()
 	for {
 		select {
-		case <-p.stopChannel:
-			fmt.Printf("Photographer stopped\n")
+		case <-p.done:
 			return nil
 		case t := <-ticker.C:
 			p.processingError = p.takePhoto(t)
@@ -41,7 +39,9 @@ func (p *PhotographerImpl) Start() error {
 }
 
 func (p *PhotographerImpl) Shutdown() error {
-	p.stopChannel <- true
+	if p.done != nil {
+		close(p.done)
+	}
 	return nil
 }
 
@@ -51,6 +51,6 @@ func (p *PhotographerImpl) Health() error {
 
 func (p *PhotographerImpl) takePhoto(t time.Time) error {
 	// TODO implement
-	fmt.Printf("Taking photo at %v", t)
+	fmt.Printf("Would have taken new photo at %v\n", t)
 	return nil
 }

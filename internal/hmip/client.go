@@ -42,7 +42,7 @@ func initializeConfig(config *hmip.Config) {
 }
 
 func (client ClientImpl) Shutdown() error {
-	return client.Shutdown()
+	return client.client.StopEventListening()
 }
 
 func (client ClientImpl) Start(climateMeasurementHandler ClimateMeasurementHandler, consumptionMeasurementHandler ConsumptionMeasurementHandler) error {
@@ -111,5 +111,8 @@ func createConsumptionMeasurement(device hmip.Device, channel hmip.FunctionalCha
 }
 
 func (client ClientImpl) Health() error {
-	return client.processingError
+	if client.processingError != nil {
+		return client.processingError
+	}
+	return client.client.GetEventLoopState()
 }

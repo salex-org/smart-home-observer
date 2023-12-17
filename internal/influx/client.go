@@ -7,7 +7,6 @@ import (
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/salex-org/smart-home-observer/internal/data"
 	"github.com/salex-org/smart-home-observer/internal/util"
-	"log"
 	"os"
 )
 
@@ -23,6 +22,7 @@ type Client interface {
 type InfluxClient struct {
 	client                                         influxdb2.Client
 	organization, consumptionBucket, climateBucket string
+	processingError                                error
 }
 
 func NewClient() (Client, error) {
@@ -34,10 +34,9 @@ func NewClient() (Client, error) {
 	if hasAdditionalRootCA {
 		cert, err := os.ReadFile(certFilename)
 		if err != nil {
-			log.Fatalf("Error reading additional root CA: %v\n", err)
+			return nil, err
 		} else {
 			rootCAs.AppendCertsFromPEM(cert)
-			log.Printf("Using additional root CA from %s\n", certFilename)
 		}
 	}
 	client := InfluxClient{
@@ -68,7 +67,8 @@ func (client InfluxClient) SaveClimateMeasurement(measurement data.ClimateMeasur
 	point.AddField("humidity", measurement.Humidity)
 	point.AddField("vapor_amount", measurement.VaporAmount)
 	point.AddTag("sensor", measurement.Sensor)
-	return api.WritePoint(context.Background(), point)
+	client.processingError = api.WritePoint(context.Background(), point)
+	return client.processingError
 }
 
 func (client InfluxClient) SaveClimateMeasurements(measurements []data.ClimateMeasurement) error {
@@ -88,7 +88,8 @@ func (client InfluxClient) SaveConsumptionMeasurement(measurement data.Consumpti
 	point.SetTime(measurement.Time)
 	point.AddField("electricity", measurement.CurrentConsumption)
 	point.AddTag("sensor", measurement.Sensor)
-	return api.WritePoint(context.Background(), point)
+	client.processingError = api.WritePoint(context.Background(), point)
+	return client.processingError
 }
 
 func (client InfluxClient) SaveConsumptionMeasurements(measurements []data.ConsumptionMeasurement) error {
@@ -103,6 +104,5 @@ func (client InfluxClient) SaveConsumptionMeasurements(measurements []data.Consu
 }
 
 func (client InfluxClient) Health() error {
-	// TODO implement
-	return nil
+	return client.processingError
 }
