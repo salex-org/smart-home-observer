@@ -30,7 +30,7 @@ type MeasurementCacheImpl struct {
 func (c *MeasurementCacheImpl) UpdateClimateMeasurements(newMeasurements []ClimateMeasurement) []ClimateMeasurement {
 	changedMeasurements := filterChangedMeasurements(c.ClimateMeasurements, newMeasurements)
 	for _, eachMeasurement := range changedMeasurements {
-		c.ClimateMeasurements[eachMeasurement.Sensor] = eachMeasurement
+		c.ClimateMeasurements[eachMeasurement.DeviceID] = eachMeasurement
 	}
 	return changedMeasurements
 }
@@ -40,7 +40,7 @@ func (c *MeasurementCacheImpl) UpdateClimateMeasurements(newMeasurements []Clima
 func (c *MeasurementCacheImpl) UpdateConsumptionMeasurements(newMeasurements []ConsumptionMeasurement) []ConsumptionMeasurement {
 	changedMeasurements := filterChangedMeasurements(c.ConsumptionMeasurements, newMeasurements)
 	for _, eachMeasurement := range changedMeasurements {
-		c.ConsumptionMeasurements[eachMeasurement.Sensor] = eachMeasurement
+		c.ConsumptionMeasurements[eachMeasurement.DeviceID] = eachMeasurement
 	}
 	return changedMeasurements
 }
@@ -50,7 +50,7 @@ func (c *MeasurementCacheImpl) UpdateConsumptionMeasurements(newMeasurements []C
 func (c *MeasurementCacheImpl) UpdateSwitchStates(newSwitchStates []SwitchState) []SwitchState {
 	changedSwitchStates := filterChangedMeasurements(c.SwitchStates, newSwitchStates)
 	for _, eachState := range changedSwitchStates {
-		c.SwitchStates[eachState.Sensor] = eachState
+		c.SwitchStates[eachState.DeviceID] = eachState
 	}
 	return changedSwitchStates
 }
@@ -58,7 +58,7 @@ func (c *MeasurementCacheImpl) UpdateSwitchStates(newSwitchStates []SwitchState)
 func filterChangedMeasurements[M ComparableMeasurement](oldMeasurements map[string]M, newMeasurements []M) []M {
 	var changedMeasurements []M
 	for _, newMeasurement := range newMeasurements {
-		oldMeasurement, found := oldMeasurements[newMeasurement.GetSensor()]
+		oldMeasurement, found := oldMeasurements[newMeasurement.GetDeviceID()]
 		if found {
 			if oldMeasurement.GetTime().Compare(newMeasurement.GetTime()) < 0 {
 				changedMeasurements = append(changedMeasurements, newMeasurement)

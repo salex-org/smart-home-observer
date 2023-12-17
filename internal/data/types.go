@@ -3,21 +3,22 @@ package data
 import "time"
 
 type Measurement struct {
-	Time   time.Time `json:"time"`
-	Sensor string    `json:"sensor"`
+	Time     time.Time `json:"time"`
+	Sensor   string    `json:"sensor"`
+	DeviceID string    `json:"deviceID"`
 }
 
 type ComparableMeasurement interface {
 	GetTime() time.Time
-	GetSensor() string
+	GetDeviceID() string
 }
 
 func (m Measurement) GetTime() time.Time {
 	return m.Time
 }
 
-func (m Measurement) GetSensor() string {
-	return m.Sensor
+func (m Measurement) GetDeviceID() string {
+	return m.DeviceID
 }
 
 type ClimateMeasurement struct {

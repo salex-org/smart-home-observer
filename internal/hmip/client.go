@@ -113,8 +113,9 @@ func (client ClientImpl) Start(climateMeasurementHandler ClimateMeasurementHandl
 func createClimateMeasurement(device hmip.Device, channel hmip.FunctionalChannel) data.ClimateMeasurement {
 	return data.ClimateMeasurement{
 		Measurement: data.Measurement{
-			Time:   device.LastStatusUpdate.Time,
-			Sensor: device.Name,
+			Time:     device.LastStatusUpdate.Time,
+			Sensor:   device.Name,
+			DeviceID: device.ID,
 		},
 		Humidity:    channel.Humidity,
 		Temperature: channel.Temperature,
@@ -125,8 +126,9 @@ func createClimateMeasurement(device hmip.Device, channel hmip.FunctionalChannel
 func createConsumptionMeasurement(device hmip.Device, channel hmip.FunctionalChannel) data.ConsumptionMeasurement {
 	return data.ConsumptionMeasurement{
 		Measurement: data.Measurement{
-			Time:   device.LastStatusUpdate.Time,
-			Sensor: device.Name,
+			Time:     device.LastStatusUpdate.Time,
+			Sensor:   device.Name,
+			DeviceID: device.ID,
 		},
 		CurrentConsumption: channel.CurrentPowerConsumption,
 	}
@@ -135,8 +137,9 @@ func createConsumptionMeasurement(device hmip.Device, channel hmip.FunctionalCha
 func createSwitchState(device hmip.Device, channel hmip.FunctionalChannel) data.SwitchState {
 	return data.SwitchState{
 		Measurement: data.Measurement{
-			Time:   device.LastStatusUpdate.Time,
-			Sensor: device.Name,
+			Time:     device.LastStatusUpdate.Time,
+			Sensor:   device.Name,
+			DeviceID: device.ID,
 		},
 		On: channel.SwitchedOn,
 	}

@@ -70,6 +70,7 @@ func (client InfluxClient) SaveClimateMeasurement(measurement data.ClimateMeasur
 	point.AddField("humidity", measurement.Humidity)
 	point.AddField("vapor_amount", measurement.VaporAmount)
 	point.AddTag("sensor", measurement.Sensor)
+	point.AddTag("device", measurement.DeviceID)
 	client.processingError = api.WritePoint(context.Background(), point)
 	return client.processingError
 }
@@ -91,6 +92,7 @@ func (client InfluxClient) SaveConsumptionMeasurement(measurement data.Consumpti
 	point.SetTime(measurement.Time)
 	point.AddField("electricity", measurement.CurrentConsumption)
 	point.AddTag("sensor", measurement.Sensor)
+	point.AddTag("device", measurement.DeviceID)
 	client.processingError = api.WritePoint(context.Background(), point)
 	return client.processingError
 }
@@ -112,6 +114,7 @@ func (client InfluxClient) SaveSwitchState(state data.SwitchState) error {
 	point.SetTime(state.Time)
 	point.AddField("on", state.On)
 	point.AddTag("sensor", state.Sensor)
+	point.AddTag("device", state.DeviceID)
 	client.processingError = api.WritePoint(context.Background(), point)
 	return client.processingError
 }
