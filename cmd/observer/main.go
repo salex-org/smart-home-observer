@@ -60,7 +60,7 @@ func main() {
 	go func() {
 		defer wait.Done()
 		fmt.Printf("Measuring started\n")
-		_ = hmipClient.Start(handleClimateMeasurements, handleConsumptionMeasurements)
+		_ = hmipClient.Start(handleClimateMeasurements, handleConsumptionMeasurements, handleSwitchStateChanges)
 	}()
 
 	// Loop function for photographer
@@ -114,6 +114,19 @@ func handleConsumptionMeasurements(consumptionMeasurements []data.ConsumptionMea
 			return err
 		}
 		fmt.Printf("New consumption measurement data received and stored to InfluxDB\n")
+	}
+	return nil
+}
+
+func handleSwitchStateChanges(switchStates []data.SwitchState) error {
+	updatedSwitchStates := measurementCache.UpdateSwitchStates(switchStates)
+	if len(updatedSwitchStates) > 0 {
+		err := influxClient.SaveSwitchStates(updatedSwitchStates)
+		if err != nil {
+			fmt.Printf("Error saving switch states in InfluxDB: %v\n", err)
+			return err
+		}
+		fmt.Printf("New switch states received and stored to InfluxDB\n")
 	}
 	return nil
 }

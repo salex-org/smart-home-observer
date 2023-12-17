@@ -7,6 +7,7 @@ import (
 type MeasurementCache interface {
 	UpdateClimateMeasurements(newMeasurements []ClimateMeasurement) []ClimateMeasurement
 	UpdateConsumptionMeasurements(newMeasurements []ConsumptionMeasurement) []ConsumptionMeasurement
+	UpdateSwitchStates(newSwitchStates []SwitchState) []SwitchState
 	GetClimateMeasurementBySensor(sensor string) *ClimateMeasurement
 	GetClimateMeasurementsBySensors(sensors []string) []ClimateMeasurement
 }
@@ -21,6 +22,7 @@ func NewMeasurementCache() MeasurementCache {
 type MeasurementCacheImpl struct {
 	ClimateMeasurements     map[string]ClimateMeasurement     `json:"climateMeasurements"`
 	ConsumptionMeasurements map[string]ConsumptionMeasurement `json:"consumptionMeasurements"`
+	SwitchStates            map[string]SwitchState            `json:"swtichStates"`
 }
 
 // UpdateClimateMeasurements updates the climate measurements
@@ -41,6 +43,16 @@ func (c *MeasurementCacheImpl) UpdateConsumptionMeasurements(newMeasurements []C
 		c.ConsumptionMeasurements[eachMeasurement.Sensor] = eachMeasurement
 	}
 	return changedMeasurements
+}
+
+// UpdateSwitchStates updates the switch states
+// returns the switch states that have newer timestamps than the previously cached ones
+func (c *MeasurementCacheImpl) UpdateSwitchStates(newSwitchStates []SwitchState) []SwitchState {
+	changedSwitchStates := filterChangedMeasurements(c.SwitchStates, newSwitchStates)
+	for _, eachState := range changedSwitchStates {
+		c.SwitchStates[eachState.Sensor] = eachState
+	}
+	return changedSwitchStates
 }
 
 func filterChangedMeasurements[M ComparableMeasurement](oldMeasurements map[string]M, newMeasurements []M) []M {

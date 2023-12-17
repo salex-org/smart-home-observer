@@ -32,6 +32,11 @@ type ConsumptionMeasurement struct {
 	CurrentConsumption float64 `json:"currentConsumption"`
 }
 
+type SwitchState struct {
+	Measurement `json:",inline"`
+	On          bool `json:"on"`
+}
+
 type Health struct {
 	Error  error
 	Status string

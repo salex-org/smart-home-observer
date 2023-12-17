@@ -15,6 +15,8 @@ type Client interface {
 	SaveClimateMeasurements(measurements []data.ClimateMeasurement) error
 	SaveConsumptionMeasurement(measurement data.ConsumptionMeasurement) error
 	SaveConsumptionMeasurements(measurements []data.ConsumptionMeasurement) error
+	SaveSwitchState(state data.SwitchState) error
+	SaveSwitchStates(states []data.SwitchState) error
 	Shutdown() error
 	Health() error
 }
@@ -97,6 +99,27 @@ func (client InfluxClient) SaveConsumptionMeasurements(measurements []data.Consu
 	var err error
 	for _, measurement := range measurements {
 		err = client.SaveConsumptionMeasurement(measurement)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (client InfluxClient) SaveSwitchState(state data.SwitchState) error {
+	api := client.client.WriteAPIBlocking(client.organization, client.consumptionBucket)
+	point := influxdb2.NewPointWithMeasurement("switch")
+	point.SetTime(state.Time)
+	point.AddField("on", state.On)
+	point.AddTag("sensor", state.Sensor)
+	client.processingError = api.WritePoint(context.Background(), point)
+	return client.processingError
+}
+
+func (client InfluxClient) SaveSwitchStates(states []data.SwitchState) error {
+	var err error
+	for _, state := range states {
+		err = client.SaveSwitchState(state)
 		if err != nil {
 			return err
 		}

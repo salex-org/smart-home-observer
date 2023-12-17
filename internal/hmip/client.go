@@ -10,8 +10,10 @@ type ClimateMeasurementHandler func([]data.ClimateMeasurement) error
 
 type ConsumptionMeasurementHandler func([]data.ConsumptionMeasurement) error
 
+type SwitchStateChangedHandler func([]data.SwitchState) error
+
 type Client interface {
-	Start(climateMeasurementHandler ClimateMeasurementHandler, consumptionMeasurementHandler ConsumptionMeasurementHandler) error
+	Start(climateMeasurementHandler ClimateMeasurementHandler, consumptionMeasurementHandler ConsumptionMeasurementHandler, switchStateChangedHandler SwitchStateChangedHandler) error
 	Shutdown() error
 	Health() error
 }
@@ -45,7 +47,7 @@ func (client ClientImpl) Shutdown() error {
 	return client.client.StopEventListening()
 }
 
-func (client ClientImpl) Start(climateMeasurementHandler ClimateMeasurementHandler, consumptionMeasurementHandler ConsumptionMeasurementHandler) error {
+func (client ClientImpl) Start(climateMeasurementHandler ClimateMeasurementHandler, consumptionMeasurementHandler ConsumptionMeasurementHandler, switchStateChangedHandler SwitchStateChangedHandler) error {
 	// Register event handler for climate measuring
 	client.client.RegisterEventHandler(func(event hmip.Event, _ hmip.Origin) {
 		var climateMeasurements []data.ClimateMeasurement
@@ -62,6 +64,18 @@ func (client ClientImpl) Start(climateMeasurementHandler ClimateMeasurementHandl
 			consumptionMeasurements = append(consumptionMeasurements, createConsumptionMeasurement(*event.Device, channel))
 		}
 		client.processingError = consumptionMeasurementHandler(consumptionMeasurements)
+	}, hmip.EVENT_TYPE_DEVICE_CHANGED)
+
+	// Register event handler for switch state
+	client.client.RegisterEventHandler(func(event hmip.Event, _ hmip.Origin) {
+		var switchStates []data.SwitchState
+		for _, channel := range event.GetFunctionalChannels(hmip.DEVICE_TYPE_PLUGABLE_SWITCH_MEASURING, hmip.CHANNEL_TYPE_SWITCH_MEASURING) {
+			switchStates = append(switchStates, createSwitchState(*event.Device, channel))
+		}
+		for _, channel := range event.GetFunctionalChannels(hmip.DEVICE_TYPE_PLUGABLE_SWITCH, hmip.CHANNEL_TYPE_SWITCH) {
+			switchStates = append(switchStates, createSwitchState(*event.Device, channel))
+		}
+		client.processingError = switchStateChangedHandler(switchStates)
 	}, hmip.EVENT_TYPE_DEVICE_CHANGED)
 
 	// Read data initially
@@ -107,6 +121,16 @@ func createConsumptionMeasurement(device hmip.Device, channel hmip.FunctionalCha
 			Sensor: device.Name,
 		},
 		CurrentConsumption: channel.CurrentPowerConsumption,
+	}
+}
+
+func createSwitchState(device hmip.Device, channel hmip.FunctionalChannel) data.SwitchState {
+	return data.SwitchState{
+		Measurement: data.Measurement{
+			Time:   device.LastStatusUpdate.Time,
+			Sensor: device.Name,
+		},
+		On: channel.SwitchedOn,
 	}
 }
 
