@@ -22,9 +22,9 @@ type Client interface {
 }
 
 type InfluxClient struct {
-	client                                         influxdb2.Client
-	organization, consumptionBucket, climateBucket string
-	processingError                                error
+	client               influxdb2.Client
+	organization, bucket string
+	processingError      error
 }
 
 func NewClient() (Client, error) {
@@ -49,9 +49,8 @@ func NewClient() (Client, error) {
 				SetTLSConfig(&tls.Config{
 					RootCAs: rootCAs,
 				})),
-		organization:      util.ReadEnvVar("INFLUX_ORGANIZATION"),
-		climateBucket:     util.ReadEnvVar("INFLUX_CLIMATE_BUCKET"),
-		consumptionBucket: util.ReadEnvVar("INFLUX_CONSUMPTION_BUCKET"),
+		organization: util.ReadEnvVar("INFLUX_ORGANIZATION"),
+		bucket:       util.ReadEnvVar("INFLUX_BUCKET"),
 	}
 	_, err := client.client.Health(context.Background())
 	return client, err
@@ -63,7 +62,7 @@ func (client InfluxClient) Shutdown() error {
 }
 
 func (client InfluxClient) SaveClimateMeasurement(measurement data.ClimateMeasurement) error {
-	api := client.client.WriteAPIBlocking(client.organization, client.climateBucket)
+	api := client.client.WriteAPIBlocking(client.organization, client.bucket)
 	point := influxdb2.NewPointWithMeasurement("climate")
 	point.SetTime(measurement.Time)
 	point.AddField("temperature", measurement.Temperature)
@@ -87,7 +86,7 @@ func (client InfluxClient) SaveClimateMeasurements(measurements []data.ClimateMe
 }
 
 func (client InfluxClient) SaveConsumptionMeasurement(measurement data.ConsumptionMeasurement) error {
-	api := client.client.WriteAPIBlocking(client.organization, client.consumptionBucket)
+	api := client.client.WriteAPIBlocking(client.organization, client.bucket)
 	point := influxdb2.NewPointWithMeasurement("consumption")
 	point.SetTime(measurement.Time)
 	point.AddField("electricity", measurement.CurrentConsumption)
@@ -109,7 +108,7 @@ func (client InfluxClient) SaveConsumptionMeasurements(measurements []data.Consu
 }
 
 func (client InfluxClient) SaveSwitchState(state data.SwitchState) error {
-	api := client.client.WriteAPIBlocking(client.organization, client.consumptionBucket)
+	api := client.client.WriteAPIBlocking(client.organization, client.bucket)
 	point := influxdb2.NewPointWithMeasurement("switch")
 	point.SetTime(state.Time)
 	point.AddField("on", state.On)
