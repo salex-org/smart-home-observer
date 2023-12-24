@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/salex-org/smart-home-observer/internal/data"
 	"net/http"
 )
 
@@ -15,15 +14,17 @@ type Server interface {
 
 type HealthCheck func() map[string]error
 
+type DataRequestHandler func() interface{}
+
 type HealthStatus struct {
 	Message string           `json:"status"`
 	Errors  map[string]error `json:"errors"`
 }
 
-func NewServer(healthCheck HealthCheck, measurementCache *data.MeasurementCache) Server {
+func NewServer(healthCheck HealthCheck, handler DataRequestHandler) Server {
 	server := ServerImpl{
-		healthCheck:      healthCheck,
-		measurementCache: measurementCache,
+		healthCheck: healthCheck,
+		handler:     handler,
 	}
 	port := 8080
 	mux := http.NewServeMux()
@@ -38,9 +39,9 @@ func NewServer(healthCheck HealthCheck, measurementCache *data.MeasurementCache)
 }
 
 type ServerImpl struct {
-	healthCheck      HealthCheck
-	measurementCache *data.MeasurementCache
-	httpServer       http.Server
+	healthCheck HealthCheck
+	httpServer  http.Server
+	handler     DataRequestHandler
 }
 
 func (s *ServerImpl) Start() error {
@@ -81,7 +82,7 @@ func (s *ServerImpl) handleHealth(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *ServerImpl) handleData(w http.ResponseWriter, _ *http.Request) {
-	jsonData, err := json.Marshal(s.measurementCache)
+	jsonData, err := json.Marshal(s.handler())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = fmt.Fprintf(w, "Error marshaling measurements: %v", err)

@@ -1,90 +1,43 @@
 package data
 
-import (
-	"slices"
-)
-
-type MeasurementCache interface {
-	UpdateClimateMeasurements(newMeasurements []ClimateMeasurement) []ClimateMeasurement
-	UpdateConsumptionMeasurements(newMeasurements []ConsumptionMeasurement) []ConsumptionMeasurement
-	UpdateSwitchStates(newSwitchStates []SwitchState) []SwitchState
-	GetClimateMeasurementBySensor(sensor string) *ClimateMeasurement
-	GetClimateMeasurementsBySensors(sensors []string) []ClimateMeasurement
+type Cache[M Cacheable] interface {
+	UpdateEntry(entry M) bool
+	GetAllEntries() []M
+	GetEntryByID(id string) M
 }
 
-func NewMeasurementCache() MeasurementCache {
-	return &MeasurementCacheImpl{
-		ClimateMeasurements:     make(map[string]ClimateMeasurement),
-		ConsumptionMeasurements: make(map[string]ConsumptionMeasurement),
-		SwitchStates:            make(map[string]SwitchState),
+func NewCache[M Cacheable]() Cache[M] {
+	return &CacheImpl[M]{
+		Entries: make(map[string]M),
 	}
 }
 
-type MeasurementCacheImpl struct {
-	ClimateMeasurements     map[string]ClimateMeasurement     `json:"climateMeasurements"`
-	ConsumptionMeasurements map[string]ConsumptionMeasurement `json:"consumptionMeasurements"`
-	SwitchStates            map[string]SwitchState            `json:"swtichStates"`
+type CacheImpl[M Cacheable] struct {
+	Entries map[string]M `json:"entries"`
 }
 
-// UpdateClimateMeasurements updates the climate measurements
-// returns the measurements that have newer timestamps than the previously cached ones
-func (c *MeasurementCacheImpl) UpdateClimateMeasurements(newMeasurements []ClimateMeasurement) []ClimateMeasurement {
-	changedMeasurements := filterChangedMeasurements(c.ClimateMeasurements, newMeasurements)
-	for _, eachMeasurement := range changedMeasurements {
-		c.ClimateMeasurements[eachMeasurement.DeviceID] = eachMeasurement
-	}
-	return changedMeasurements
-}
-
-// UpdateConsumptionMeasurements updates the consumption measurements
-// returns the measurements that have newer timestamps than the previously cached ones
-func (c *MeasurementCacheImpl) UpdateConsumptionMeasurements(newMeasurements []ConsumptionMeasurement) []ConsumptionMeasurement {
-	changedMeasurements := filterChangedMeasurements(c.ConsumptionMeasurements, newMeasurements)
-	for _, eachMeasurement := range changedMeasurements {
-		c.ConsumptionMeasurements[eachMeasurement.DeviceID] = eachMeasurement
-	}
-	return changedMeasurements
-}
-
-// UpdateSwitchStates updates the switch states
-// returns the switch states that have newer timestamps than the previously cached ones
-func (c *MeasurementCacheImpl) UpdateSwitchStates(newSwitchStates []SwitchState) []SwitchState {
-	changedSwitchStates := filterChangedMeasurements(c.SwitchStates, newSwitchStates)
-	for _, eachState := range changedSwitchStates {
-		c.SwitchStates[eachState.DeviceID] = eachState
-	}
-	return changedSwitchStates
-}
-
-func filterChangedMeasurements[M ComparableMeasurement](oldMeasurements map[string]M, newMeasurements []M) []M {
-	var changedMeasurements []M
-	for _, newMeasurement := range newMeasurements {
-		oldMeasurement, found := oldMeasurements[newMeasurement.GetDeviceID()]
-		if found {
-			if oldMeasurement.GetTime().Compare(newMeasurement.GetTime()) < 0 {
-				changedMeasurements = append(changedMeasurements, newMeasurement)
-			}
-		} else {
-			changedMeasurements = append(changedMeasurements, newMeasurement)
+// UpdateEntry updates the given entry in the cache
+// returns true, if the given entry is new or has newer status than the previously cached one and false otherwise
+func (c *CacheImpl[M]) UpdateEntry(newEntry M) bool {
+	oldEntry, exists := c.Entries[newEntry.GetID()]
+	if exists {
+		if !newEntry.GetTime().After(oldEntry.GetTime()) {
+			return false
 		}
 	}
-	return changedMeasurements
+	c.Entries[newEntry.GetID()] = newEntry
+	return true
 }
 
-func (c *MeasurementCacheImpl) GetClimateMeasurementBySensor(sensor string) *ClimateMeasurement {
-	measurement, found := c.ClimateMeasurements[sensor]
-	if found {
-		return &measurement
+func (c *CacheImpl[M]) GetAllEntries() []M {
+	var entries []M
+	for _, entry := range c.Entries {
+		entries = append(entries, entry)
 	}
-	return nil
+	return entries
 }
 
-func (c *MeasurementCacheImpl) GetClimateMeasurementsBySensors(sensors []string) []ClimateMeasurement {
-	var filteredMeasurements []ClimateMeasurement
-	for _, measurement := range c.ClimateMeasurements {
-		if slices.Contains(sensors, measurement.Sensor) {
-			filteredMeasurements = append(filteredMeasurements, measurement)
-		}
-	}
-	return filteredMeasurements
+func (c *CacheImpl[M]) GetEntryByID(id string) M {
+	group, _ := c.Entries[id]
+	return group
 }

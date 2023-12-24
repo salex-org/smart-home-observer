@@ -4,16 +4,16 @@ import (
 	"github.com/salex-org/hmip-go-client/pkg/hmip"
 	"github.com/salex-org/smart-home-observer/internal/data"
 	"github.com/salex-org/smart-home-observer/internal/util"
+	"slices"
+	"time"
 )
 
-type ClimateMeasurementHandler func([]data.ClimateMeasurement) error
-
-type ConsumptionMeasurementHandler func([]data.ConsumptionMeasurement) error
-
-type SwitchStateChangedHandler func([]data.SwitchState) error
+type DeviceChangedHandler func(data.Device) error
 
 type Client interface {
-	Start(climateMeasurementHandler ClimateMeasurementHandler, consumptionMeasurementHandler ConsumptionMeasurementHandler, switchStateChangedHandler SwitchStateChangedHandler) error
+	Start(deviceChangedHandler DeviceChangedHandler) error
+	GetCachedData() map[string]any
+	GetCachedDeviceClimateData(sensorNames []string) []data.ClimateMeasuring
 	Shutdown() error
 	Health() error
 }
@@ -21,10 +21,15 @@ type Client interface {
 type ClientImpl struct {
 	client          hmip.Client
 	processingError error
+	devicesCache    data.Cache[data.Device]
+	groupsCache     data.Cache[data.Group]
 }
 
 func NewClient() (Client, error) {
-	client := ClientImpl{}
+	client := ClientImpl{
+		devicesCache: data.NewCache[data.Device](),
+		groupsCache:  data.NewCache[data.Group](),
+	}
 	config, err := hmip.GetConfig()
 	if err != nil {
 		return client, err
@@ -47,102 +52,110 @@ func (client ClientImpl) Shutdown() error {
 	return client.client.StopEventListening()
 }
 
-func (client ClientImpl) Start(climateMeasurementHandler ClimateMeasurementHandler, consumptionMeasurementHandler ConsumptionMeasurementHandler, switchStateChangedHandler SwitchStateChangedHandler) error {
-	// Register event handler for climate measuring
+func (client ClientImpl) Start(deviceChangedHandler DeviceChangedHandler) error {
+	// Register event handler for device changes
 	client.client.RegisterEventHandler(func(event hmip.Event, _ hmip.Origin) {
-		var climateMeasurements []data.ClimateMeasurement
-		for _, channel := range event.GetFunctionalChannels(hmip.DEVICE_TYPE_TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR, hmip.CHANNEL_TYPE_CLIMATE_SENSOR) {
-			climateMeasurements = append(climateMeasurements, createClimateMeasurement(*event.Device, channel))
+		device, updated := client.updateDevice(*event.Device)
+		if updated {
+			client.processingError = deviceChangedHandler(device)
 		}
-		client.processingError = climateMeasurementHandler(climateMeasurements)
 	}, hmip.EVENT_TYPE_DEVICE_CHANGED)
 
-	// Register event handler for consumption measuring
+	// Register event handler for group changes
 	client.client.RegisterEventHandler(func(event hmip.Event, _ hmip.Origin) {
-		var consumptionMeasurements []data.ConsumptionMeasurement
-		for _, channel := range event.GetFunctionalChannels(hmip.DEVICE_TYPE_PLUGABLE_SWITCH_MEASURING, hmip.CHANNEL_TYPE_SWITCH_MEASURING) {
-			consumptionMeasurements = append(consumptionMeasurements, createConsumptionMeasurement(*event.Device, channel))
-		}
-		client.processingError = consumptionMeasurementHandler(consumptionMeasurements)
-	}, hmip.EVENT_TYPE_DEVICE_CHANGED)
-
-	// Register event handler for switch state
-	client.client.RegisterEventHandler(func(event hmip.Event, _ hmip.Origin) {
-		var switchStates []data.SwitchState
-		for _, channel := range event.GetFunctionalChannels(hmip.DEVICE_TYPE_PLUGABLE_SWITCH_MEASURING, hmip.CHANNEL_TYPE_SWITCH_MEASURING) {
-			switchStates = append(switchStates, createSwitchState(*event.Device, channel))
-		}
-		for _, channel := range event.GetFunctionalChannels(hmip.DEVICE_TYPE_PLUGABLE_SWITCH, hmip.CHANNEL_TYPE_SWITCH) {
-			switchStates = append(switchStates, createSwitchState(*event.Device, channel))
-		}
-		client.processingError = switchStateChangedHandler(switchStates)
-	}, hmip.EVENT_TYPE_DEVICE_CHANGED)
+		_, _ = client.updateGroup(*event.Group)
+	}, hmip.EVENT_TYPE_GROUP_CHANGED)
 
 	// Read data initially
 	var state *hmip.State
 	state, client.processingError = client.client.LoadCurrentState()
 	if client.processingError == nil {
-		var climateMeasurements []data.ClimateMeasurement
-		var consumptionMeasurements []data.ConsumptionMeasurement
-		var switchStates []data.SwitchState
-		for _, device := range state.GetDevicesByType(hmip.DEVICE_TYPE_TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR) {
-			for _, channel := range device.GetFunctionalChannelsByType(hmip.CHANNEL_TYPE_CLIMATE_SENSOR) {
-				climateMeasurements = append(climateMeasurements, createClimateMeasurement(device, channel))
+		for _, each := range state.Groups {
+			_, _ = client.updateGroup(each)
+		}
+		for _, each := range state.Devices {
+			device, updated := client.updateDevice(each)
+			if updated {
+				client.processingError = deviceChangedHandler(device)
 			}
 		}
-		for _, device := range state.GetDevicesByType(hmip.DEVICE_TYPE_PLUGABLE_SWITCH_MEASURING) {
-			for _, channel := range device.GetFunctionalChannelsByType(hmip.CHANNEL_TYPE_SWITCH_MEASURING) {
-				consumptionMeasurements = append(consumptionMeasurements, createConsumptionMeasurement(device, channel))
-				switchStates = append(switchStates, createSwitchState(device, channel))
-			}
-		}
-		for _, device := range state.GetDevicesByType(hmip.DEVICE_TYPE_PLUGABLE_SWITCH) {
-			for _, channel := range device.GetFunctionalChannelsByType(hmip.CHANNEL_TYPE_SWITCH) {
-				switchStates = append(switchStates, createSwitchState(device, channel))
-			}
-		}
-		client.processingError = climateMeasurementHandler(climateMeasurements)
-		client.processingError = consumptionMeasurementHandler(consumptionMeasurements)
-		client.processingError = switchStateChangedHandler(switchStates)
 	}
 
 	// Start the event listening
 	return client.client.ListenForEvents()
 }
 
-func createClimateMeasurement(device hmip.Device, channel hmip.FunctionalChannel) data.ClimateMeasurement {
-	return data.ClimateMeasurement{
-		Measurement: data.Measurement{
-			Time:     device.LastStatusUpdate.Time,
-			Sensor:   device.Name,
-			DeviceID: device.ID,
-		},
-		Humidity:    channel.Humidity,
-		Temperature: channel.Temperature,
-		VaporAmount: channel.VapourAmount,
+// updateDevice transforms the given device into a data.Device and
+// updates the entry in the devices cache. Returns true, if the device was added
+// or updated in the cache, otherwise return false.
+func (client ClientImpl) updateDevice(device hmip.Device) (data.Device, bool) {
+	var base data.BaseDevice
+	baseChannels := device.GetFunctionalChannelsByType(hmip.CHANNEL_TYPE_DEVICE_BASE)
+	if len(baseChannels) > 0 {
+		base = data.BaseDevice{
+			Status: data.Status{
+				ID:   device.ID,
+				Time: device.LastStatusUpdate.Time,
+			},
+			Type: device.Type,
+			Name: device.Name,
+		}
+		base.LowBattery = baseChannels[0].LowBattery
+		base.Unreached = baseChannels[0].Unreached
+		base.ConnectionQuality = baseChannels[0].RSSIValue // TODO calculate
+		if len(baseChannels[0].Groups) > 0 {
+			base.MetaGroup = client.groupsCache.GetEntryByID(baseChannels[0].Groups[0])
+		}
+	}
+	switch device.Type {
+	case hmip.DEVICE_TYPE_TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR:
+		climate := data.ClimateDevice{
+			BaseDevice: base,
+		}
+		channels := device.GetFunctionalChannelsByType(hmip.CHANNEL_TYPE_CLIMATE_SENSOR)
+		if len(channels) > 0 {
+			climate.Temperature = channels[0].Temperature
+			climate.Humidity = channels[0].Humidity
+			climate.VaporAmount = channels[0].VapourAmount
+		}
+		return climate, client.devicesCache.UpdateEntry(climate)
+	case hmip.DEVICE_TYPE_PLUGABLE_SWITCH:
+		switchable := data.SwitchingDevice{
+			BaseDevice: base,
+		}
+		channels := device.GetFunctionalChannelsByType(hmip.CHANNEL_TYPE_SWITCH)
+		if len(channels) > 0 {
+			switchable.SwitchedOn = channels[0].SwitchedOn
+		}
+		return switchable, client.devicesCache.UpdateEntry(switchable)
+	case hmip.DEVICE_TYPE_PLUGABLE_SWITCH_MEASURING:
+		switchableMeasuring := data.SwitchingMeasuringDevice{
+			BaseDevice: base,
+		}
+		channels := device.GetFunctionalChannelsByType(hmip.CHANNEL_TYPE_SWITCH_MEASURING)
+		if len(channels) > 0 {
+			switchableMeasuring.SwitchedOn = channels[0].SwitchedOn
+			switchableMeasuring.CurrentConsumption = channels[0].CurrentPowerConsumption
+		}
+		return switchableMeasuring, client.devicesCache.UpdateEntry(switchableMeasuring)
+	default:
+		return base, client.devicesCache.UpdateEntry(base)
 	}
 }
 
-func createConsumptionMeasurement(device hmip.Device, channel hmip.FunctionalChannel) data.ConsumptionMeasurement {
-	return data.ConsumptionMeasurement{
-		Measurement: data.Measurement{
-			Time:     device.LastStatusUpdate.Time,
-			Sensor:   device.Name,
-			DeviceID: device.ID,
+// updateGroup transforms the given group into a data.Group and
+// updates the entry in the groups cache. Returns true, if the device was added
+// or updated in the cache, otherwise return false.
+func (client ClientImpl) updateGroup(group hmip.Group) (data.Group, bool) {
+	cacheable := data.MetaGroup{
+		Status: data.Status{
+			ID:   group.ID,
+			Time: time.Now(), // To always update the cache, use current timstamp
 		},
-		CurrentConsumption: channel.CurrentPowerConsumption,
+		Type: group.Type,
+		Name: group.Name,
 	}
-}
-
-func createSwitchState(device hmip.Device, channel hmip.FunctionalChannel) data.SwitchState {
-	return data.SwitchState{
-		Measurement: data.Measurement{
-			Time:     device.LastStatusUpdate.Time,
-			Sensor:   device.Name,
-			DeviceID: device.ID,
-		},
-		On: channel.SwitchedOn,
-	}
+	return cacheable, client.groupsCache.UpdateEntry(cacheable)
 }
 
 func (client ClientImpl) Health() error {
@@ -150,4 +163,24 @@ func (client ClientImpl) Health() error {
 		return client.processingError
 	}
 	return client.client.GetEventLoopState()
+}
+
+func (client ClientImpl) GetCachedData() map[string]any {
+	cache := make(map[string]any)
+	cache["devices"] = client.devicesCache
+	cache["groups"] = client.groupsCache
+	return cache
+}
+
+func (client ClientImpl) GetCachedDeviceClimateData(sensorNames []string) []data.ClimateMeasuring {
+	var devices []data.ClimateMeasuring
+	for _, device := range client.devicesCache.GetAllEntries() {
+		if slices.Contains(sensorNames, device.GetName()) {
+			switch device := device.(type) {
+			case data.ClimateMeasuring:
+				devices = append(devices, device)
+			}
+		}
+	}
+	return devices
 }

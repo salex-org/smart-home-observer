@@ -10,8 +10,8 @@ var (
 	overviewTemplate = `
 <span class="salex_no-series-meta-information">
 	{{range .}}
-	<p style="text-align: left;">{{.Sensor}}: {{template "temperature" .Temperature}} bei {{template "humidity" .Humidity}}</p>
-	<p style="text-align: left;"><span style="color: #808080;">Gemessen am {{template "timestamp" .Time}}</span></p>
+	<p style="text-align: left;">{{.GetName()}}: {{template "temperature" .GetTemperature()}} bei {{template "humidity" .GetHumidity()}}</p>
+	<p style="text-align: left;"><span style="color: #808080;">Gemessen am {{template "timestamp" .GetTime()}}</span></p>
 	{{end}}
 </span>
 `
@@ -26,7 +26,7 @@ var (
 )
 
 type Renderer interface {
-	RenderOverview(measurements []data.ClimateMeasurement) (string, error)
+	RenderOverview(devices []data.ClimateMeasuring) (string, error)
 }
 
 type WordpressRenderer struct {
@@ -44,9 +44,9 @@ func NewRenderer() (Renderer, error) {
 	return renderer, nil
 }
 
-func (r *WordpressRenderer) RenderOverview(measurements []data.ClimateMeasurement) (string, error) {
+func (r *WordpressRenderer) RenderOverview(devices []data.ClimateMeasuring) (string, error) {
 	var buffer bytes.Buffer
-	err := r.overviewTemplate.Execute(&buffer, measurements)
+	err := r.overviewTemplate.Execute(&buffer, devices)
 	if err != nil {
 		return "", err
 	}

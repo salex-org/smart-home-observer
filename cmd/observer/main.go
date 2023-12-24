@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	hmip2 "github.com/salex-org/hmip-go-client/pkg/hmip"
 	"github.com/salex-org/smart-home-observer/internal/data"
 	"github.com/salex-org/smart-home-observer/internal/hmip"
 	"github.com/salex-org/smart-home-observer/internal/influx"
@@ -24,7 +25,6 @@ var (
 	wordpressRenderer wordpress.Renderer
 	webServer         webserver.Server
 	photographer      photo.Photographer
-	measurementCache  data.MeasurementCache
 )
 
 func main() {
@@ -60,7 +60,7 @@ func main() {
 	go func() {
 		defer wait.Done()
 		fmt.Printf("Measuring started\n")
-		_ = hmipClient.Start(handleClimateMeasurements, handleConsumptionMeasurements, handleSwitchStateChanges)
+		_ = hmipClient.Start(handleDeviceChanges)
 	}()
 
 	// Loop function for photographer
@@ -86,15 +86,14 @@ func main() {
 	os.Exit(0)
 }
 
-func handleClimateMeasurements(climateMeasurements []data.ClimateMeasurement) error {
-	updatedMeasurements := measurementCache.UpdateClimateMeasurements(climateMeasurements)
-	if len(updatedMeasurements) > 0 {
-		err := influxClient.SaveClimateMeasurements(updatedMeasurements)
-		if err != nil {
-			fmt.Printf("Error saving climate measurements in InfluxDB: %v\n", err)
-			return err
-		}
-		fmt.Printf("New climate measurement data received and stored to InfluxDB\n")
+func handleDeviceChanges(device data.Device) error {
+	err := influxClient.SaveDeviceState(device)
+	if err != nil {
+		fmt.Printf("Error saving device state in InfluxDB: %v\n", err)
+		return err
+	}
+	fmt.Printf("New device state received and stored to InfluxDB\n")
+	if device.GetType() == hmip2.DEVICE_TYPE_TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR {
 		err = updateBlog()
 		if err != nil {
 			fmt.Printf("Error updating climate data on WordPress Blog: %v\n", err)
@@ -105,38 +104,12 @@ func handleClimateMeasurements(climateMeasurements []data.ClimateMeasurement) er
 	return nil
 }
 
-func handleConsumptionMeasurements(consumptionMeasurements []data.ConsumptionMeasurement) error {
-	updatedMeasurements := measurementCache.UpdateConsumptionMeasurements(consumptionMeasurements)
-	if len(updatedMeasurements) > 0 {
-		err := influxClient.SaveConsumptionMeasurements(updatedMeasurements)
-		if err != nil {
-			fmt.Printf("Error saving consumption measurements in InfluxDB: %v\n", err)
-			return err
-		}
-		fmt.Printf("New consumption measurement data received and stored to InfluxDB\n")
-	}
-	return nil
-}
-
-func handleSwitchStateChanges(switchStates []data.SwitchState) error {
-	updatedSwitchStates := measurementCache.UpdateSwitchStates(switchStates)
-	if len(updatedSwitchStates) > 0 {
-		err := influxClient.SaveSwitchStates(updatedSwitchStates)
-		if err != nil {
-			fmt.Printf("Error saving switch states in InfluxDB: %v\n", err)
-			return err
-		}
-		fmt.Printf("New switch states received and stored to InfluxDB\n")
-	}
-	return nil
-}
-
 func updateBlog() error {
 	post, err := wordpressClient.GetPost(wordpress.OverviewID, wordpress.OverviewType)
 	if err != nil {
 		return err
 	}
-	post.Content.Rendered, err = wordpressRenderer.RenderOverview(measurementCache.GetClimateMeasurementsBySensors(([]string{"Maschinenraum", "Bankraum"})))
+	post.Content.Rendered, err = wordpressRenderer.RenderOverview(hmipClient.GetCachedDeviceClimateData(([]string{"Maschinenraum", "Bankraum"})))
 	if err != nil {
 		return err
 	}
@@ -152,10 +125,13 @@ func startup() error {
 		fmt.Printf("Timezone CET loaded\n")
 	}
 
-	measurementCache = data.NewMeasurementCache()
-	fmt.Printf("Measurement cache created\n")
-
-	webServer = webserver.NewServer(healthCheck, &measurementCache)
+	webServer = webserver.NewServer(healthCheck, func() interface{} {
+		if hmipClient != nil {
+			return hmipClient.GetCachedData()
+		} else {
+			return ""
+		}
+	})
 	fmt.Printf("Web server created\n")
 
 	photographer = photo.NewPhotographer(time.Minute * 10) // TODO make interval configurable

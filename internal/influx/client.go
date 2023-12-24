@@ -11,12 +11,8 @@ import (
 )
 
 type Client interface {
-	SaveClimateMeasurement(measurement data.ClimateMeasurement) error
-	SaveClimateMeasurements(measurements []data.ClimateMeasurement) error
-	SaveConsumptionMeasurement(measurement data.ConsumptionMeasurement) error
-	SaveConsumptionMeasurements(measurements []data.ConsumptionMeasurement) error
-	SaveSwitchState(state data.SwitchState) error
-	SaveSwitchStates(states []data.SwitchState) error
+	SaveDeviceStates(devices []data.Device) error
+	SaveDeviceState(device data.Device) error
 	Shutdown() error
 	Health() error
 }
@@ -56,28 +52,10 @@ func NewClient() (Client, error) {
 	return client, err
 }
 
-func (client InfluxClient) Shutdown() error {
-	client.client.Close()
-	return nil
-}
-
-func (client InfluxClient) SaveClimateMeasurement(measurement data.ClimateMeasurement) error {
-	api := client.client.WriteAPIBlocking(client.organization, client.bucket)
-	point := influxdb2.NewPointWithMeasurement("climate")
-	point.SetTime(measurement.Time)
-	point.AddField("temperature", measurement.Temperature)
-	point.AddField("humidity", measurement.Humidity)
-	point.AddField("vapor_amount", measurement.VaporAmount)
-	point.AddTag("sensor", measurement.Sensor)
-	point.AddTag("device", measurement.DeviceID)
-	client.processingError = api.WritePoint(context.Background(), point)
-	return client.processingError
-}
-
-func (client InfluxClient) SaveClimateMeasurements(measurements []data.ClimateMeasurement) error {
+func (c InfluxClient) SaveDeviceStates(devices []data.Device) error {
 	var err error
-	for _, measurement := range measurements {
-		err = client.SaveClimateMeasurement(measurement)
+	for _, device := range devices {
+		err = c.SaveDeviceState(device)
 		if err != nil {
 			return err
 		}
@@ -85,47 +63,34 @@ func (client InfluxClient) SaveClimateMeasurements(measurements []data.ClimateMe
 	return nil
 }
 
-func (client InfluxClient) SaveConsumptionMeasurement(measurement data.ConsumptionMeasurement) error {
-	api := client.client.WriteAPIBlocking(client.organization, client.bucket)
-	point := influxdb2.NewPointWithMeasurement("consumption")
-	point.SetTime(measurement.Time)
-	point.AddField("electricity", measurement.CurrentConsumption)
-	point.AddTag("sensor", measurement.Sensor)
-	point.AddTag("device", measurement.DeviceID)
-	client.processingError = api.WritePoint(context.Background(), point)
-	return client.processingError
-}
-
-func (client InfluxClient) SaveConsumptionMeasurements(measurements []data.ConsumptionMeasurement) error {
-	var err error
-	for _, measurement := range measurements {
-		err = client.SaveConsumptionMeasurement(measurement)
-		if err != nil {
-			return err
-		}
+func (c InfluxClient) SaveDeviceState(device data.Device) error {
+	api := c.client.WriteAPIBlocking(c.organization, c.bucket)
+	point := influxdb2.NewPointWithMeasurement("device")
+	point.SetTime(device.GetTime())
+	point.AddField("connection_quality", device.GetConnectionQuality())
+	point.AddField("unreached", device.GetUnreached())
+	point.AddField("low_battery", device.GetLowBattery())
+	point.AddTag("device_name", device.GetName())
+	point.AddTag("device_type", device.GetType())
+	point.AddTag("device_id", device.GetID())
+	point.AddTag("group_name", device.GetMetaGroup().GetName())
+	point.AddTag("group_id", device.GetMetaGroup().GetID())
+	switch device := device.(type) {
+	case data.Switchable:
+		point.AddField("switched_on", device.IsSwitchedIn())
+	case data.ConsumptionMeasuring:
+		point.AddField("current_consumption", device.GetConsumption())
+	case data.ClimateMeasuring:
+		point.AddField("temperature", device.GetTemperature())
+		point.AddField("humidity", device.GetHumidity())
+		point.AddField("vapor_amount", device.GetVaporAmount())
 	}
-	return nil
+	c.processingError = api.WritePoint(context.Background(), point)
+	return c.processingError
 }
 
-func (client InfluxClient) SaveSwitchState(state data.SwitchState) error {
-	api := client.client.WriteAPIBlocking(client.organization, client.bucket)
-	point := influxdb2.NewPointWithMeasurement("switch")
-	point.SetTime(state.Time)
-	point.AddField("on", state.On)
-	point.AddTag("sensor", state.Sensor)
-	point.AddTag("device", state.DeviceID)
-	client.processingError = api.WritePoint(context.Background(), point)
-	return client.processingError
-}
-
-func (client InfluxClient) SaveSwitchStates(states []data.SwitchState) error {
-	var err error
-	for _, state := range states {
-		err = client.SaveSwitchState(state)
-		if err != nil {
-			return err
-		}
-	}
+func (c InfluxClient) Shutdown() error {
+	c.client.Close()
 	return nil
 }
 
