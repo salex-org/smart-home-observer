@@ -17,8 +17,7 @@ services:
     environment:
       - INFLUX_URL=http://influx:8086
       - INFLUX_TOKEN=localadmintoken
-      - INFLUX_CLIMATE_BUCKET=smart-home
-      - INFLUX_CONSUMPTION_BUCKET=smart-home
+      - INFLUX_BUCKET=homematic
       - INFLUX_ORGANIZATION=salex
     env_file:
       - .env.observer
@@ -41,7 +40,7 @@ services:
       - DOCKER_INFLUXDB_INIT_PASSWORD=localsecret
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=localadmintoken
       - DOCKER_INFLUXDB_INIT_ORG=salex
-      - DOCKER_INFLUXDB_INIT_BUCKET=smart-home
+      - DOCKER_INFLUXDB_INIT_BUCKET=homematic
     networks:
       - smart-home
     healthcheck:

@@ -13,8 +13,8 @@ var (
 	overviewTemplate = `
 <span class="salex_no-series-meta-information">
 	{{range .}}
-	<p style="text-align: left;">{{.getName()}}: {{template "temperature" .getTemperature()}} bei {{template "humidity" .getHumidity()}}</p>
-	<p style="text-align: left;"><span style="color: #808080;">Gemessen am {{template "timestamp" .getTime()}}</span></p>
+	<p style="text-align: left;">{{.name}}: {{template "temperature" .temperature}} bei {{template "humidity" .humidity}}</p>
+	<p style="text-align: left;"><span style="color: #808080;">Gemessen am {{template "timestamp" .updated}}</span></p>
 	{{end}}
 </span>
 `
@@ -29,7 +29,7 @@ var (
 )
 
 type Renderer interface {
-	RenderOverview(deviceNames []string) (string, error)
+	RenderOverview(deviceIDs []string) (string, error)
 }
 
 type renderer struct {
@@ -41,26 +41,13 @@ type climateDataEntry struct {
 	name        string
 	humidity    int
 	temperature float64
-	timestamp   time.Time
+	updated     time.Time
 }
 
-func (cde climateDataEntry) getName() string {
-	return cde.name
-}
-func (cde climateDataEntry) getHumidity() int {
-	return cde.humidity
-}
-func (cde climateDataEntry) getTemperature() float64 {
-	return cde.temperature
-}
-func (cde climateDataEntry) getTime() time.Time {
-	return cde.timestamp
-}
-
-func (r *renderer) getClimateDataEntries(deviceNames []string) []climateDataEntry {
+func (r *renderer) getClimateDataEntries(deviceIDs []string) []climateDataEntry {
 	var entries []climateDataEntry
 	for _, device := range r.devicesCache.GetAllEntries() {
-		if slices.Contains(deviceNames, device.GetName()) && device.GetType() == hmip.DEVICE_TYPE_TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR {
+		if slices.Contains(deviceIDs, device.GetID()) && device.GetType() == hmip.DEVICE_TYPE_TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR {
 			entries = append(entries, getClimateDataEntry(device))
 		}
 	}
@@ -68,8 +55,8 @@ func (r *renderer) getClimateDataEntries(deviceNames []string) []climateDataEntr
 }
 func getClimateDataEntry(device hmip.Device) climateDataEntry {
 	cde := climateDataEntry{
-		name:      device.GetName(),
-		timestamp: device.GetLastUpdated(),
+		name:    device.GetName(),
+		updated: device.GetLastUpdated(),
 	}
 	for _, base := range device.GetFunctionalChannels() {
 		switch channel := base.(type) {
