@@ -6,6 +6,7 @@ import (
 	"github.com/salex-org/smart-home-observer/internal/cache"
 	"slices"
 	"text/template"
+	"time"
 )
 
 var (
@@ -13,7 +14,7 @@ var (
 <span class="salex_no-series-meta-information">
 	{{range .}}
 	<p style="text-align: left;">{{.getName()}}: {{template "temperature" .getTemperature()}} bei {{template "humidity" .getHumidity()}}</p>
-	<p style="text-align: left;"><span style="color: #808080;">Gemessen am {{template "timestamp" .GetTime()}}</span></p>
+	<p style="text-align: left;"><span style="color: #808080;">Gemessen am {{template "timestamp" .getTime()}}</span></p>
 	{{end}}
 </span>
 `
@@ -40,6 +41,7 @@ type climateDataEntry struct {
 	name        string
 	humidity    int
 	temperature float64
+	timestamp   time.Time
 }
 
 func (cde climateDataEntry) getName() string {
@@ -51,6 +53,10 @@ func (cde climateDataEntry) getHumidity() int {
 func (cde climateDataEntry) getTemperature() float64 {
 	return cde.temperature
 }
+func (cde climateDataEntry) getTime() time.Time {
+	return cde.timestamp
+}
+
 func (r *renderer) getClimateDataEntries(deviceNames []string) []climateDataEntry {
 	var entries []climateDataEntry
 	for _, device := range r.devicesCache.GetAllEntries() {
@@ -62,7 +68,8 @@ func (r *renderer) getClimateDataEntries(deviceNames []string) []climateDataEntr
 }
 func getClimateDataEntry(device hmip.Device) climateDataEntry {
 	cde := climateDataEntry{
-		name: device.GetName(),
+		name:      device.GetName(),
+		timestamp: device.GetLastUpdated(),
 	}
 	for _, base := range device.GetFunctionalChannels() {
 		switch channel := base.(type) {
