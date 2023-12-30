@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	hmip2 "github.com/salex-org/hmip-go-client/pkg/hmip"
-	"github.com/salex-org/smart-home-observer/internal/data"
+	"github.com/salex-org/smart-home-observer/internal/cache"
 	"github.com/salex-org/smart-home-observer/internal/hmip"
 	"github.com/salex-org/smart-home-observer/internal/influx"
 	"github.com/salex-org/smart-home-observer/internal/photo"
@@ -86,7 +86,7 @@ func main() {
 	os.Exit(0)
 }
 
-func handleDeviceChanges(device data.Device) error {
+func handleDeviceChanges(device hmip2.Device) error {
 	err := influxClient.SaveDeviceState(device)
 	if err != nil {
 		fmt.Printf("Error saving device state in InfluxDB: %v\n", err)
@@ -104,12 +104,13 @@ func handleDeviceChanges(device data.Device) error {
 	return nil
 }
 
+// TODO: Impement new hmip types
 func updateBlog() error {
 	post, err := wordpressClient.GetPost(wordpress.OverviewID, wordpress.OverviewType)
 	if err != nil {
 		return err
 	}
-	post.Content.Rendered, err = wordpressRenderer.RenderOverview(hmipClient.GetCachedDeviceClimateData(([]string{"Maschinenraum", "Bankraum"})))
+	post.Content.Rendered, err = wordpressRenderer.RenderOverview([]string{"Maschinenraum", "Bankraum"})
 	if err != nil {
 		return err
 	}
@@ -125,19 +126,19 @@ func startup() error {
 		fmt.Printf("Timezone CET loaded\n")
 	}
 
-	webServer = webserver.NewServer(healthCheck, func() interface{} {
-		if hmipClient != nil {
-			return hmipClient.GetCachedData()
-		} else {
-			return ""
-		}
-	})
+	devicesCache := cache.NewCache[hmip2.Device]()
+	fmt.Printf("Device cache created\n")
+
+	groupsCache := cache.NewCache[hmip2.Group]()
+	fmt.Printf("Groups cache created\n")
+
+	webServer = webserver.NewServer(healthCheck, devicesCache, groupsCache)
 	fmt.Printf("Web server created\n")
 
 	photographer = photo.NewPhotographer(time.Minute * 10) // TODO make interval configurable
 	fmt.Printf("Photographer created\n")
 
-	hmipClient, err = hmip.NewClient()
+	hmipClient, err = hmip.NewClient(devicesCache, groupsCache)
 	if err != nil {
 		return err
 	} else {
@@ -147,14 +148,14 @@ func startup() error {
 	wordpressClient = wordpress.NewClient()
 	fmt.Printf("WordPress client created\n")
 
-	wordpressRenderer, err = wordpress.NewRenderer()
+	wordpressRenderer, err = wordpress.NewRenderer(devicesCache)
 	if err != nil {
 		return err
 	} else {
 		fmt.Printf("WordPress renderer created\n")
 	}
 
-	influxClient, err = influx.NewClient()
+	influxClient, err = influx.NewClient(groupsCache)
 	if err != nil {
 		return err
 	} else {

@@ -1,27 +1,29 @@
-package data
+package cache
 
-type Cache[M Cacheable] interface {
+import "github.com/salex-org/hmip-go-client/pkg/hmip"
+
+type Cache[M hmip.Stateful] interface {
 	UpdateEntry(entry M) bool
 	GetAllEntries() []M
 	GetEntryByID(id string) M
 }
 
-func NewCache[M Cacheable]() Cache[M] {
-	return &CacheImpl[M]{
+func NewCache[M hmip.Stateful]() Cache[M] {
+	return &cache[M]{
 		Entries: make(map[string]M),
 	}
 }
 
-type CacheImpl[M Cacheable] struct {
+type cache[M hmip.Stateful] struct {
 	Entries map[string]M `json:"entries"`
 }
 
 // UpdateEntry updates the given entry in the cache
 // returns true, if the given entry is new or has newer status than the previously cached one and false otherwise
-func (c *CacheImpl[M]) UpdateEntry(newEntry M) bool {
+func (c *cache[M]) UpdateEntry(newEntry M) bool {
 	oldEntry, exists := c.Entries[newEntry.GetID()]
 	if exists {
-		if !newEntry.GetTime().After(oldEntry.GetTime()) {
+		if !newEntry.GetLastUpdated().After(oldEntry.GetLastUpdated()) {
 			return false
 		}
 	}
@@ -29,7 +31,7 @@ func (c *CacheImpl[M]) UpdateEntry(newEntry M) bool {
 	return true
 }
 
-func (c *CacheImpl[M]) GetAllEntries() []M {
+func (c *cache[M]) GetAllEntries() []M {
 	var entries []M
 	for _, entry := range c.Entries {
 		entries = append(entries, entry)
@@ -37,7 +39,7 @@ func (c *CacheImpl[M]) GetAllEntries() []M {
 	return entries
 }
 
-func (c *CacheImpl[M]) GetEntryByID(id string) M {
+func (c *cache[M]) GetEntryByID(id string) M {
 	group, _ := c.Entries[id]
 	return group
 }

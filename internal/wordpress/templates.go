@@ -2,7 +2,9 @@ package wordpress
 
 import (
 	"bytes"
-	"github.com/salex-org/smart-home-observer/internal/data"
+	"github.com/salex-org/hmip-go-client/pkg/hmip"
+	"github.com/salex-org/smart-home-observer/internal/cache"
+	"slices"
 	"text/template"
 )
 
@@ -10,7 +12,7 @@ var (
 	overviewTemplate = `
 <span class="salex_no-series-meta-information">
 	{{range .}}
-	<p style="text-align: left;">{{.GetName()}}: {{template "temperature" .GetTemperature()}} bei {{template "humidity" .GetHumidity()}}</p>
+	<p style="text-align: left;">{{.getName()}}: {{template "temperature" .getTemperature()}} bei {{template "humidity" .getHumidity()}}</p>
 	<p style="text-align: left;"><span style="color: #808080;">Gemessen am {{template "timestamp" .GetTime()}}</span></p>
 	{{end}}
 </span>
@@ -26,27 +28,67 @@ var (
 )
 
 type Renderer interface {
-	RenderOverview(devices []data.ClimateMeasuring) (string, error)
+	RenderOverview(deviceNames []string) (string, error)
 }
 
-type WordpressRenderer struct {
+type renderer struct {
 	overviewTemplate *template.Template
+	devicesCache     cache.Cache[hmip.Device]
 }
 
-func NewRenderer() (Renderer, error) {
+type climateDataEntry struct {
+	name        string
+	humidity    int
+	temperature float64
+}
+
+func (cde climateDataEntry) getName() string {
+	return cde.name
+}
+func (cde climateDataEntry) getHumidity() int {
+	return cde.humidity
+}
+func (cde climateDataEntry) getTemperature() float64 {
+	return cde.temperature
+}
+func (r *renderer) getClimateDataEntries(deviceNames []string) []climateDataEntry {
+	var entries []climateDataEntry
+	for _, device := range r.devicesCache.GetAllEntries() {
+		if slices.Contains(deviceNames, device.GetName()) && device.GetType() == hmip.DEVICE_TYPE_TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR {
+			entries = append(entries, getClimateDataEntry(device))
+		}
+	}
+	return entries
+}
+func getClimateDataEntry(device hmip.Device) climateDataEntry {
+	cde := climateDataEntry{
+		name: device.GetName(),
+	}
+	for _, base := range device.GetFunctionalChannels() {
+		switch channel := base.(type) {
+		case hmip.ClimateSensorChannel:
+			cde.humidity = channel.GetHumidity()
+			cde.temperature = channel.GetActualTemperature()
+		}
+	}
+	return cde
+}
+
+func NewRenderer(devicesCache cache.Cache[hmip.Device]) (Renderer, error) {
 	overviewTemplate, err := initializeOverviewTemplate()
 	if err != nil {
 		return nil, err
 	}
-	renderer := &WordpressRenderer{
+	renderer := &renderer{
 		overviewTemplate: overviewTemplate,
+		devicesCache:     devicesCache,
 	}
 	return renderer, nil
 }
 
-func (r *WordpressRenderer) RenderOverview(devices []data.ClimateMeasuring) (string, error) {
+func (r *renderer) RenderOverview(deviceNames []string) (string, error) {
 	var buffer bytes.Buffer
-	err := r.overviewTemplate.Execute(&buffer, devices)
+	err := r.overviewTemplate.Execute(&buffer, r.getClimateDataEntries(deviceNames))
 	if err != nil {
 		return "", err
 	}

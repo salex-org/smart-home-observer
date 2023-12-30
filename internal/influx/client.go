@@ -5,25 +5,27 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
-	"github.com/salex-org/smart-home-observer/internal/data"
+	"github.com/salex-org/hmip-go-client/pkg/hmip"
+	"github.com/salex-org/smart-home-observer/internal/cache"
 	"github.com/salex-org/smart-home-observer/internal/util"
 	"os"
 )
 
 type Client interface {
-	SaveDeviceStates(devices []data.Device) error
-	SaveDeviceState(device data.Device) error
+	SaveDeviceStates(devices hmip.Devices) error
+	SaveDeviceState(device hmip.Device) error
 	Shutdown() error
 	Health() error
 }
 
-type InfluxClient struct {
+type client struct {
 	client               influxdb2.Client
 	organization, bucket string
 	processingError      error
+	groupsCache          cache.Cache[hmip.Group]
 }
 
-func NewClient() (Client, error) {
+func NewClient(groupsCache cache.Cache[hmip.Group]) (Client, error) {
 	certFilename, hasAdditionalRootCA := os.LookupEnv("ADDITIONAL_ROOT_CA")
 	rootCAs, _ := x509.SystemCertPool()
 	if rootCAs == nil {
@@ -37,7 +39,7 @@ func NewClient() (Client, error) {
 			rootCAs.AppendCertsFromPEM(cert)
 		}
 	}
-	client := InfluxClient{
+	client := client{
 		client: influxdb2.NewClientWithOptions(
 			util.ReadEnvVar("INFLUX_URL"),
 			util.ReadEnvVar("INFLUX_TOKEN"),
@@ -47,12 +49,13 @@ func NewClient() (Client, error) {
 				})),
 		organization: util.ReadEnvVar("INFLUX_ORGANIZATION"),
 		bucket:       util.ReadEnvVar("INFLUX_BUCKET"),
+		groupsCache:  groupsCache,
 	}
 	_, err := client.client.Health(context.Background())
 	return client, err
 }
 
-func (c InfluxClient) SaveDeviceStates(devices []data.Device) error {
+func (c client) SaveDeviceStates(devices hmip.Devices) error {
 	var err error
 	for _, device := range devices {
 		err = c.SaveDeviceState(device)
@@ -63,37 +66,63 @@ func (c InfluxClient) SaveDeviceStates(devices []data.Device) error {
 	return nil
 }
 
-func (c InfluxClient) SaveDeviceState(device data.Device) error {
+func (c client) SaveDeviceState(device hmip.Device) error {
 	api := c.client.WriteAPIBlocking(c.organization, c.bucket)
 	point := influxdb2.NewPointWithMeasurement("device")
-	point.SetTime(device.GetTime())
-	point.AddField("connection_quality", device.GetConnectionQuality())
-	point.AddField("unreached", device.GetUnreached())
-	point.AddField("low_battery", device.GetLowBattery())
+	point.SetTime(device.GetLastUpdated())
 	point.AddTag("device_name", device.GetName())
 	point.AddTag("device_type", device.GetType())
 	point.AddTag("device_id", device.GetID())
-	point.AddTag("group_name", device.GetMetaGroup().GetName())
-	point.AddTag("group_id", device.GetMetaGroup().GetID())
-	switch device := device.(type) {
-	case data.Switchable:
-		point.AddField("switched_on", device.IsSwitchedIn())
-	case data.ConsumptionMeasuring:
-		point.AddField("current_consumption", device.GetConsumption())
-	case data.ClimateMeasuring:
-		point.AddField("temperature", device.GetTemperature())
-		point.AddField("humidity", device.GetHumidity())
-		point.AddField("vapor_amount", device.GetVaporAmount())
+	for _, base := range device.GetFunctionalChannels() {
+		switch channel := base.(type) {
+		case hmip.BaseDeviceChannel:
+			point.AddField("connection_quality", calculateConnectionQualityFromChannel(channel))
+			point.AddField("unreached", channel.IsUnreached())
+			point.AddField("low_battery", channel.HasLowBattery())
+			point.AddField("under_voltage", channel.HasUnderVoltage())
+			point.AddField("overheated", channel.IsOverheated())
+			metaGroup := c.getMetaGroupFromChannel(channel)
+			if metaGroup != nil {
+				point.AddTag("group_name", metaGroup.GetName())
+				point.AddTag("group_id", metaGroup.GetID())
+			}
+		case hmip.Switchable:
+			point.AddField("switched_on", channel.IsSwitchedOn())
+		case hmip.PowerConsumptionMeasuring:
+			point.AddField("current_power_consumption", channel.GetCurrentPowerConsumption())
+		case hmip.ClimateMeasuring:
+			point.AddField("actual_temperature", channel.GetActualTemperature())
+			point.AddField("humidity", channel.GetHumidity())
+			point.AddField("vapour_amount", channel.GetVapourAmount())
+		}
 	}
 	c.processingError = api.WritePoint(context.Background(), point)
 	return c.processingError
 }
 
-func (c InfluxClient) Shutdown() error {
+func (c client) Shutdown() error {
 	c.client.Close()
 	return nil
 }
 
-func (client InfluxClient) Health() error {
-	return client.processingError
+func (c client) Health() error {
+	return c.processingError
+}
+
+func calculateConnectionQualityFromChannel(channel hmip.BaseDeviceChannel) int {
+	rssi := channel.GetRSSIValue()
+	if rssi < -100 || rssi > 0 {
+		return 0
+	}
+	return rssi + 100
+}
+
+func (c client) getMetaGroupFromChannel(channel hmip.BaseDeviceChannel) hmip.MetaGroup {
+	for _, groupID := range channel.GetGroups() {
+		switch group := c.groupsCache.GetEntryByID(groupID).(type) {
+		case hmip.MetaGroup:
+			return group
+		}
+	}
+	return nil
 }
