@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/salex-org/smart-home-observer/internal/data"
+	"github.com/salex-org/hmip-go-client/pkg/hmip"
+	"github.com/salex-org/smart-home-observer/internal/cache"
 	"net/http"
 )
 
@@ -20,10 +21,11 @@ type HealthStatus struct {
 	Errors  map[string]error `json:"errors"`
 }
 
-func NewServer(healthCheck HealthCheck, measurementCache *data.MeasurementCache) Server {
+func NewServer(healthCheck HealthCheck, devicesCache cache.Cache[hmip.Device], groupsCache cache.Cache[hmip.Group]) Server {
 	server := ServerImpl{
-		healthCheck:      healthCheck,
-		measurementCache: measurementCache,
+		healthCheck: healthCheck,
+		devicesCache: devicesCache,
+		groupsCache: groupsCache,
 	}
 	port := 8080
 	mux := http.NewServeMux()
@@ -38,9 +40,10 @@ func NewServer(healthCheck HealthCheck, measurementCache *data.MeasurementCache)
 }
 
 type ServerImpl struct {
-	healthCheck      HealthCheck
-	measurementCache *data.MeasurementCache
-	httpServer       http.Server
+	healthCheck  HealthCheck
+	httpServer   http.Server
+	devicesCache cache.Cache[hmip.Device]
+	groupsCache  cache.Cache[hmip.Group]
 }
 
 func (s *ServerImpl) Start() error {
@@ -81,18 +84,21 @@ func (s *ServerImpl) handleHealth(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *ServerImpl) handleData(w http.ResponseWriter, _ *http.Request) {
-	jsonData, err := json.Marshal(s.measurementCache)
+	groupData, err := json.Marshal(s.groupsCache)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "Error marshaling measurements: %v", err)
+		_, _ = fmt.Fprintf(w, "Error marshaling groups cache: %v", err)
 		return
 	}
-	if err == nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		_, _ = fmt.Fprint(w, string(jsonData))
-	} else {
+	deviceData, err := json.Marshal(s.devicesCache)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = fmt.Fprintf(w, "Error marshaling devices cache: %v", err)
+		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprintf(w, "\"groups\": %s,\n\"devices\": %s", string(groupData), string(deviceData))
 }
 
 func setMessage(status *HealthStatus) {

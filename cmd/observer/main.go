@@ -3,7 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/salex-org/smart-home-observer/internal/data"
+	hmip2 "github.com/salex-org/hmip-go-client/pkg/hmip"
+	"github.com/salex-org/smart-home-observer/internal/cache"
 	"github.com/salex-org/smart-home-observer/internal/hmip"
 	"github.com/salex-org/smart-home-observer/internal/influx"
 	"github.com/salex-org/smart-home-observer/internal/photo"
@@ -24,7 +25,6 @@ var (
 	wordpressRenderer wordpress.Renderer
 	webServer         webserver.Server
 	photographer      photo.Photographer
-	measurementCache  data.MeasurementCache
 )
 
 func main() {
@@ -60,7 +60,7 @@ func main() {
 	go func() {
 		defer wait.Done()
 		fmt.Printf("Measuring started\n")
-		_ = hmipClient.Start(handleClimateMeasurements, handleConsumptionMeasurements, handleSwitchStateChanges)
+		_ = hmipClient.Start(handleDeviceChanges)
 	}()
 
 	// Loop function for photographer
@@ -86,15 +86,14 @@ func main() {
 	os.Exit(0)
 }
 
-func handleClimateMeasurements(climateMeasurements []data.ClimateMeasurement) error {
-	updatedMeasurements := measurementCache.UpdateClimateMeasurements(climateMeasurements)
-	if len(updatedMeasurements) > 0 {
-		err := influxClient.SaveClimateMeasurements(updatedMeasurements)
-		if err != nil {
-			fmt.Printf("Error saving climate measurements in InfluxDB: %v\n", err)
-			return err
-		}
-		fmt.Printf("New climate measurement data received and stored to InfluxDB\n")
+func handleDeviceChanges(device hmip2.Device) error {
+	err := influxClient.SaveDeviceState(device)
+	if err != nil {
+		fmt.Printf("Error saving device state in InfluxDB: %v\n", err)
+		return err
+	}
+	fmt.Printf("New device state received and stored to InfluxDB\n")
+	if device.GetType() == hmip2.DEVICE_TYPE_TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR {
 		err = updateBlog()
 		if err != nil {
 			fmt.Printf("Error updating climate data on WordPress Blog: %v\n", err)
@@ -105,38 +104,13 @@ func handleClimateMeasurements(climateMeasurements []data.ClimateMeasurement) er
 	return nil
 }
 
-func handleConsumptionMeasurements(consumptionMeasurements []data.ConsumptionMeasurement) error {
-	updatedMeasurements := measurementCache.UpdateConsumptionMeasurements(consumptionMeasurements)
-	if len(updatedMeasurements) > 0 {
-		err := influxClient.SaveConsumptionMeasurements(updatedMeasurements)
-		if err != nil {
-			fmt.Printf("Error saving consumption measurements in InfluxDB: %v\n", err)
-			return err
-		}
-		fmt.Printf("New consumption measurement data received and stored to InfluxDB\n")
-	}
-	return nil
-}
-
-func handleSwitchStateChanges(switchStates []data.SwitchState) error {
-	updatedSwitchStates := measurementCache.UpdateSwitchStates(switchStates)
-	if len(updatedSwitchStates) > 0 {
-		err := influxClient.SaveSwitchStates(updatedSwitchStates)
-		if err != nil {
-			fmt.Printf("Error saving switch states in InfluxDB: %v\n", err)
-			return err
-		}
-		fmt.Printf("New switch states received and stored to InfluxDB\n")
-	}
-	return nil
-}
-
+// TODO: Impement new hmip types
 func updateBlog() error {
 	post, err := wordpressClient.GetPost(wordpress.OverviewID, wordpress.OverviewType)
 	if err != nil {
 		return err
 	}
-	post.Content.Rendered, err = wordpressRenderer.RenderOverview(measurementCache.GetClimateMeasurementsBySensors(([]string{"Maschinenraum", "Bankraum"})))
+	post.Content.Rendered, err = wordpressRenderer.RenderOverview([]string{"Maschinenraum", "Bankraum"})
 	if err != nil {
 		return err
 	}
@@ -152,16 +126,19 @@ func startup() error {
 		fmt.Printf("Timezone CET loaded\n")
 	}
 
-	measurementCache = data.NewMeasurementCache()
-	fmt.Printf("Measurement cache created\n")
+	devicesCache := cache.NewCache[hmip2.Device]()
+	fmt.Printf("Device cache created\n")
 
-	webServer = webserver.NewServer(healthCheck, &measurementCache)
+	groupsCache := cache.NewCache[hmip2.Group]()
+	fmt.Printf("Groups cache created\n")
+
+	webServer = webserver.NewServer(healthCheck, devicesCache, groupsCache)
 	fmt.Printf("Web server created\n")
 
 	photographer = photo.NewPhotographer(time.Minute * 10) // TODO make interval configurable
 	fmt.Printf("Photographer created\n")
 
-	hmipClient, err = hmip.NewClient()
+	hmipClient, err = hmip.NewClient(devicesCache, groupsCache)
 	if err != nil {
 		return err
 	} else {
@@ -171,14 +148,14 @@ func startup() error {
 	wordpressClient = wordpress.NewClient()
 	fmt.Printf("WordPress client created\n")
 
-	wordpressRenderer, err = wordpress.NewRenderer()
+	wordpressRenderer, err = wordpress.NewRenderer(devicesCache)
 	if err != nil {
 		return err
 	} else {
 		fmt.Printf("WordPress renderer created\n")
 	}
 
-	influxClient, err = influx.NewClient()
+	influxClient, err = influx.NewClient(groupsCache)
 	if err != nil {
 		return err
 	} else {
