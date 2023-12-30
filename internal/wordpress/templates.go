@@ -13,8 +13,8 @@ var (
 	overviewTemplate = `
 <span class="salex_no-series-meta-information">
 	{{range .}}
-	<p style="text-align: left;">{{.name}}: {{template "temperature" .temperature}} bei {{template "humidity" .humidity}}</p>
-	<p style="text-align: left;"><span style="color: #808080;">Gemessen am {{template "timestamp" .updated}}</span></p>
+	<p style="text-align: left;">{{.Name}}: {{template "temperature" .Temperature}} bei {{template "humidity" .Humidity}}</p>
+	<p style="text-align: left;"><span style="color: #808080;">Gemessen am {{template "timestamp" .Updated}}</span></p>
 	{{end}}
 </span>
 `
@@ -38,10 +38,10 @@ type renderer struct {
 }
 
 type climateDataEntry struct {
-	name        string
-	humidity    int
-	temperature float64
-	updated     time.Time
+	Name        string
+	Humidity    int
+	Temperature float64
+	Updated     time.Time
 }
 
 func (r *renderer) getClimateDataEntries(deviceIDs []string) []climateDataEntry {
@@ -55,14 +55,14 @@ func (r *renderer) getClimateDataEntries(deviceIDs []string) []climateDataEntry 
 }
 func getClimateDataEntry(device hmip.Device) climateDataEntry {
 	cde := climateDataEntry{
-		name:    device.GetName(),
-		updated: device.GetLastUpdated(),
+		Name:    device.GetName(),
+		Updated: device.GetLastUpdated(),
 	}
 	for _, base := range device.GetFunctionalChannels() {
 		switch channel := base.(type) {
 		case hmip.ClimateSensorChannel:
-			cde.humidity = channel.GetHumidity()
-			cde.temperature = channel.GetActualTemperature()
+			cde.Humidity = channel.GetHumidity()
+			cde.Temperature = channel.GetActualTemperature()
 		}
 	}
 	return cde

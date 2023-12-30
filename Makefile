@@ -54,3 +54,7 @@ docker-stop:
 .PHONY: docker-remove
 docker-remove:
 	docker image rm ${IMAGE}
+
+.PHONY: start-influx
+start-influx:
+	docker compose --file ./docker/docker-compose.yml --project-name smart-home up influx --detach

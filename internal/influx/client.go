@@ -73,9 +73,10 @@ func (c client) SaveDeviceState(device hmip.Device) error {
 	point.AddTag("device_name", device.GetName())
 	point.AddTag("device_type", device.GetType())
 	point.AddTag("device_id", device.GetID())
+	hasBase := false
 	for _, base := range device.GetFunctionalChannels() {
-		switch channel := base.(type) {
-		case hmip.BaseDeviceChannel:
+		if channel, implemented := base.(hmip.BaseDeviceChannel); implemented {
+			hasBase = true
 			point.AddField("connection_quality", calculateConnectionQualityFromChannel(channel))
 			point.AddField("unreached", channel.IsUnreached())
 			point.AddField("low_battery", channel.HasLowBattery())
@@ -86,17 +87,22 @@ func (c client) SaveDeviceState(device hmip.Device) error {
 				point.AddTag("group_name", metaGroup.GetName())
 				point.AddTag("group_id", metaGroup.GetID())
 			}
-		case hmip.Switchable:
+		}
+		if channel, implemented := base.(hmip.Switchable); implemented {
 			point.AddField("switched_on", channel.IsSwitchedOn())
-		case hmip.PowerConsumptionMeasuring:
+		}
+		if channel, implemented := base.(hmip.PowerConsumptionMeasuring); implemented {
 			point.AddField("current_power_consumption", channel.GetCurrentPowerConsumption())
-		case hmip.ClimateMeasuring:
+		}
+		if channel, implemented := base.(hmip.ClimateMeasuring); implemented {
 			point.AddField("actual_temperature", channel.GetActualTemperature())
 			point.AddField("humidity", channel.GetHumidity())
 			point.AddField("vapour_amount", channel.GetVapourAmount())
 		}
 	}
-	c.processingError = api.WritePoint(context.Background(), point)
+	if hasBase {
+		c.processingError = api.WritePoint(context.Background(), point)
+	}
 	return c.processingError
 }
 

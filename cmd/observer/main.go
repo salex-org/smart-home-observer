@@ -110,7 +110,7 @@ func updateBlog() error {
 	if err != nil {
 		return err
 	}
-	post.Content.Rendered, err = wordpressRenderer.RenderOverview([]string{"3014-F711-A000-0EDD-89B3-A112", "3014-F711-A000-0EDD-89B3-A015"})
+	post.Content.Rendered, err = wordpressRenderer.RenderOverview([]string{"3014F711A0000EDD89B3A112", "3014F711A0000EDD89B3A015"})
 	if err != nil {
 		return err
 	}

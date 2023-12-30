@@ -23,9 +23,9 @@ type HealthStatus struct {
 
 func NewServer(healthCheck HealthCheck, devicesCache cache.Cache[hmip.Device], groupsCache cache.Cache[hmip.Group]) Server {
 	server := ServerImpl{
-		healthCheck: healthCheck,
+		healthCheck:  healthCheck,
 		devicesCache: devicesCache,
-		groupsCache: groupsCache,
+		groupsCache:  groupsCache,
 	}
 	port := 8080
 	mux := http.NewServeMux()
@@ -98,7 +98,7 @@ func (s *ServerImpl) handleData(w http.ResponseWriter, _ *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	_, _ = fmt.Fprintf(w, "\"groups\": %s,\n\"devices\": %s", string(groupData), string(deviceData))
+	_, _ = fmt.Fprintf(w, "{ \"groups\": %s, \"devices\": %s }", string(groupData), string(deviceData))
 }
 
 func setMessage(status *HealthStatus) {
