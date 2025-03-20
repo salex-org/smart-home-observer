@@ -1,6 +1,8 @@
 module github.com/salex-org/smart-home-observer
 
-go 1.21
+go 1.23.0
+
+toolchain go1.23.7
 
 require (
 	github.com/influxdata/influxdb-client-go/v2 v2.12.2
