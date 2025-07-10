@@ -20,6 +20,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Update version
+        run: |
+          cat <<< "$(yq '.appVersion = "${{ github.event.inputs.version }}" | .version = "${{ github.event.inputs.version }}"' ./deployments/kubernetes/helm/observer/Chart.yaml)" > ./deployments/kubernetes/helm/observer/Chart.yaml
+
       - name: Create tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
