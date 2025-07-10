@@ -1,0 +1,14 @@
+name: observer
+replicas: 1
+container:
+  image: ghcr.io/salex-org/smart-home-observer
+config:
+  interval: 10
+  hmip:
+    secret: hmip-credentials
+  wordpress:
+    secret: wordpress-credentials
+    endpoint: https://holzwerken.salex.org
+  influx:
+    bucket: homematic
+    organization: salex

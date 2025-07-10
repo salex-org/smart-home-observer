@@ -5,3 +5,4 @@ bin
 
 docker/influx/*
 docker/.env.*
+/deployments/kubernetes/helm/observer/charts/

@@ -2,6 +2,7 @@ BIN ?= bin
 
 APP ?= smart-home-observer
 VERSION ?= 0.0.0
+KIND-CLUSTER ?= salex
 
 IMAGE ?= $(APP):$(VERSION)
 ifeq ($(OS),Windows_NT)
@@ -58,3 +59,20 @@ docker-remove:
 .PHONY: start-influx
 start-influx:
 	docker compose --file ./docker/docker-compose.yml --project-name smart-home up influx --detach
+
+# ===================================
+# Deploy to local kind
+# ===================================
+
+.PHONY: kind-deploy
+kind-deploy: kind-load-image
+	helm upgrade -i ${APP} deployments/kubernetes/helm/observer --set "name=${APP},container.image=${IMAGE}" --kube-context kind-${KIND-CLUSTER}
+
+.PHONY: kind-undeploy
+kind-undeploy:
+	helm delete ${APP} --kube-context kind-${KIND-CLUSTER} --wait
+	docker exec -it salex-control-plane crictl rmi ${IMAGE}
+
+.PHONY: kind-load-image
+kind-load-image: docker-build
+	kind load docker-image ${IMAGE} --name ${KIND-CLUSTER}
