@@ -2,6 +2,8 @@ name: observer
 replicas: 1
 container:
   image: ghcr.io/salex-org/smart-home-observer
+  imagePullSecrets:
+    - name: ghcr-secret
 config:
   interval: 10
   hmip:
