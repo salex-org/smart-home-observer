@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.name }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.name }}
+data:
+  INFLUX_URL: http://{{ .Release.Name }}-influxdb2.{{ .Release.Namespace }}.svc.cluster.local
+  INFLUX_BUCKET: {{ .Values.config.influx.bucket }}
+  INFLUX_ORGANIZATION: {{ .Values.config.influx.organization }}
+  PROCESS_INTERVAL: {{ .Values.config.intervat }}
+  WORDPRESS_ENDPOINT: {{ .Values.config.wordpress.endpoint }}
