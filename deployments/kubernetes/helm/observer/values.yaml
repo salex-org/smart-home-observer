@@ -12,3 +12,8 @@ config:
   influx:
     bucket: homematic
     organization: salex
+influxdb2:
+  adminUser:
+    organization: "salex"
+    bucket: "homematic"
+    retention_policy: "731d"

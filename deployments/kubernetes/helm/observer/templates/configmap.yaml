@@ -6,7 +6,7 @@ metadata:
   labels:
     app: {{ .Values.name }}
 data:
-  INFLUX_URL: {{ .Release.Name }}-influxdb2.{{ .Release.Namespace }}.cluster.svc.cluster.local
+  INFLUX_URL: http://{{ .Release.Name }}-influxdb2.{{ .Release.Namespace }}.svc.cluster.local
   INFLUX_BUCKET: {{ .Values.config.influx.bucket }}
   INFLUX_ORGANIZATION: {{ .Values.config.influx.organization }}
   PROCESS_INTERVAL: {{ .Values.config.intervat }}
