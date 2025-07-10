@@ -30,6 +30,8 @@ jobs:
         run: |
           git config --global user.email "buildmanager@salex.org"
           git config --global user.name "Bob the Builder"
+          git add deployments/kubernetes/helm/observer/Chart.yaml
+          git commit -m "updating version to ${{ github.event.inputs.version }} in helm chart"
           git tag -a v${{ github.event.inputs.version }} -m "tagging version ${{ github.event.inputs.version }}"
           git push --tags
 
