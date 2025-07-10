@@ -120,6 +120,8 @@ jobs:
           ref: v${{ github.event.inputs.version }}
 
       - name: Set up Helm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: azure/setup-helm@v3
 
       - name: Helm dependency update
