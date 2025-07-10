@@ -12,6 +12,8 @@ config:
   influx:
     bucket: homematic
     organization: salex
+  grafana:
+    enabled: false # set to true to deploy grafana datasource, dashboards and alerts
 influxdb2:
   adminUser:
     organization: salex
