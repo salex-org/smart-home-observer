@@ -14,6 +14,7 @@ config:
     organization: salex
 influxdb2:
   adminUser:
-    organization: "salex"
-    bucket: "homematic"
-    retention_policy: "731d"
+    organization: salex
+    bucket: homematic
+    retention_policy: 731d
+    existingSecret: influx-credentials
