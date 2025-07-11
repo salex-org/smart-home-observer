@@ -1,6 +1,7 @@
 package hmip
 
 import (
+	"fmt"
 	"github.com/salex-org/hmip-go-client/pkg/hmip"
 	"github.com/salex-org/smart-home-observer/internal/cache"
 	"github.com/salex-org/smart-home-observer/internal/util"
@@ -24,7 +25,7 @@ type client struct {
 func NewClient(devicesCache cache.Cache[hmip.Device], groupsCache cache.Cache[hmip.Group]) (Client, error) {
 	client := client{
 		devicesCache: devicesCache,
-		groupsCache: groupsCache,
+		groupsCache:  groupsCache,
 	}
 	config, err := hmip.GetConfig()
 	if err != nil {
@@ -60,11 +61,13 @@ func (client client) Start(deviceChangedHandler DeviceChangedHandler) error {
 			_ = client.groupsCache.UpdateEntry(event.GetGroup())
 		}
 	}, hmip.EVENT_TYPE_DEVICE_CHANGED, hmip.EVENT_TYPE_GROUP_CHANGED)
+	fmt.Printf("HmIP: Event handler registered\n")
 
 	// Read data initially
 	var state hmip.State
 	state, client.processingError = client.homematic.LoadCurrentState()
 	if client.processingError == nil {
+		fmt.Printf("HmIP: Reading intial state successful\n")
 		for _, each := range state.GetGroups() {
 			_ = client.groupsCache.UpdateEntry(each)
 		}

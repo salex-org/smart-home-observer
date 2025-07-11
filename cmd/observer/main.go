@@ -7,9 +7,7 @@ import (
 	"github.com/salex-org/smart-home-observer/internal/cache"
 	"github.com/salex-org/smart-home-observer/internal/hmip"
 	"github.com/salex-org/smart-home-observer/internal/influx"
-	"github.com/salex-org/smart-home-observer/internal/photo"
 	"github.com/salex-org/smart-home-observer/internal/webserver"
-	"github.com/salex-org/smart-home-observer/internal/wordpress"
 	"log"
 	"os"
 	"os/signal"
@@ -19,12 +17,12 @@ import (
 )
 
 var (
-	hmipClient        hmip.Client
-	influxClient      influx.Client
-	wordpressClient   wordpress.Client
-	wordpressRenderer wordpress.Renderer
-	webServer         webserver.Server
-	photographer      photo.Photographer
+	hmipClient   hmip.Client
+	influxClient influx.Client
+	//	wordpressClient   wordpress.Client
+	//	wordpressRenderer wordpress.Renderer
+	webServer webserver.Server
+	//	photographer      photo.Photographer
 )
 
 func main() {
@@ -64,12 +62,12 @@ func main() {
 	}()
 
 	// Loop function for photographer
-	wait.Add(1)
-	go func() {
-		defer wait.Done()
-		fmt.Printf("Photographer started\n")
-		_ = photographer.Start()
-	}()
+	//wait.Add(1)
+	//go func() {
+	//	defer wait.Done()
+	//	fmt.Printf("Photographer started\n")
+	//	_ = photographer.Start()
+	//}()
 
 	// Shutdown function waiting for the SIGTERM notification to start the shutdown process
 	wait.Add(1)
@@ -93,29 +91,29 @@ func handleDeviceChanges(device hmip2.Device) error {
 		return err
 	}
 	fmt.Printf("New device state received and stored to InfluxDB\n")
-	if device.GetType() == hmip2.DEVICE_TYPE_TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR {
-		err = updateBlog()
-		if err != nil {
-			fmt.Printf("Error updating climate data on WordPress Blog: %v\n", err)
-			return err
-		}
-		fmt.Printf("Climate data on WordPress Blog updated\n")
-	}
+	//if device.GetType() == hmip2.DEVICE_TYPE_TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR {
+	//	err = updateBlog()
+	//	if err != nil {
+	//		fmt.Printf("Error updating climate data on WordPress Blog: %v\n", err)
+	//		return err
+	//	}
+	//	fmt.Printf("Climate data on WordPress Blog updated\n")
+	//}
 	return nil
 }
 
 // TODO: Impement new hmip types
-func updateBlog() error {
-	post, err := wordpressClient.GetPost(wordpress.OverviewID, wordpress.OverviewType)
-	if err != nil {
-		return err
-	}
-	post.Content.Rendered, err = wordpressRenderer.RenderOverview([]string{"3014F711A0000EDD89B3A112", "3014F711A0000EDD89B3A015"})
-	if err != nil {
-		return err
-	}
-	return wordpressClient.UpdatePost(post)
-}
+//func updateBlog() error {
+//	post, err := wordpressClient.GetPost(wordpress.OverviewID, wordpress.OverviewType)
+//	if err != nil {
+//		return err
+//	}
+//	post.Content.Rendered, err = wordpressRenderer.RenderOverview([]string{"3014F711A0000EDD89B3A112", "3014F711A0000EDD89B3A015"})
+//	if err != nil {
+//		return err
+//	}
+//	return wordpressClient.UpdatePost(post)
+//}
 
 func startup() error {
 	var err error
@@ -135,8 +133,8 @@ func startup() error {
 	webServer = webserver.NewServer(healthCheck, devicesCache, groupsCache)
 	fmt.Printf("Web server created\n")
 
-	photographer = photo.NewPhotographer(time.Minute * 10) // TODO make interval configurable
-	fmt.Printf("Photographer created\n")
+	//photographer = photo.NewPhotographer(time.Minute * 10) // TODO make interval configurable
+	//fmt.Printf("Photographer created\n")
 
 	hmipClient, err = hmip.NewClient(devicesCache, groupsCache)
 	if err != nil {
@@ -145,15 +143,15 @@ func startup() error {
 		fmt.Printf("HomematicIP client created\n")
 	}
 
-	wordpressClient = wordpress.NewClient()
-	fmt.Printf("WordPress client created\n")
-
-	wordpressRenderer, err = wordpress.NewRenderer(devicesCache)
-	if err != nil {
-		return err
-	} else {
-		fmt.Printf("WordPress renderer created\n")
-	}
+	//wordpressClient = wordpress.NewClient()
+	//fmt.Printf("WordPress client created\n")
+	//
+	//wordpressRenderer, err = wordpress.NewRenderer(devicesCache)
+	//if err != nil {
+	//	return err
+	//} else {
+	//	fmt.Printf("WordPress renderer created\n")
+	//}
 
 	influxClient, err = influx.NewClient(groupsCache)
 	if err != nil {
@@ -166,14 +164,14 @@ func startup() error {
 }
 
 func shutdown() {
-	err := photographer.Shutdown()
-	if err != nil {
-		fmt.Printf("Error stopping photographer: %v\n", err)
-	} else {
-		fmt.Printf("Photographer stopped\n")
-	}
+	//err := photographer.Shutdown()
+	//if err != nil {
+	//	fmt.Printf("Error stopping photographer: %v\n", err)
+	//} else {
+	//	fmt.Printf("Photographer stopped\n")
+	//}
 
-	err = hmipClient.Shutdown()
+	err := hmipClient.Shutdown()
 	if err != nil {
 		fmt.Printf("Error stopping measuring: %v\n", err)
 	} else {
@@ -203,11 +201,11 @@ func healthCheck() map[string]error {
 	if err := hmipClient.Health(); err != nil {
 		errors["HomematicIP Client"] = err
 	}
-	if err := wordpressClient.Health(); err != nil {
-		errors["WordPress Client"] = err
-	}
-	if err := photographer.Health(); err != nil {
-		errors["Photographer"] = err
-	}
+	//if err := wordpressClient.Health(); err != nil {
+	//	errors["WordPress Client"] = err
+	//}
+	//if err := photographer.Health(); err != nil {
+	//	errors["Photographer"] = err
+	//}
 	return errors
 }
