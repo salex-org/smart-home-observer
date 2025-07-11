@@ -76,6 +76,8 @@ func (client client) Start(deviceChangedHandler DeviceChangedHandler) error {
 				client.processingError = deviceChangedHandler(each)
 			}
 		}
+	} else {
+		fmt.Printf("HmIP: Reading intial state failed %v\n", client.processingError)
 	}
 
 	// Start the event listening
