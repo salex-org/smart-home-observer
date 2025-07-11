@@ -4,5 +4,4 @@ FROM gcr.io/distroless/static:nonroot
 ARG TARGETPLATFORM
 WORKDIR /
 COPY bin/${TARGETPLATFORM}/observer .
-COPY bin/${TARGETPLATFORM}/healthcheck .
 ENTRYPOINT ["/observer", "run"]

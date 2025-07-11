@@ -44,21 +44,9 @@ $(BIN):
 docker-build:
 	docker build -f local.Dockerfile -t ${IMAGE} .
 
-.PHONY: docker-run
-docker-run: docker-build
-	docker compose --file ./docker/docker-compose.yml --project-name smart-home up --detach
-
-.PHONY: docker-stop
-docker-stop:
-	docker compose --file ./docker/docker-compose.yml --project-name smart-home down
-
 .PHONY: docker-remove
 docker-remove:
 	docker image rm ${IMAGE}
-
-.PHONY: start-influx
-start-influx:
-	docker compose --file ./docker/docker-compose.yml --project-name smart-home up influx --detach
 
 # ===================================
 # Deploy to local kind
