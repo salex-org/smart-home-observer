@@ -78,10 +78,17 @@ func (client client) Start(deviceChangedHandler DeviceChangedHandler) error {
 		}
 	} else {
 		fmt.Printf("HmIP: Reading intial state failed %v\n", client.processingError)
+		return client.processingError
 	}
 
 	// Start the event listening
-	return client.homematic.ListenForEvents()
+	err := client.homematic.ListenForEvents()
+	if err != nil {
+		fmt.Printf("HmIP: Start event listening failed %v\n", err)
+		return err
+	}
+
+	return nil
 }
 
 func (client client) Health() error {
