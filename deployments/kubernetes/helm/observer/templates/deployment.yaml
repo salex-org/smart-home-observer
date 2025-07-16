@@ -26,18 +26,18 @@ spec:
             - containerPort: 8080
           readinessProbe:
             httpGet:
-              path: /health
+              path: /ready
               port: 8080
             initialDelaySeconds: 5
-            periodSeconds: 10
-            failureThreshold: 3
+            periodSeconds: 5
+            failureThreshold: 12
           livenessProbe:
             httpGet:
-              path: /health
+              path: /alive
               port: 8080
             initialDelaySeconds: 60
             periodSeconds: 60
-            failureThreshold: 10
+            failureThreshold: 3
           envFrom:
             - secretRef:
                 name: {{ .Values.config.hmip.secret }}
