@@ -17,10 +17,6 @@ type Server interface {
 type HealthCheck func() map[string]error
 
 type ReadyStatus struct {
-	Message string `json:"status"`
-}
-
-type HealthyStatus struct {
 	Message string           `json:"status"`
 	Errors  map[string]error `json:"errors"`
 }
@@ -33,7 +29,7 @@ func NewServer(healthCheck HealthCheck, devicesCache cache.Cache[hmip.Device], g
 	}
 	port := 8080
 	mux := http.NewServeMux()
-	mux.HandleFunc("/healthy", server.handleHealthy)
+	mux.HandleFunc("/alive", server.handleAlive)
 	mux.HandleFunc("/ready", server.handleReady)
 	mux.HandleFunc("/data", server.handleData)
 	mux.HandleFunc("/", server.handle404)
@@ -68,26 +64,16 @@ func (s *ServerImpl) handle404(w http.ResponseWriter, r *http.Request) {
 	_, _ = fmt.Fprintf(w, "%s not found.", r.URL.Path)
 }
 
-func (s *ServerImpl) handleHealthy(w http.ResponseWriter, r *http.Request) {
-	status := HealthyStatus{
-		Message: "healthy",
-		Errors:  s.healthCheck(),
-	}
-	response, err := json.Marshal(status)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "Error marshaling health status: %v", err)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
+func (s *ServerImpl) handleAlive(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	_, _ = fmt.Fprintf(w, "%s", string(response))
+	_, _ = fmt.Fprint(w, "alive")
 }
 
 func (s *ServerImpl) handleReady(w http.ResponseWriter, _ *http.Request) {
-	errors := s.healthCheck()
-	status := ReadyStatus{}
-	if len(errors) == 0 {
+	status := ReadyStatus{
+		Errors: s.healthCheck(),
+	}
+	if len(status.Errors) == 0 {
 		w.WriteHeader(http.StatusOK)
 		status.Message = "ready"
 	} else {
