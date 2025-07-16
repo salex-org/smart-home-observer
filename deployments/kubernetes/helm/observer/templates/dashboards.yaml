@@ -7,9 +7,9 @@ metadata:
   labels:
     grafana_dashboard: "1"
 data:
-  {{- $files := .Files.Glob "dashboards/*.json" }}
-  {{- range $path, $file := $files }}
-    {{ base $path }}: |-
-  {{ $file | indent 4 }}
-  {{- end }}
+{{- $files := .Files.Glob "dashboards/*.json" }}
+{{- range $path, $file := $files }}
+  {{ base $path }}: |-
+{{ printf "%s" $file | indent 4 }}
+{{- end }}
 {{- end }}
