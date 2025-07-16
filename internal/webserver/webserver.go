@@ -16,7 +16,11 @@ type Server interface {
 
 type HealthCheck func() map[string]error
 
-type HealthStatus struct {
+type ReadyStatus struct {
+	Message string `json:"status"`
+}
+
+type HealthyStatus struct {
 	Message string           `json:"status"`
 	Errors  map[string]error `json:"errors"`
 }
@@ -29,7 +33,8 @@ func NewServer(healthCheck HealthCheck, devicesCache cache.Cache[hmip.Device], g
 	}
 	port := 8080
 	mux := http.NewServeMux()
-	mux.HandleFunc("/health", server.handleHealth)
+	mux.HandleFunc("/healthy", server.handleHealthy)
+	mux.HandleFunc("/ready", server.handleReady)
 	mux.HandleFunc("/data", server.handleData)
 	mux.HandleFunc("/", server.handle404)
 	server.httpServer = http.Server{
@@ -63,11 +68,11 @@ func (s *ServerImpl) handle404(w http.ResponseWriter, r *http.Request) {
 	_, _ = fmt.Fprintf(w, "%s not found.", r.URL.Path)
 }
 
-func (s *ServerImpl) handleHealth(w http.ResponseWriter, _ *http.Request) {
-	status := HealthStatus{
-		Errors: s.healthCheck(),
+func (s *ServerImpl) handleHealthy(w http.ResponseWriter, r *http.Request) {
+	status := HealthyStatus{
+		Message: "healthy",
+		Errors:  s.healthCheck(),
 	}
-	setMessage(&status)
 	response, err := json.Marshal(status)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -75,11 +80,27 @@ func (s *ServerImpl) handleHealth(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	if len(status.Errors) == 0 {
+	w.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprintf(w, "%s", string(response))
+}
+
+func (s *ServerImpl) handleReady(w http.ResponseWriter, _ *http.Request) {
+	errors := s.healthCheck()
+	status := ReadyStatus{}
+	if len(errors) == 0 {
 		w.WriteHeader(http.StatusOK)
+		status.Message = "ready"
 	} else {
 		w.WriteHeader(http.StatusInternalServerError)
+		status.Message = "not ready"
 	}
+	response, err := json.Marshal(status)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = fmt.Fprintf(w, "Error marshaling ready status: %v", err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
 	_, _ = fmt.Fprintf(w, "%s", string(response))
 }
 
@@ -99,12 +120,4 @@ func (s *ServerImpl) handleData(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, _ = fmt.Fprintf(w, "{ \"groups\": %s, \"devices\": %s }", string(groupData), string(deviceData))
-}
-
-func setMessage(status *HealthStatus) {
-	if len(status.Errors) == 0 {
-		status.Message = "healthy"
-	} else {
-		status.Message = "unhealthy"
-	}
 }
