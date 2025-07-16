@@ -14,6 +14,10 @@ config:
   influx:
     bucket: homematic
     organization: salex
+    ingress:
+      enabled: true
+      organization: salex.home
+      host: influx.observer.naboo.salex.home
   grafana:
     enabled: false # set to true to deploy grafana datasource, dashboards and alerts
 influxdb2:
