@@ -52,7 +52,6 @@ func (client client) Shutdown() error {
 func (client client) Start(deviceChangedHandler DeviceChangedHandler) error {
 	// Register event handler changes
 	client.homematic.RegisterEventHandler(func(baseEvent hmip.Event, _ hmip.Origin) {
-		fmt.Printf("HmIP: Event handler called\n")
 		switch event := baseEvent.(type) {
 		case hmip.DeviceChangedEvent:
 			if client.devicesCache.UpdateEntry(event.GetDevice()) {
