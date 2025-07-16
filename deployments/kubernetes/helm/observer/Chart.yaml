@@ -2,8 +2,8 @@ apiVersion: v2
 name: smart-home-observer-chart
 description: A helm chart deploying salex smart-home-observer app to kubernetes
 type: application
-version: 0.0.0
-appVersion: "0.0.0"
+version: 2.9.2
+appVersion: "2.9.2"
 dependencies:
   - name: influxdb2
     version: 2.1.2
