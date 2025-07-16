@@ -4,11 +4,14 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
+	"github.com/avast/retry-go/v4"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/salex-org/hmip-go-client/pkg/hmip"
 	"github.com/salex-org/smart-home-observer/internal/cache"
 	"github.com/salex-org/smart-home-observer/internal/util"
 	"os"
+	"time"
 )
 
 type Client interface {
@@ -51,7 +54,20 @@ func NewClient(groupsCache cache.Cache[hmip.Group]) (Client, error) {
 		bucket:       util.ReadEnvVar("INFLUX_BUCKET"),
 		groupsCache:  groupsCache,
 	}
-	_, err := client.client.Health(context.Background())
+	err := retry.Do(func() error {
+		ready, err := client.client.Ready(context.Background())
+		if err != nil {
+			return err
+		}
+		if ready == nil || ready.Status == nil || *ready.Status != "ready" {
+			return fmt.Errorf("InfluxDB nicht bereit, Status: %v", ready.Status)
+		}
+		return nil
+	},
+		retry.Delay(5*time.Second), // alle 5 Sekunden
+		retry.Attempts(36),         // 36 Versuche → 3 Minuten
+		retry.DelayType(retry.FixedDelay))
+
 	return client, err
 }
 
