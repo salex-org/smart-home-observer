@@ -92,6 +92,9 @@ groups:
         annotations:
           summary: The minimum temperature of {{ $labels.device_name }} was less than 3 degree in the last 24 hours
         isPaused: false
+        labels:
+          room: workshop
+          subject: climate
       - uid: b718b7c8-2ec4-4e58-8169-617bd57ed053
         title: Workshop too hot
         condition: C
@@ -179,6 +182,9 @@ groups:
         annotations:
           summary: The maximum temperature of {{ $labels.device_name }} was more than 30 degree in the last 24 hours
         isPaused: false
+        labels:
+          room: workshop
+          subject: climate
       - uid: dad0758d-e873-4c69-ad7c-d78f8557ddf5
         title: Workshop too wet
         condition: C
@@ -266,6 +272,9 @@ groups:
         annotations:
           summary: The maximum humidity of {{ $labels.device_name }} was more than 90 percent in the last 24 hours
         isPaused: false
+        labels:
+          room: workshop
+          subject: climate
       - uid: de2c5f2a-1961-4dec-af0f-871f549a24df
         title: Workshop too dry
         condition: C
@@ -353,3 +362,6 @@ groups:
         annotations:
           summary: The minimum humidity of {{ $labels.device_name }} was less than 10 percent in the last 24 hours
         isPaused: false
+        labels:
+          room: workshop
+          subject: climate

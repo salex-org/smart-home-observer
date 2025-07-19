@@ -145,13 +145,13 @@
       },
       "id": 3,
       "options": {
-        "alertInstanceLabelFilter": "",
+        "alertInstanceLabelFilter": "room=workshop,subject=climate",
         "alertName": "",
         "dashboardAlerts": false,
         "datasource": "-- Grafana --",
         "folder": {
-          "title": "smart-home",
-          "uid": "smart-home"
+          "title": "",
+          "uid": ""
         },
         "groupBy": [],
         "groupMode": "default",
