@@ -2,7 +2,7 @@ apiVersion: 1
 groups:
   - orgId: 1
     name: climate
-    folder: smart-home-observer
+    folder: smart-home
     interval: 1d
     rules:
       - uid: b27458f1-f03b-44e4-8826-709ba30c9b16
@@ -30,9 +30,6 @@ groups:
                     )
                   )
                   |> group(columns: ["device_name"])
-              datasource:
-                type: influxdb
-                uid: smart-home-observer
           - refId: B
             relativeTimeRange:
               from: 86400
@@ -120,9 +117,6 @@ groups:
                     )
                   )
                   |> group(columns: ["device_name"])
-              datasource:
-                type: influxdb
-                uid: smart-home-observer
           - refId: B
             relativeTimeRange:
               from: 86400
@@ -210,9 +204,6 @@ groups:
                     )
                   )
                   |> group(columns: ["device_name"])
-              datasource:
-                type: influxdb
-                uid: smart-home-observer
           - refId: B
             relativeTimeRange:
               from: 86400
@@ -300,9 +291,6 @@ groups:
                     )
                   )
                   |> group(columns: ["device_name"])
-              datasource:
-                type: influxdb
-                uid: smart-home-observer
           - refId: B
             relativeTimeRange:
               from: 86400

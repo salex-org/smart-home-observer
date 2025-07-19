@@ -150,8 +150,8 @@
         "dashboardAlerts": false,
         "datasource": "-- Grafana --",
         "folder": {
-          "title": "smart-home-observer",
-          "uid": "smart-home-observer"
+          "title": "smart-home",
+          "uid": "smart-home"
         },
         "groupBy": [],
         "groupMode": "default",
@@ -299,7 +299,6 @@
   "timepicker": {},
   "timezone": "",
   "title": "Klima",
-  "folderUid": "smart-home-observer",
   "uid": "a32a1e0d-4db5-46dd-8d16-ef9a58fe0108",
   "version": 2
 }
