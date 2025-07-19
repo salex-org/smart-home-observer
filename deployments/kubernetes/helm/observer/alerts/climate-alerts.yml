@@ -29,7 +29,6 @@ groups:
                       r.device_id == "3014F711A0000EDD89B3A112"
                     )
                   )
-                  |> map(fn: (r) => ({ r with subject: "climate" }))
                   |> group(columns: ["device_name"])
           - refId: B
             relativeTimeRange:
@@ -117,7 +116,6 @@ groups:
                       r.device_id == "3014F711A0000EDD89B3A112"
                     )
                   )
-                  |> map(fn: (r) => ({ r with subject: "climate" }))
                   |> group(columns: ["device_name"])
           - refId: B
             relativeTimeRange:
@@ -205,7 +203,6 @@ groups:
                       r.device_id == "3014F711A0000EDD89B3A112"
                     )
                   )
-                  |> map(fn: (r) => ({ r with subject: "climate" }))
                   |> group(columns: ["device_name"])
           - refId: B
             relativeTimeRange:
@@ -293,7 +290,6 @@ groups:
                       r.device_id == "3014F711A0000EDD89B3A112"
                     )
                   )
-                  |> map(fn: (r) => ({ r with subject: "climate" }))
                   |> group(columns: ["device_name"])
           - refId: B
             relativeTimeRange:
