@@ -24,7 +24,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "fieldConfig": {
         "defaults": {
@@ -149,7 +149,7 @@
           "alias": "consumption",
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [
             {
@@ -196,7 +196,7 @@
           "alias": "state",
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "hide": false,
@@ -245,8 +245,8 @@
         "dashboardAlerts": false,
         "datasource": "-- Grafana --",
         "folder": {
-          "title": "vivaria",
-          "uid": "c63e3446-1376-4f34-9248-72a8d87e6e0e"
+          "title": "Vivarien",
+          "uid": "smart-home-vivaria"
         },
         "groupBy": [],
         "groupMode": "default",
@@ -267,7 +267,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "fieldConfig": {
         "defaults": {
@@ -392,7 +392,7 @@
           "alias": "consumption",
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [
             {
@@ -439,7 +439,7 @@
           "alias": "state",
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "hide": false,
@@ -473,7 +473,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "fieldConfig": {
         "defaults": {
@@ -598,7 +598,7 @@
           "alias": "consumption",
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [
             {
@@ -645,7 +645,7 @@
           "alias": "state",
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "hide": false,

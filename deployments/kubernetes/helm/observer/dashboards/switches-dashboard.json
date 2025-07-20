@@ -24,7 +24,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "description": "",
       "fieldConfig": {
@@ -89,7 +89,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "measurement": "device",
@@ -126,7 +126,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "description": "",
       "fieldConfig": {
@@ -206,7 +206,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "measurement": "device",
@@ -239,7 +239,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "description": "",
       "fieldConfig": {
@@ -304,7 +304,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "measurement": "device",
@@ -341,7 +341,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "description": "",
       "fieldConfig": {
@@ -421,7 +421,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "measurement": "device",
@@ -454,7 +454,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "description": "",
       "fieldConfig": {
@@ -519,7 +519,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "measurement": "device",
@@ -556,7 +556,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "description": "",
       "fieldConfig": {
@@ -636,7 +636,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "measurement": "device",
@@ -669,7 +669,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "description": "",
       "fieldConfig": {
@@ -734,7 +734,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "measurement": "device",
@@ -771,7 +771,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "description": "",
       "fieldConfig": {
@@ -851,7 +851,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "measurement": "device",
@@ -884,7 +884,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "description": "",
       "fieldConfig": {
@@ -949,7 +949,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "measurement": "device",
@@ -986,7 +986,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "description": "",
       "fieldConfig": {
@@ -1066,7 +1066,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "measurement": "device",
@@ -1099,7 +1099,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "description": "",
       "fieldConfig": {
@@ -1164,7 +1164,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "measurement": "device",
@@ -1201,7 +1201,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "homematic-influx"
+        "uid": "smart-home-observer-homematic"
       },
       "description": "",
       "fieldConfig": {
@@ -1281,7 +1281,7 @@
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "homematic-influx"
+            "uid": "smart-home-observer-homematic"
           },
           "groupBy": [],
           "measurement": "device",

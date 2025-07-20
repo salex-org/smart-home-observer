@@ -1,0 +1,69 @@
+{{- if .Values.config.grafana.enabled }}
+{{- $influxSecret := lookup "v1" "Secret" .Release.Namespace .Values.influxdb2.adminUser.existingSecret }}
+{{- if not $influxSecret }}
+{{- fail "InfluxDB Secret not found – deploy Influx first" }}
+{{- end }}
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: {{ .Values.name }}-homematic-datasource
+  namespace: {{ .Release.Namespace }}
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      grafana: naboo
+  valuesFrom:
+    - targetPath: "secureJsonData.httpHeaderValue1"
+      valueFrom:
+        secretKeyRef:
+          name: "influx-credentials"
+          key: "admin-token"
+  datasource:
+    name: InfluxDB Homematic
+    uid: smart-home-observer-homematic
+    type: influxdb
+    access: proxy
+    url: http://{{ .Release.Name }}-influxdb2.{{ .Release.Namespace }}.svc.cluster.local
+    jsonData:
+      dbName: homematic
+      httpMode: GET
+      version: InfluxQL
+      httpHeaderName1: Authorization
+    secureJsonData:
+      "httpHeaderValue1": "Token ${admin-token}"
+    isDefault: false
+    editable: false
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: {{ .Values.name }}-consumption-datasource
+  namespace: {{ .Release.Namespace }}
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      grafana: naboo
+  valuesFrom:
+    - targetPath: "secureJsonData.httpHeaderValue1"
+      valueFrom:
+        secretKeyRef:
+          name: "influx-credentials"
+          key: "admin-token"
+  datasource:
+    name: InfluxDB Consumption
+    uid: smart-home-observer-consumption
+    type: influxdb
+    access: proxy
+    url: http://{{ .Release.Name }}-influxdb2.{{ .Release.Namespace }}.svc.cluster.local
+    jsonData:
+      dbName: consumption
+      httpMode: GET
+      version: InfluxQL
+      httpHeaderName1: Authorization
+    secureJsonData:
+      "httpHeaderValue1": "Token ${admin-token}"
+    isDefault: false
+    editable: false
+{{- end }}

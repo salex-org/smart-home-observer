@@ -19,7 +19,7 @@ spec:
           relativeTimeRange:
             from: 86400
             to: 0
-          datasourceUid: homematic-influx
+          datasourceUid: smart-home-observer-homematic
           model:
             datasource:
               type: influxdb
@@ -125,7 +125,7 @@ spec:
           relativeTimeRange:
             from: 86400
             to: 0
-          datasourceUid: homematic-influx
+          datasourceUid: smart-home-observer-homematic
           model:
             datasource:
               type: influxdb
@@ -226,7 +226,7 @@ spec:
           relativeTimeRange:
             from: 86400
             to: 0
-          datasourceUid: homematic-influx
+          datasourceUid: smart-home-observer-homematic
           model:
             datasource:
               type: influxdb
