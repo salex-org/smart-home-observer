@@ -1,0 +1,363 @@
+{{- if .Values.config.grafana.enabled }}
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaAlertRuleGroup
+metadata:
+  name: {{ .Values.name }}-climate-alerts
+  namespace: {{ .Release.Namespace }}
+spec:
+  folderRef: {{ .Values.name }}-climate-folder
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      grafana: naboo
+  interval: 1d
+  rules:
+    - uid: b27458f1-f03b-44e4-8826-709ba30c9b16
+      title: Workshop too cold
+      condition: C
+      data:
+        - refId: A
+          relativeTimeRange:
+            from: 86400
+            to: 0
+          datasourceUid: smart-home-observer
+          model:
+            refId: A
+            rawQuery: true
+            resultFormat: time_series
+            query: |
+              from(bucket: "homematic")
+                |> range(start: v.timeRangeStart, stop:v.timeRangeStop)
+                |> filter(fn: (r) =>
+                  r._measurement == "device" and
+                  r._field == "actual_temperature" and
+                  (
+                    r.device_id == "3014F711A0000EDD89B3A015" or
+                    r.device_id == "3014F711A0000EDD89B3A112"
+                  )
+                )
+                |> group(columns: ["device_name"])
+        - refId: B
+          relativeTimeRange:
+            from: 86400
+            to: 0
+          datasourceUid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params: []
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params:
+                    - B
+                reducer:
+                  params: []
+                  type: last
+                type: query
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: A
+            intervalMs: 1000
+            maxDataPoints: 43200
+            reducer: min
+            refId: B
+            type: reduce
+        - refId: C
+          relativeTimeRange:
+            from: 86400
+            to: 0
+          datasourceUid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params:
+                    - 3
+                  type: lt
+                operator:
+                  type: and
+                query:
+                  params:
+                    - C
+                reducer:
+                  params: []
+                  type: last
+                type: query
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: B
+            intervalMs: 1000
+            maxDataPoints: 43200
+            refId: C
+            type: threshold
+      noDataState: NoData
+      execErrState: Error
+      for: 0s
+      annotations:
+        summary: The minimum temperature of {{ $labels.device_name }} was less than 3 degree in the last 24 hours
+      isPaused: false
+    - uid: b718b7c8-2ec4-4e58-8169-617bd57ed053
+      title: Workshop too hot
+      condition: C
+      data:
+        - refId: A
+          relativeTimeRange:
+            from: 86400
+            to: 0
+          datasourceUid: smart-home-observer
+          model:
+            refId: A
+            rawQuery: true
+            resultFormat: time_series
+            query: |
+              from(bucket: "homematic")
+                |> range(start: v.timeRangeStart, stop:v.timeRangeStop)
+                |> filter(fn: (r) =>
+                  r._measurement == "device" and
+                  r._field == "actual_temperature" and
+                  (
+                    r.device_id == "3014F711A0000EDD89B3A015" or
+                    r.device_id == "3014F711A0000EDD89B3A112"
+                  )
+                )
+                |> group(columns: ["device_name"])
+        - refId: B
+          relativeTimeRange:
+            from: 86400
+            to: 0
+          datasourceUid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params: []
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params:
+                    - B
+                reducer:
+                  params: []
+                  type: last
+                type: query
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: A
+            intervalMs: 1000
+            maxDataPoints: 43200
+            reducer: max
+            refId: B
+            type: reduce
+        - refId: C
+          relativeTimeRange:
+            from: 86400
+            to: 0
+          datasourceUid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params:
+                    - 30
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params:
+                    - C
+                reducer:
+                  params: []
+                  type: last
+                type: query
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: B
+            intervalMs: 1000
+            maxDataPoints: 43200
+            refId: C
+            type: threshold
+      noDataState: NoData
+      execErrState: Error
+      for: 0s
+      annotations:
+        summary: The maximum temperature of {{ $labels.device_name }} was more than 30 degree in the last 24 hours
+      isPaused: false
+    - uid: dad0758d-e873-4c69-ad7c-d78f8557ddf5
+      title: Workshop too wet
+      condition: C
+      data:
+        - refId: A
+          relativeTimeRange:
+            from: 86400
+            to: 0
+          datasourceUid: smart-home-observer
+          model:
+            refId: A
+            rawQuery: true
+            resultFormat: time_series
+            query: |
+              from(bucket: "homematic")
+                |> range(start: v.timeRangeStart, stop:v.timeRangeStop)
+                |> filter(fn: (r) =>
+                  r._measurement == "device" and
+                  r._field == "humidity" and
+                  (
+                    r.device_id == "3014F711A0000EDD89B3A015" or
+                    r.device_id == "3014F711A0000EDD89B3A112"
+                  )
+                )
+                |> group(columns: ["device_name"])
+        - refId: B
+          relativeTimeRange:
+            from: 86400
+            to: 0
+          datasourceUid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params: []
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params:
+                    - B
+                reducer:
+                  params: []
+                  type: last
+                type: query
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: A
+            intervalMs: 1000
+            maxDataPoints: 43200
+            reducer: max
+            refId: B
+            type: reduce
+        - refId: C
+          relativeTimeRange:
+            from: 86400
+            to: 0
+          datasourceUid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params:
+                    - 90
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params:
+                    - C
+                reducer:
+                  params: []
+                  type: last
+                type: query
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: B
+            intervalMs: 1000
+            maxDataPoints: 43200
+            refId: C
+            type: threshold
+      noDataState: NoData
+      execErrState: Error
+      for: 0s
+      annotations:
+        summary: The maximum humidity of {{ $labels.device_name }} was more than 90 percent in the last 24 hours
+      isPaused: false
+    - uid: de2c5f2a-1961-4dec-af0f-871f549a24df
+      title: Workshop too dry
+      condition: C
+      data:
+        - refId: A
+          relativeTimeRange:
+            from: 86400
+            to: 0
+          datasourceUid: smart-home-observer
+          model:
+            refId: A
+            rawQuery: true
+            resultFormat: time_series
+            query: |
+              from(bucket: "homematic")
+                |> range(start: v.timeRangeStart, stop:v.timeRangeStop)
+                |> filter(fn: (r) =>
+                  r._measurement == "device" and
+                  r._field == "humidity" and
+                  (
+                    r.device_id == "3014F711A0000EDD89B3A015" or
+                    r.device_id == "3014F711A0000EDD89B3A112"
+                  )
+                )
+                |> group(columns: ["device_name"])
+        - refId: B
+          relativeTimeRange:
+            from: 86400
+            to: 0
+          datasourceUid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params: []
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params:
+                    - B
+                reducer:
+                  params: []
+                  type: last
+                type: query
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: A
+            intervalMs: 1000
+            maxDataPoints: 43200
+            reducer: min
+            refId: B
+            type: reduce
+        - refId: C
+          relativeTimeRange:
+            from: 86400
+            to: 0
+          datasourceUid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params:
+                    - 10
+                  type: lt
+                operator:
+                  type: and
+                query:
+                  params:
+                    - C
+                reducer:
+                  params: []
+                  type: last
+                type: query
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: B
+            intervalMs: 1000
+            maxDataPoints: 43200
+            refId: C
+            type: threshold
+      noDataState: NoData
+      execErrState: Error
+      for: 0s
+      annotations:
+        summary: The minimum humidity of {{ $labels.device_name }} was less than 10 percent in the last 24 hours
+      isPaused: false
+{{- end }}

@@ -1,0 +1,16 @@
+{{- if .Values.config.grafana.enabled }}
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: {{ .Values.name }}-climate-dashboard
+  namespace: {{ .Release.Namespace }}
+spec:
+  folderRef: { .Values.name }}-climate-folder
+  resyncPeriod: 30s
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      grafana: naboo
+  json: >
+{{ .Files.Get "dashboards/climate-dashboard.json" | indent 4 }}
+{{- end }}

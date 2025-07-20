@@ -3,26 +3,29 @@
 {{- if not $influxSecret }}
 {{- fail "InfluxDB Secret not found – deploy Influx first" }}
 {{- end }}
-apiVersion: v1
-kind: Secret
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
 metadata:
   name: {{ .Values.name }}-datasource
   namespace: {{ .Release.Namespace }}
-  labels:
-    grafana_datasource: "1"
-type: Opaque
-stringData:
-  influx-datasource.yaml: |
-    apiVersion: 1
-    datasources:
-      - name: InfluxDB
-        uid: smart-home-observer
-        type: influxdb
-        access: proxy
-        url: http://{{ .Release.Name }}-influxdb2.{{ .Release.Namespace }}.svc.cluster.local
-        jsonData:
-          version: Flux
-          organization: salex
-        secureJsonData:
-          token: '{{ index $influxSecret.data "admin-token" | b64dec }}'
+spec:
+  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      grafana: naboo
+  valuesFrom:
+    - targetPath: "secureJsonData.token"
+      valueFrom:
+        secretKeyRef:
+          name: "influx-credentials"
+          key: "admin-token"
+  datasource:
+    name: InfluxDB
+    uid: smart-home-observer
+    type: influxdb
+    access: proxy
+    url: http://{{ .Release.Name }}-influxdb2.{{ .Release.Namespace }}.svc.cluster.local
+    jsonData:
+      version: Flux
+      organization: salex
 {{- end }}
