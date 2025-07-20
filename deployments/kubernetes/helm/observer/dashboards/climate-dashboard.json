@@ -180,10 +180,6 @@
         "alertName": "",
         "dashboardAlerts": false,
         "datasource": "-- Grafana --",
-        "folder": {
-          "title": "",
-          "uid": ""
-        },
         "groupBy": [],
         "groupMode": "default",
         "maxItems": 20,
