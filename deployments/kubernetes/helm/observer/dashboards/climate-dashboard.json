@@ -176,13 +176,13 @@
       },
       "id": 3,
       "options": {
-        "alertInstanceLabelFilter": "",
+        "alertInstanceLabelFilter": "grafana_folder=Smart Home/Klima",
         "alertName": "",
         "dashboardAlerts": false,
         "datasource": "-- Grafana --",
         "folder": {
-          "title": "Klima",
-          "uid": "smart-home-climate"
+          "title": "",
+          "uid": ""
         },
         "groupBy": [],
         "groupMode": "default",

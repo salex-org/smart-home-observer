@@ -10,7 +10,7 @@ spec:
   instanceSelector:
     matchLabels:
       grafana: naboo
-  interval: 24h
+  interval: 30m
   rules:
     - uid: b27458f1-f03b-44e4-8826-709ba30c9b16
       title: Workshop too cold
