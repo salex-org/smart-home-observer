@@ -176,7 +176,7 @@
       },
       "id": 3,
       "options": {
-        "alertInstanceLabelFilter": "grafana_folder=Smart Home/Klima",
+        "alertInstanceLabelFilter": "smart_home_section=climate",
         "alertName": "",
         "dashboardAlerts": false,
         "datasource": "-- Grafana --",

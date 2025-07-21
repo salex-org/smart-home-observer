@@ -20,6 +20,7 @@ config:
       host: influx.observer.naboo.salex.home
   grafana:
     enabled: false # set to true to deploy grafana datasource, dashboards and alerts
+    instance: naboo # add a label named 'grafana' to the instanceSelector section in spec of all grafana resources
 influxdb2:
   adminUser:
     organization: salex

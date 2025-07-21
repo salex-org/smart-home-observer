@@ -240,7 +240,7 @@
       },
       "id": 4,
       "options": {
-        "alertInstanceLabelFilter": "grafana_folder=Smart Home/Vivarien",
+        "alertInstanceLabelFilter": "smart_home_section=vivaria",
         "alertName": "",
         "dashboardAlerts": false,
         "datasource": "-- Grafana --",

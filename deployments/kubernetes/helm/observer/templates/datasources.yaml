@@ -12,7 +12,7 @@ spec:
   allowCrossNamespaceImport: true
   instanceSelector:
     matchLabels:
-      grafana: naboo
+      {{ .Values.config.grafana.instance }}
   valuesFrom:
     - targetPath: "secureJsonData.httpHeaderValue1"
       valueFrom:
@@ -44,7 +44,7 @@ spec:
   allowCrossNamespaceImport: true
   instanceSelector:
     matchLabels:
-      grafana: naboo
+      {{ .Values.config.grafana.instance }}
   valuesFrom:
     - targetPath: "secureJsonData.httpHeaderValue1"
       valueFrom:

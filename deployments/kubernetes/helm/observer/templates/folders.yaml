@@ -2,41 +2,13 @@
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaFolder
 metadata:
-  name: {{ .Values.name }}-parent-folder
+  name: {{ .Values.name }}-folder
   namespace: {{ .Release.Namespace }}
 spec:
   allowCrossNamespaceImport: true
   instanceSelector:
     matchLabels:
-      grafana: naboo
+      {{ .Values.config.grafana.instance }}
   title: Smart Home
-  uid: smart-home
----
-apiVersion: grafana.integreatly.org/v1beta1
-kind: GrafanaFolder
-metadata:
-  name: {{ .Values.name }}-climate-folder
-  namespace: {{ .Release.Namespace }}
-spec:
-  parentFolderRef: {{ .Values.name }}-parent-folder
-  allowCrossNamespaceImport: true
-  instanceSelector:
-    matchLabels:
-      grafana: naboo
-  title: Klima
-  uid: smart-home-climate
----
-apiVersion: grafana.integreatly.org/v1beta1
-kind: GrafanaFolder
-metadata:
-  name: {{ .Values.name }}-vivaria-folder
-  namespace: {{ .Release.Namespace }}
-spec:
-  parentFolderRef: {{ .Values.name }}-parent-folder
-  allowCrossNamespaceImport: true
-  instanceSelector:
-    matchLabels:
-      grafana: naboo
-  title: Vivarien
-  uid: smart-home-vivaria
+  uid: smart-home-observer
 {{- end }}

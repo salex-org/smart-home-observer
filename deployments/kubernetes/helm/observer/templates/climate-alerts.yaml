@@ -5,15 +5,17 @@ metadata:
   name: {{ .Values.name }}-climate-alerts
   namespace: {{ .Release.Namespace }}
 spec:
-  folderRef: {{ .Values.name }}-climate-folder
+  folderRef: {{ .Values.name }}-folder
   allowCrossNamespaceImport: true
   instanceSelector:
     matchLabels:
-      grafana: naboo
+      grafana: {{ .Values.config.grafana.instance }}
   interval: 30m
   rules:
     - uid: b27458f1-f03b-44e4-8826-709ba30c9b16
       title: Workshop too cold
+      labels:
+        smart_home_section: climate
       condition: C
       data:
         - refId: A
@@ -111,6 +113,8 @@ spec:
       isPaused: false
     - uid: b718b7c8-2ec4-4e58-8169-617bd57ed053
       title: Workshop too hot
+      labels:
+        smart_home_section: climate
       condition: C
       data:
         - refId: A
@@ -208,6 +212,8 @@ spec:
       isPaused: false
     - uid: dad0758d-e873-4c69-ad7c-d78f8557ddf5
       title: Workshop too wet
+      labels:
+        smart_home_section: climate
       condition: C
       data:
         - refId: A
@@ -305,6 +311,8 @@ spec:
       isPaused: false
     - uid: de2c5f2a-1961-4dec-af0f-871f549a24df
       title: Workshop too dry
+      labels:
+        smart_home_section: climate
       condition: C
       data:
         - refId: A

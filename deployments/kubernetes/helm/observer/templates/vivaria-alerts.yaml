@@ -4,15 +4,17 @@ metadata:
   name: {{ .Values.name }}-vivaria-alerts
   namespace: {{ .Release.Namespace }}
 spec:
-  folderRef: {{ .Values.name }}-vivaria-folder
+  folderRef: {{ .Values.name }}-folder
   allowCrossNamespaceImport: true
   instanceSelector:
     matchLabels:
-      grafana: naboo
+      {{ .Values.config.grafana.instance }}
   interval: 5m
   rules:
     - uid: e64b653e-d33a-45cd-81e8-f72f5e070c7c
       title: Terrarium light faulty
+      labels:
+        smart_home_section: vivaria
       condition: C
       data:
         - refId: A
@@ -119,6 +121,8 @@ spec:
       isPaused: false
     - uid: ce583edd-359b-4959-99db-c4409024ea17
       title: Aquarium light faulty
+      labels:
+        smart_home_section: vivaria
       condition: C
       data:
         - refId: A
@@ -220,6 +224,8 @@ spec:
       isPaused: false
     - uid: bed43213-7917-4195-88e2-27a48f7fbaa9
       title: Aquarium pump faulty
+      labels:
+        smart_home_section: vivaria
       condition: C
       data:
         - refId: A

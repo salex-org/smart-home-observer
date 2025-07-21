@@ -1,0 +1,21 @@
+{{- if .Values.config.grafana.enabled }}
+  {{- $root := . }}
+  {{- $files := .Files.Glob "dashboards/*.json" }}
+  {{- range $path, $file := $files }}
+    {{- $filename := base $path | replace ".json" "" }}
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: {{ $root.Values.name }}-{{ $filename }}
+  namespace: {{ $root.Release.Namespace }}
+spec:
+  folderRef: {{ $root.Values.name }}-folder
+  resyncPeriod: 30s
+  instanceSelector:
+    matchLabels:
+      grafana: {{ $root.Values.config.grafana.instance }}
+  json: >
+{{ printf "%s" $file | indent 4 }}
+  {{- end }}
+{{- end }}
