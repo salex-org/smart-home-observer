@@ -12,6 +12,7 @@ metadata:
 spec:
   folderRef: {{ $root.Release.Name }}-folder
   resyncPeriod: 30s
+  allowCrossNamespaceImport: true
   instanceSelector:
     matchLabels:
       grafana: {{ $root.Values.config.grafana.instance }}
