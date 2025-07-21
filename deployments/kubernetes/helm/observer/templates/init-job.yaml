@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.name }}-influx-init
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.name }}-influx-init
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    spec:
+      containers:
+        - name: influx-init
+          image: ghcr.io/salex-org/backup:0.0.4
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              CONSUMPTION_BUCKET_ID=$(influx bucket create --org salex --name consumption --retention 365d --json | jq -r ".id")
+              influx auth create --org salex --token "$CONSUMPTION_TOKEN" --write-buckets "$CONSUMPTION_BUCKET_ID"
+          env:
+            - name: INFLUX_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.influxdb2.adminUser.existingSecret }}
+                  key: admin-token
+            - name: CONSUMPTION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: { { .Values.influxdb2.adminUser.existingSecret } }
+                  key: consumption-token
+      imagePullSecrets:
+        - name: {{ .Values.container.imagePullSecrets[0].name }}
+      restartPolicy: OnFailure

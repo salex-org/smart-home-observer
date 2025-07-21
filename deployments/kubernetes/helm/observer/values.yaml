@@ -20,17 +20,10 @@ config:
       host: influx.observer.naboo.salex.home
   grafana:
     enabled: false # set to true to deploy grafana datasource, dashboards and alerts
-    instance: naboo # add a label named 'grafana' to the instanceSelector section in spec of all grafana resources
+    instance: "" # add a label named 'grafana' to the instanceSelector section in spec of all grafana resources
 influxdb2:
   adminUser:
     organization: salex
     bucket: homematic
     retention_policy: 731d
     existingSecret: influx-credentials
-  initScripts:
-    enabled: true
-    scripts:
-      create-buckets.sh: |-
-        #!/bin/sh
-        influx bucket create --org salex --name consumption --retention 365d
-      
