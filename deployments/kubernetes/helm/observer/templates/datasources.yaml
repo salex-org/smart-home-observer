@@ -12,7 +12,7 @@ spec:
   allowCrossNamespaceImport: true
   instanceSelector:
     matchLabels:
-      {{ .Values.config.grafana.instance }}
+      grafana: {{ .Values.config.grafana.instance }}
   valuesFrom:
     - targetPath: "secureJsonData.httpHeaderValue1"
       valueFrom:
@@ -44,7 +44,7 @@ spec:
   allowCrossNamespaceImport: true
   instanceSelector:
     matchLabels:
-      {{ .Values.config.grafana.instance }}
+      grafana: {{ .Values.config.grafana.instance }}
   valuesFrom:
     - targetPath: "secureJsonData.httpHeaderValue1"
       valueFrom:

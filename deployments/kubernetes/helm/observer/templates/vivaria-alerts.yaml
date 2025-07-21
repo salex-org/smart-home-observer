@@ -1,14 +1,15 @@
+{{- if .Values.config.grafana.enabled }}
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaAlertRuleGroup
 metadata:
-  name: {{ .Values.name }}-vivaria-alerts
+  name: {{ .Release.Name }}-vivaria-alerts
   namespace: {{ .Release.Namespace }}
 spec:
-  folderRef: {{ .Values.name }}-folder
+  folderRef: {{ .Release.Name }}-folder
   allowCrossNamespaceImport: true
   instanceSelector:
     matchLabels:
-      {{ .Values.config.grafana.instance }}
+      grafana: {{ .Values.config.grafana.instance }}
   interval: 5m
   rules:
     - uid: e64b653e-d33a-45cd-81e8-f72f5e070c7c
@@ -330,3 +331,5 @@ spec:
       annotations:
         summary: The power consumption of the aquarium pump is out of normal range while switched on. Maybe it is broken.
       isPaused: false
+
+  {{- end }}

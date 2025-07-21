@@ -2,13 +2,13 @@
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaFolder
 metadata:
-  name: {{ .Values.name }}-folder
+  name: {{ .Release.Name }}-folder
   namespace: {{ .Release.Namespace }}
 spec:
   allowCrossNamespaceImport: true
   instanceSelector:
     matchLabels:
-      {{ .Values.config.grafana.instance }}
+      grafana: {{ .Values.config.grafana.instance }}
   title: Smart Home
   uid: smart-home-observer
 {{- end }}

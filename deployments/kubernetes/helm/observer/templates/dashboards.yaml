@@ -7,10 +7,10 @@
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:
-  name: {{ $root.Values.name }}-{{ $filename }}
+  name: {{ $root.Release.Name }}-{{ $filename }}
   namespace: {{ $root.Release.Namespace }}
 spec:
-  folderRef: {{ $root.Values.name }}-folder
+  folderRef: {{ $root.Release.Name }}-folder
   resyncPeriod: 30s
   instanceSelector:
     matchLabels:
