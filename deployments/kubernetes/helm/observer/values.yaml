@@ -27,3 +27,10 @@ influxdb2:
     bucket: homematic
     retention_policy: 731d
     existingSecret: influx-credentials
+  initScripts:
+    enabled: true
+    scripts:
+      create-buckets.sh: |-
+        #!/bin/sh
+        influx bucket create --org salex --name consumption --retention 365d
+      
