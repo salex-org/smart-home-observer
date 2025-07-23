@@ -1233,7 +1233,7 @@
         "multi": false,
         "name": "GasQuality",
         "options": [],
-        "query": "0.3666,9.3717,9.4889,9.723,9.746",
+        "query": "9.3666,9.3717,9.4889,9.723,9.746",
         "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"
