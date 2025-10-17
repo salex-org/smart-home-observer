@@ -156,7 +156,7 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "device\\.temp \\ {device_name: ([A-Za-z]+) \\}",
+            "regex": "device\\.temp \\{ device_name: ([A-Za-z]+) \\}",
             "renamePattern": "$1"
           }
         }
@@ -332,7 +332,7 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "device\\.hum \\ {device_name: ([A-Za-z]+) \\}",
+            "regex": "device\\.hum \\{ device_name: ([A-Za-z]+) \\}",
             "renamePattern": "$1"
           }
         }
