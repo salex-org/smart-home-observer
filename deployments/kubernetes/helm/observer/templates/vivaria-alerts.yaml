@@ -67,8 +67,8 @@ spec:
             conditions:
               - evaluator:
                   params:
-                    - 100
-                    - 115
+                    - 10
+                    - 15
                   type: outside_range
                 operator:
                   type: and
